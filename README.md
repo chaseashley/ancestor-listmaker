@@ -1,7 +1,7 @@
 # ancestor-listmaker
 Ancestor Listmaker app for use with WikiTree
 
-App was created in VSCode using Javascript and React.
+App was created in VSCode Studio using Javascript and React.
 
 Brief description of the files:
 - App.js is the file that renders the main screen and pulls in the other elements.
