@@ -18,7 +18,7 @@ export async function getAncestors(descendantName, numGens) {
         let ancestors = await jsonResponse[0]['ancestors'].slice(1); //strip response down to array of ancestor objects
         return ancestors = removeDuplicates(ancestors);
     } catch(err) {
-        alert('Unable to collect ancestors. The Wikitree ID may be incorrect or the Descendant\'s family tree may be private.');
+        alert('Unable to collect ancestors. The Wikitree ID may be incorrect or Descendant\'s profile may Unlisted or Private. The app will only work for a Descendant whose privacy level is set to Private with Public Family Tree, Private with Public Biography and Family Tree, Public, or Open.');
         console.log(err);
         return null;
     }

@@ -5,7 +5,7 @@ import 'react-dropdown/style.css';
 import { CSVLink } from "react-csv";
 import { getAncestors, getAdditionalGens, replaceUndefinedFields, deletePrivateProfiles } from './ancestors';
 import { getCategoryPages } from "./categoryPages";
-import { filterOrphans, filterLocationText, filterUSImmigrants, filterCategoryPages } from './filters';
+import { filterOrphans, filterLocationText, filterUSImmigrants, filterAustralianImmigrants, filterCanadianImmigrants, filterCategoryPages } from './filters';
 import { Table } from './Table';
 import { sortByName, sortByDOB, sortByDOD, sortByPOB, sortByPOD } from './sort';
 
@@ -29,8 +29,9 @@ class App extends React.Component {
       lastGenerations: null,
       ancestorList: null,
       ancestorLists: [null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null], //1-20 gens
+      'American Immigrants': null,
       'American Revolution': null,
-      'European Royals and Aristocrats': null,
+      'EuroAristo': null,
       'Filles du Roi': null,
       'French and Indian War': null,
       'Huguenot': null,
@@ -44,8 +45,7 @@ class App extends React.Component {
       'Palatine Migration': null,
       'Puritan Great Migration': null,
       'Quakers': null,
-      'U.S. Civil War': null,
-      'U.S. Immigrants': null,
+      'US Civil War': null,
       matchingAncestorsList: null,
       processingStatus: null,
       outputTable: <div></div>,
@@ -148,8 +148,14 @@ class App extends React.Component {
           if (this.state.category === 'Orphans') {
             matchingAncestors = filterOrphans(this.state.ancestorList);
             this.setState({matchingAncestorsList: matchingAncestors});
-          } else if (this.state.category === 'U.S. Immigrants') {
+          } else if (this.state.category === 'American Immigrants') {
             matchingAncestors = filterUSImmigrants(this.state.ancestorList);
+            this.setState({matchingAncestorsList: matchingAncestors});
+          } else if (this.state.category === 'Australian Immigrants') {
+            matchingAncestors = filterAustralianImmigrants(this.state.ancestorList);
+            this.setState({matchingAncestorsList: matchingAncestors});
+          } else if (this.state.category === 'Canadian Immigrants') {
+            matchingAncestors = filterCanadianImmigrants(this.state.ancestorList);
             this.setState({matchingAncestorsList: matchingAncestors});
           } else if (this.state.category === 'Location Text') {
             matchingAncestors = filterLocationText(this.state.ancestorList, this.state.locationText);
@@ -164,6 +170,32 @@ class App extends React.Component {
                 const huguenotEmigrantFamilyPages = await getCategoryPages('Huguenot Emigrant Family');
                 const huguenotNonEmigrantPages = await getCategoryPages('Huguenot non-Emigrant');
                 categoryPages = huguenotPages + huguenotAncestorPages + huguenotEmigrantPages +  huguenotEmigrantFamilyPages + huguenotNonEmigrantPages;
+              } else if (this.state.category === 'Quakers') {
+                const quakersProjectPages = await getCategoryPages('Quakers Project');
+                const quakersStickerPages = await getCategoryPages('Quakers Sticker');
+                categoryPages = quakersProjectPages + quakersStickerPages;
+              } else if (this.state.category === 'American Revolution') {
+                const amRevProjectPages = await getCategoryPages('American Revolution Project');
+                const amRevStickerPages = await getCategoryPages('American Revolution Sticker');
+                const nsdarPages = await getCategoryPages('NSDAR');
+                const nssarPages = await getCategoryPages('NSSAR');
+                categoryPages = amRevProjectPages + amRevStickerPages + nsdarPages + nssarPages;
+              } else if (this.state.category === 'US Civil War') {
+                const usCivilWarProjectPages = await getCategoryPages('US Civil War Project');
+                const usCivilWarStickerPages = await getCategoryPages('US Civil War Sticker');
+                categoryPages = usCivilWarProjectPages + usCivilWarStickerPages;
+              } else if (this.state.category === 'EuroAristo') {
+                const euroAristoPages = await getCategoryPages('EuroAristo');
+                const euroRoyalOrAristoPages = await getCategoryPages('European Royals and Aristocrats');
+                categoryPages = euroAristoPages + euroRoyalOrAristoPages;
+              } else if (this.state.category === 'French and Indian War') {
+                const fandIWarProjectPages = await getCategoryPages('French and Indian War Project');
+                const fandIWarStickerPages = await getCategoryPages('French and Indian War Sticker');
+                categoryPages = fandIWarProjectPages + fandIWarStickerPages;
+              } else if (this.state.category === 'New Netherland Settlers') {
+                const newNetherlandSettlerPages = await getCategoryPages('New Netherland Settler');
+                const newNetherlandSettlerStickerPages = await getCategoryPages('New Netherland Settler Sticker');
+                categoryPages = newNetherlandSettlerPages + newNetherlandSettlerStickerPages;
               } else {
                 categoryPages = await getCategoryPages(this.state.category);
               }
@@ -260,25 +292,27 @@ class App extends React.Component {
   render() {
     const categoryOptions = [
       {value:'All', label: 'All - All ancestors'},
-      {value:'American Revolution', label: 'American Revolution - Ancestors who participated in the American Revolution, as indicated by the presence of the 1776 template on their profile'},
-      {value:'European Royals and Aristocrats', label: 'European Royals and Aristocrats - Ancestors who were European royals or aristocrats, as indicated by the presence of the European Royals and Aristocrats template on their profile'},
+      {value:'American Immigrants', label: 'American Immigrants - Ancestors who immigrated or may have immigrated to America (USA or areas that became a part thereof), as indicated by the birth and death locations on their profiles'},
+      {value:'American Revolution', label: 'American Revolution - Ancestors who participated in the American Revolution, as indicated by the 1776 sticker or 1776 Project template on their profile or their inclusion in the NSDAR or NSSAR Patriot Ancestor categories'},
+      {value:'Australian Immigrants', label: 'Australian Immigrants - Ancestors who immigrated or may have immigrated to Australia (or areas that became a part thereof), as indicated by the birth and death locations on their profiles'},
+      {value:'Canadian Immigrants', label: 'Canadian Immigrants - Ancestors who immigrated or may have immigrated to Canada (or areas that became a part thereof), as indicated by the birth and death locations on their profiles'},
+      {value:'EuroAristo', label: 'European Royals and Aristocrats - Ancestors who were European royals or aristocrats, as indicated by the presence of the EuroAristo sticker or European Royals and Aristocrats template on their profile'},
       {value:'Filles du Roi', label: 'Filles du Roi - Ancestors who were among the Filles du Roi, as indicated by the presence of the Filles du Roi template on their profile'},
-      {value:'French and Indian War', label: 'French and Indian War - Ancestors who participated in the French and Indian War, as indicated by the presence of the French and Indian War template on their profile'},
+      {value:'French and Indian War', label: 'French and Indian War - Ancestors who participated in the French and Indian War, as indicated by the presence of the French and Indian War sticker or French and Indian War Project template on their profile'},
       {value:'Huguenot', label: 'Huguenot - Ancestors who were Huguenots, as indicated by the presence of the Huguenot, Huguenot Ancestor, Huguenot Emigrant, Huguenot Emigrant Family or Huguenot non-Emigrant template on their profile'},
       {value:'Jamestown', label: 'Jamestown - Ancestors who are Jamestowne Society Qualifying Ancestors, as indicated by their inclusion in the Jamestowne Society Qualifying Ancestors category'},
       {value:'Location Text', label: 'Location Text - Ancestors whose Birth or Death Location fields contain the search terms you enter. When this category is selected, a text box will open up to enter the search terms.'},
       {value:'Magna Carta Gateway', label: 'Magna Carta Gateway - Ancestors who were U.S. immigrants descended from a Magna Carta Surety Baron, as indicated by their inclusion in the Gateway Ancestors category'},
-      {value:'Mayflower Passengers', label: 'Mayflower Passengers - Ancestors who were passengers on the Mayflower, as indicated by the presence of the Mayflower Passengers template on their profile'},
+      {value:'Mayflower Passengers', label: 'Mayflower Passengers - Ancestors who were passengers on the Mayflower, as indicated by the presence of the Mayflower Passenger template on their profile'},
       {value:'Mexican-American War', label: 'Mexican-American War - Ancestors who participated in the Mexican-American War, as indicated by the presence of the Mexican-American War template on their profile'},
       {value:'New England Witches', label: 'New England Witches - New England ancestors accused as being witches, as indicated by their inclusion in the Accused Witches of New England category'},
-      {value:'New Netherland Settlers', label: 'New Netherland Settlers - Ancestors who lived in New Netherland before 1675, as indicated by the presence of the New Netherland Settler template on their profile'},
+      {value:'New Netherland Settlers', label: 'New Netherland Settlers - Ancestors who lived in New Netherland before 1675, as indicated by the presence of the New Netherland Settler sticker or template on their profile'},
       {value:'Notables', label: 'Notables - Ancestors who have the Notables sticker on their profile'},
       {value:'Orphans', label: 'Orphans - Ancestors whose profiles do not currently have a Profile Manager'},
       {value:'Palatine Migration', label: 'Palatine Migration - Ancestors who immigrated to America from a German-speaking area of Europe in 1700-1776, as indicated by the presence of the Palatine Migration template on their profile'},
       {value:'Puritan Great Migration', label: 'Puritan Great Migration - Ancestors who immigrated to New England in 1621-1640, as indicated by the presence of the Puritan Great Migration template on their profile'},
-      {value:'Quakers', label: 'Quakers - Ancestors who were Quakers, as indicated by the presence of the Quakers sticker on their profile'},
-      {value:'U.S. Civil War', label: 'U.S. Civil War - Ancestors who participated in the U.S. Civil War, as indicated by the presence of the US Civil War template on their profile'},
-      {value:'U.S. Immigrants', label: 'U.S. Immigrants - Ancestors who immigrated or may have immigrated to the United States (or areas that ), as indicated by the birth and death locations on their profiles'}
+      {value:'Quakers', label: 'Quakers - Ancestors who were Quakers, as indicated by the presence of the Quakers sticker or Quakers Project template on their profile'},
+      {value:'US Civil War', label: 'U.S. Civil War - Ancestors who participated in the U.S. Civil War, as indicated by the presence of the US Civil War sticker or US Civil War Project template on their profile'}
     ];
     const generationOptions = ['1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20'];
     
