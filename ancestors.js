@@ -1,10 +1,11 @@
 /* This module contains functions for retrieving a list of ancetors back a specificied number of generations */
+import { removeDuplicates } from './filters';
 const fetch = require("node-fetch");
 
 /* Makes a getAncestors call to the wikitree api in order to fetch all ancestors of descendantName back numGen
 ** generations; strips out list of ancestor profile objects from returned json and removes duplicate profiles
 ** and returns and ancestors array of non-duplicate ancestor profile objects */
-export async function getAncestors(descendantName, numGens) {
+export async function getAncestorsJson(descendantName, numGens) {
     let gens;
     if (numGens < 10) {
         gens = numGens;
@@ -15,23 +16,12 @@ export async function getAncestors(descendantName, numGens) {
     try {
         const response = await fetch(url);
         const jsonResponse = await response.json();
-        let ancestors = await jsonResponse[0]['ancestors'].slice(1); //strip response down to array of ancestor objects
-        return ancestors = removeDuplicates(ancestors);
+        return jsonResponse;
     } catch(err) {
         alert('Unable to collect ancestors. The Wikitree ID may be incorrect or Descendant\'s profile may Unlisted or Private. The app will only work for a Descendant whose privacy level is set to Private with Public Family Tree, Private with Public Biography and Family Tree, Public, or Open.');
         console.log(err);
         return null;
     }
-}
-
-/* Removes duplicate ancestor objects from an array */
-export function removeDuplicates(arr) {
-    return arr.reduce(function (p, c) {
-        // if the next object's id is not found in the output array
-        // push the object into the output array
-        if (!p.some(function (el) {return el['Name'] === c['Name']; })) p.push(c);
-        return p;
-      }, []);
 }
 
 /* Checks if each ancestor in the ancestors array has a parent who is not also included in the ancestors

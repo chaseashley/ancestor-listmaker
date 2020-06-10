@@ -73,7 +73,8 @@
     height: 110px;
 }
 
-.button {
+.getListButton {
+    width: 110px;
     font-size: 16px;
 }
 
@@ -114,6 +115,12 @@
     font-family: Arial;
     border-collapse: separate;
     margin-bottom: -20px;
+}
+
+.thahnen {
+    background:rgb(56, 83, 56);
+    color: white;
+    text-align:center;
 }
 
 .thname {

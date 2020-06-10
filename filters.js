@@ -1,6 +1,5 @@
 /* This module contains functions that check a list of ancestors against a particular criteria and return
 ** those that match */
-import { removeDuplicates } from './ancestors';
 
 export function filterOrphans(ancestors) {
     let matchingAncestors = [];
@@ -113,4 +112,14 @@ export function filterCategoryPages(ancestors, categoryPages) {
         }
     }
     return matchingAncestors;
+}
+
+/* Removes duplicate ancestor objects from an array */
+export function removeDuplicates(arr) {
+    return arr.reduce(function (p, c) {
+        // if the next object's id is not found in the output array
+        // push the object into the output array
+        if (!p.some(function (el) {return el['Name'] === c['Name']; })) p.push(c);
+        return p;
+      }, []);
 }

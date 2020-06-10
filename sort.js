@@ -81,3 +81,10 @@ export function sortByDOD(ancestors, ascending) {
     })
 }
 
+export function sortByAhnen(ancestors, ascending) {
+    return ancestors.sort((a,b) => {
+        if (ascending) return a['Ahnen'] > b['Ahnen'] ? 1 : -1;
+        if (!ascending) return a['Ahnen'] > b['Ahnen'] ? -1 : 1;
+    })
+}
+

@@ -7,7 +7,9 @@ export async function getCategoryPages(category) {
     const categoryUrl = {
         'American Revolution Project': 'https://www.wikitree.com/index.php?title=Special:Whatlinkshere/Template:1776_Project&limit=500&from=0',
         'American Revolution Sticker': 'https://www.wikitree.com/index.php?title=Special:Whatlinkshere/Template:1776&limit=5000&from=0',
+        'British Aristo': 'https://www.wikitree.com/index.php?title=Special:Whatlinkshere/Template:British_Isles_Aristo&limit=5000&from=0',
         'EuroAristo': 'https://www.wikitree.com/index.php?title=Special:Whatlinkshere/Template:EuroAristo_Sticker&limit=5000&from=0',
+        'European Aristocrat': 'https://www.wikitree.com/index.php?title=Special:Whatlinkshere/Template:European_Aristocrat&limit=5000&from=0',
         'European Royals and Aristocrats': 'https://www.wikitree.com/index.php?title=Special:Whatlinkshere/Template:European_Royals_and_Aristocrats&limit=5000&from=0',
         'Filles du Roi': 'https://www.wikitree.com/index.php?title=Special:Whatlinkshere/Template:Filles_du_Roi&limit=5000',
         'French and Indian War Project': 'https://www.wikitree.com/index.php?title=Special:Whatlinkshere/Template:French_and_Indian_War_Project&limit=500&from=0',
@@ -20,7 +22,10 @@ export async function getCategoryPages(category) {
         'Jamestown': 'https://www.wikitree.com/wiki/Category:Jamestowne_Society_Qualifying_Ancestors',
         'Magna Carta Gateway': 'https://www.wikitree.com/wiki/Category:Gateway_Ancestors',
         'Mayflower Passengers': 'https://www.wikitree.com/index.php?title=Special:Whatlinkshere/Template:Mayflower_Passenger&limit=500&from=0',
-        'Mexican-American War': 'https://www.wikitree.com/index.php?title=Special:Whatlinkshere/Template:Mexican-American_War&limit=5000&from=0',
+        'Mexican-American War Project': 'https://www.wikitree.com/index.php?title=Special:Whatlinkshere/Template:Mexican-American_War_Project&limit=5000&from=0',
+        'Mexican-American War Sticker': 'https://www.wikitree.com/index.php?title=Special:Whatlinkshere/Template:Mexican-American_War&limit=5000&from=0',
+        'Native Americans Project': 'https://www.wikitree.com/index.php?title=Special:Whatlinkshere/Template:Native_American&limit=5000&from=0',
+        'Native Americans Sticker': 'https://www.wikitree.com/index.php?title=Special:Whatlinkshere/Template:Native_American_Sticker&limit=5000&from=0',
         'New England Witches': 'https://www.wikitree.com/wiki/Category:Accused_Witches_of_New_England',
         'New Netherland Settler': 'https://www.wikitree.com/index.php?title=Special:Whatlinkshere/Template:New_Netherland_Settler&limit=5000&from=0',
         'New Netherland Settler Sticker': 'https://www.wikitree.com/index.php?title=Special:Whatlinkshere/Template:New_Netherland_Settler_Sticker&limit=5000&from=0',
@@ -96,8 +101,8 @@ function getNextLinkUrl(page) {
     }
 }
 
-function extractAhrefs (pages) {
-    const $ = cheerio.load(pages);
+function extractAhrefs (page) {
+    const $ = cheerio.load(page);
     let ahrefPage = '';
     $('a').each(function(i,elem) {
         const link = $(this).attr('href');
