@@ -2,7 +2,7 @@ const axios = require('axios');
 const cheerio = require('cheerio');
 
 /* Fetch and return string containing all pages listing links to a particular category */
-export async function getCategoryPages(category) {
+async function getCategoryArefs(category) {
     // pageInfo holds the url and next page link info for the various categories
     const categoryUrl = {
         'American Revolution Project': 'https://www.wikitree.com/index.php?title=Special:Whatlinkshere/Template:1776_Project&limit=500&from=0',
@@ -114,4 +114,55 @@ function extractAhrefs (page) {
         };
     });
     return ahrefPage;
+}
+
+export async function getAllRelatedCategoryArefs(category) {
+    let categoryArefs;
+    if (category === 'Huguenot') {
+        const huguenotArefs = await getCategoryArefs('Huguenot');
+        const huguenotAncestorArefs = await getCategoryArefs('Huguenot Ancestor');
+        const huguenotEmigrantArefs = await getCategoryArefs('Huguenot Emigrant');
+        const huguenotEmigrantFamilyArefs = await getCategoryArefs('Huguenot Emigrant Family');
+        const huguenotNonEmigrantArefs = await getCategoryArefs('Huguenot non-Emigrant');
+        categoryArefs = huguenotArefs + huguenotAncestorArefs + huguenotEmigrantArefs +  huguenotEmigrantFamilyArefs + huguenotNonEmigrantArefs;
+    } else if (category === 'Quakers') {
+        const quakersProjectArefs = await getCategoryArefs('Quakers Project');
+        const quakersStickerArefs = await getCategoryArefs('Quakers Sticker');
+        categoryArefs = quakersProjectArefs + quakersStickerArefs;
+    } else if (category === 'American Revolution') {
+        const amRevProjectArefs = await getCategoryArefs('American Revolution Project');
+        const amRevStickerArefs = await getCategoryArefs('American Revolution Sticker');
+        const nsdarArefs = await getCategoryArefs('NSDAR');
+        const nssarArefs = await getCategoryArefs('NSSAR');
+        categoryArefs = amRevProjectArefs + amRevStickerArefs + nsdarArefs + nssarArefs;
+    } else if (category === 'US Civil War') {
+        const usCivilWarProjectArefs = await getCategoryArefs('US Civil War Project');
+        const usCivilWarStickerArefs = await getCategoryArefs('US Civil War Sticker');
+        categoryArefs = usCivilWarProjectArefs + usCivilWarStickerArefs;
+    } else if (category === 'European Aristocrats') {
+        const britishAristoArefs = await getCategoryArefs('British Aristo');
+        const euroAristoArefs = await getCategoryArefs('EuroAristo');
+        const euroAristocratArefs = await getCategoryArefs('European Aristocrat');
+        const euroRoyalOrAristoArefs = await getCategoryArefs('European Royals and Aristocrats');
+        categoryArefs = britishAristoArefs + euroAristoArefs + euroAristocratArefs + euroRoyalOrAristoArefs;
+    } else if (category === 'French and Indian War') {
+        const fandIWarProjectArefs = await getCategoryArefs('French and Indian War Project');
+        const fandIWarStickerArefs = await getCategoryArefs('French and Indian War Sticker');
+        categoryArefs = fandIWarProjectArefs + fandIWarStickerArefs;
+    } else if (category === 'Mexican-American War') {
+        const mexAmWarProjectArefs = await getCategoryArefs('Mexican-American War Project');
+        const mexAmWarStickerArefs = await getCategoryArefs('Mexican-American War Sticker');
+        categoryArefs = mexAmWarProjectArefs + mexAmWarStickerArefs;
+    } else if (category === 'Native Americans') {
+        const nativeAmProjectArefs = await getCategoryArefs('Native Americans Project');
+        const nativeAmStickerArefs = await getCategoryArefs('Native Americans Sticker');
+        categoryArefs = nativeAmProjectArefs + nativeAmStickerArefs;
+    } else if (category === 'New Netherland Settlers') {
+        const newNetherlandSettlerArefs = await getCategoryArefs('New Netherland Settler');
+        const newNetherlandSettlerStickerArefs = await getCategoryArefs('New Netherland Settler Sticker');
+        categoryArefs = newNetherlandSettlerArefs + newNetherlandSettlerStickerArefs;
+    } else {
+        categoryArefs = await getCategoryArefs(category);
+    }
+    return categoryArefs;
 }

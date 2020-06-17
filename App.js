@@ -4,8 +4,8 @@ import Dropdown from 'react-dropdown';
 import 'react-dropdown/style.css';
 import { CSVLink } from "react-csv";
 import { getAncestorsJson, getAdditionalGens, replaceUndefinedFields, deletePrivateProfiles } from './ancestors';
-import { getCategoryPages } from "./categoryPages";
-import { filterOrphans, filterLocationText, filterUSImmigrants, filterAustralianImmigrants, filterCanadianImmigrants, filterCategoryPages, removeDuplicates } from './filters';
+import { getAllRelatedCategoryArefs } from "./categoryPages";
+import { filterCategoryText, filterByWikiTreePlus, filterUnknownFather, filterUnknownMother, filterOrphans, filterLocationText, filterUSImmigrants, filterAustralianImmigrants, filterCanadianImmigrants, filterCategoryArefs, removeDuplicates } from './filters';
 import { Table } from './Table';
 import { sortByName, sortByDOB, sortByDOD, sortByPOB, sortByPOD, sortByAhnen } from './sort';
 import { AhnenTable } from './AhnenTable';
@@ -23,16 +23,23 @@ class App extends React.Component {
     this.onClickPODSort = this.onClickPODSort.bind(this);
     this.onClickAhnenSort = this.onClickAhnenSort.bind(this);
     this.getDownloadData = this.getDownloadData.bind(this);
+    this.onClickPrematureDownload = this.onClickPrematureDownload.bind(this);
     this.state = {
       descendant: null,
       category: null,
       generations: null,
+      ahnentafel: false,
+      displayName: 'BirthNamePrivate',
+      fullname: false,
       lastDescendant: null,
       descendantJson: null,
       lastCategory: null,
       lastGenerations: null,
+      lastAhnentafel: false,
       ancestorList: null,
       ancestorLists: [null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null], //1-20 gens
+      ahnenAncestorList: null,
+      ahnenAncestorLists: [null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null], //1-20 gens
       'American Immigrants': null,
       'American Revolution': null,
       'European Aristocrats': null,
@@ -55,7 +62,40 @@ class App extends React.Component {
       processingStatus: null,
       outputTable: <div></div>,
       lastSort: null,
-      locationText: ''
+      locationText: '',
+      categoryText: '',
+      categoryOptions: [
+        {value:'All', label: 'All - All ancestors'},
+        {value:'American Immigrants', label: 'American Immigrants - Ancestors who immigrated or may have immigrated to America (USA or areas that became a part thereof), as indicated by the birth and death locations on their profiles'},
+        {value:'American Revolution', label: 'American Revolution - Ancestors who participated in the American Revolution, as indicated by the 1776 sticker or project template on their profile or their inclusion in the NSDAR or NSSAR Patriot Ancestor categories'},
+        {value:'Australian Immigrants', label: 'Australian Immigrants - Ancestors who immigrated or may have immigrated to Australia (or areas that became a part thereof), as indicated by the birth and death locations on their profiles'},
+        {value:'Canadian Immigrants', label: 'Canadian Immigrants - Ancestors who immigrated or may have immigrated to Canada (or areas that became a part thereof), as indicated by the birth and death locations on their profiles'},
+        {value:'Category Text', label: 'Category Text - Ancestors who are in a category whose name contains the search terms you enter. When this list option is selected, a text box will appear in which to enter the search terms.'},
+        {value:'European Aristocrats', label: 'European Aristocrats - Ancestors who were European aristocrats, as indicated by the presence of the EuroAristo sticker or the British Isles Aristo, European Aristocrat, or European Royals and Aristocrats template on their profile'},
+        {value:'Filles du Roi', label: 'Filles du Roi - Ancestors who were among the Filles du Roi, as indicated by the presence of the Filles du Roi template on their profile'},
+        {value:'Five-Star Profiles', label: 'Five-Star Profiles - Ancestors whose profiles have had 1,000 or more total page views and 100 or more different visitors in the past year. (Note that the ancestor data used for this list is only updated weekly.)'},
+        {value:'French and Indian War', label: 'French and Indian War - Ancestors who participated in the French and Indian War, as indicated by the presence of the French and Indian War sticker or project template on their profile'},
+        {value:'GEDCOM Junk', label: 'GEDCOM Junk - Ancestors whose profiles contain headings considered GEDCOM junk. (Note that the ancestor data used for this list is only updated weekly.)'},
+        {value:'Huguenot', label: 'Huguenot - Ancestors who were Huguenots, as indicated by the presence of the Huguenot, Huguenot Ancestor, Huguenot Emigrant, Huguenot Emigrant Family or Huguenot non-Emigrant template on their profile'},
+        {value:'Jamestown', label: 'Jamestown - Ancestors who are Jamestowne Society Qualifying Ancestors, as indicated by their inclusion in the Jamestowne Society Qualifying Ancestors category'},
+        {value:'Location Text', label: 'Location Text - Ancestors whose Birth or Death Location fields contain the search terms you enter. When this list option is selected, a text box will appear in which to enter the search terms.'},
+        {value:'Magna Carta Gateway', label: 'Magna Carta Gateway - Ancestors who were U.S. immigrants descended from a Magna Carta Surety Baron, as indicated by their inclusion in the Gateway Ancestors category'},
+        {value:'Mayflower Passengers', label: 'Mayflower Passengers - Ancestors who were passengers on the Mayflower, as indicated by the presence of the Mayflower Passenger template on their profile'},
+        {value:'Mexican-American War', label: 'Mexican-American War - Ancestors who participated in the Mexican-American War, as indicated by the presence of the Mexican-American War sticker or project template on their profile'},
+        {value:'Native Americans', label: 'Native Americans - Ancestors who were Native Americans, as indicated by the presence of the Native American sticker or project template on their profile'},
+        {value:'New England Witches', label: 'New England Witches - New England ancestors accused as being witches, as indicated by their inclusion in the Accused Witches of New England category'},
+        {value:'New Netherland Settlers', label: 'New Netherland Settlers - Ancestors who lived in New Netherland before 1675, as indicated by the presence of the New Netherland Settler sticker or project template on their profile'},
+        {value:'Notables', label: 'Notables - Ancestors who have the Notables sticker on their profile'},
+        {value:'Orphans', label: 'Orphans - Ancestors whose profiles do not currently have a Profile Manager'},
+        {value:'Palatine Migration', label: 'Palatine Migration - Ancestors who immigrated to America from a German-speaking area of Europe in 1700-1776, as indicated by the presence of the Palatine Migration template on their profile'},
+        {value:'Puritan Great Migration', label: 'Puritan Great Migration - Ancestors who immigrated to New England in 1621-1640, as indicated by the presence of the Puritan Great Migration template on their profile'},
+        {value:'Quakers', label: 'Quakers - Ancestors who were Quakers, as indicated by the presence of the Quakers sticker or project template on their profile'},
+        {value:'Unknown/Missing Father', label: 'Unknown/Missing Father - Ancestors whose father\'s surname is "Unknown" or who have no father attached to their profile'},
+        {value:'Unknown/Missing Mother', label: 'Unknown/Missing Mother - Ancestors whose mother\'s surname is "Unknown" or who have no mother attached to their profile'},
+        {value:'Unsourced', label: 'Unsourced - Ancestors whose profiles have the Unsourced template on them. (Note that the ancestor data used for this list is only updated weekly.)'},
+        {value:'US Civil War', label: 'U.S. Civil War - Ancestors who participated in the U.S. Civil War, as indicated by the presence of the US Civil War sticker or project template on their profile'}
+      ],
+      generationOptions: ['1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20']
     };
   }
 
@@ -66,8 +106,15 @@ class App extends React.Component {
     this.setState({ancestorLists: newAncestorListsState}) //set the new state
   }
 
+  setAhnenAncestorListsState(i, ahnenAncestors) {
+    const newAhnenAncestorListsState = this.state.ahnenAncestorLists.slice(); //copy the array
+    newAhnenAncestorListsState[i] = ahnenAncestors;
+    this.setState({ahnenAncestorLists: newAhnenAncestorListsState}) //set the new state
+  }
+
   nullAncestorListsState() {
     this.setState({ancestorLists: [null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null]}); //1-20 gens
+    this.setState({ahnenAncestorLists: [null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null]}); //1-20 gens
   }
 
   nextLowestStoredGeneration(gens) { //find next lowest generation that has a stored ancestorList
@@ -101,17 +148,13 @@ class App extends React.Component {
                 this.setAncestorListsState(9,ancestors);
                 ancestors = await getAdditionalGens(ancestors, this.state.generations-10);
               }
-              //ancestors = deletePrivateProfiles(ancestors);
               ancestors = replaceUndefinedFields(ancestors);
-              this.setState({ancestorList: ancestors});
               this.setAncestorListsState(this.state.generations-1, ancestors);
               this.setState({lastDescendant: this.state.descendant});
               this.setState({lastGenerations: this.state.generations});
             }
           } else if ((this.state.descendant === this.state.lastDescendant) && (this.state.generations !== this.state.lastGenerations)){ //same descendant, but diff number of gens, so need to get ancestors for that number of gens
-            if (this.state.ancestorLists[this.state.generations-1] !== null) { //if have stored ancestors for that number of gens, use it
-              await this.setState({ancestorList: this.state.ancestorLists[this.state.generations-1]});
-            } else { //no stored ancestorList for that number of generations, so need to get ancestors
+            if (this.state.ancestorLists[this.state.generations-1] === null) {
               let ancestors;
               if (this.state.generations <10) { //if less then 10, gens don't bother checking lower stored, just get
                 let ancestorsJson = await getAncestorsJson(this.state.descendant, this.state.generations);
@@ -143,118 +186,90 @@ class App extends React.Component {
                 }
               }
               if (ancestors !== null) {
-                //ancestors = deletePrivateProfiles(ancestors)
                 ancestors = replaceUndefinedFields(ancestors);
-                this.setState({ancestorList: ancestors});
                 this.setAncestorListsState(this.state.generations-1, ancestors);
               }
             }
-          this.setState({lastGenerations: this.state.generations});
+        }
+      }
+
+      if (this.state.processingStatus !== null) {
+        if (this.state.ahnentafel) { //if ahnentafel checkbox selected, get or create ahnentafel ancestor list and set ancestorList to it
+          if (this.state.ahnenAncestorLists[this.state.generations-1] !== null) {
+            await this.setState({ancestorList: this.state.ahnenAncestorLists[this.state.generations-1]});
+          } else {
+            await this.setState({ahnenAncestorList: null});
+            let ahnenAncestors = this.state.ancestorLists[this.state.generations-1].slice();
+            for (let i=0; i<ahnenAncestors.length; i++) {
+              ahnenAncestors[i]['Ahnen'] = -1;
+            }
+            let descendantJson = this.state.descendantJson;
+            descendantJson['Ahnen'] = 1;
+            ahnenAncestors = (assignAhnens(descendantJson, ahnenAncestors));
+            for (let i = 0; i<ahnenAncestors.length; i++) {
+              ahnenAncestors[i]['Generation'] = Math.floor(Math.log2(ahnenAncestors[i]['Ahnen']));
+            }
+            await this.setState({ancestorList: ahnenAncestors});
+            await this.setState({ahnenAncestorList: ahnenAncestors});
+            await this.setAhnenAncestorListsState(this.state.generations-1, ahnenAncestors);
+          }
+        } else { //if ahnentafel checkbox not selected, set ancestorList to non-ahnentafel ancestor list
+          await this.setState({ancestorList: this.state.ancestorLists[this.state.generations-1]});
         }
       }
 
       //Then filter the ancestors against the specified category/criteria and create a table of the matches
       if (this.state.ancestorList !== null) {
         await this.setState({processingStatus: 'Filtering'});
-        if (this.state.category === 'All') {
-          await this.setState({matchingAncestorsList: deletePrivateProfiles(this.state.ancestorList)});
-        } else if (this.state.category === 'All Ahnentafel') {
-          let matchingAncestors = this.state.ancestorList.slice();
-          for (let i=0; i<matchingAncestors.length; i++) {
-              matchingAncestors[i]['Ahnen'] = -1;
-          }
-          let descendantJson = this.state.descendantJson;
-          descendantJson['Ahnen'] = 1;
-          matchingAncestors = deletePrivateProfiles(assignAhnens(descendantJson, matchingAncestors));
-          for (let i = 0; i<matchingAncestors.length; i++) {
-            matchingAncestors[i]['Generation'] = Math.floor(Math.log2(matchingAncestors[i]['Ahnen']));
-          }
-          this.setState({matchingAncestorsList: deletePrivateProfiles(matchingAncestors)});
-        } else {
-          let matchingAncestors;
+        let matchingAncestors = deletePrivateProfiles(this.state.ancestorList);
+        if (this.state.category !== 'All') {
           if (this.state.category === 'Orphans') {
-            matchingAncestors = filterOrphans(deletePrivateProfiles(this.state.ancestorList));
-            this.setState({matchingAncestorsList: matchingAncestors});
+            matchingAncestors = filterOrphans(matchingAncestors);
           } else if (this.state.category === 'American Immigrants') {
-            matchingAncestors = filterUSImmigrants(deletePrivateProfiles(this.state.ancestorList));
-            this.setState({matchingAncestorsList: matchingAncestors});
+            matchingAncestors = filterUSImmigrants(matchingAncestors);
           } else if (this.state.category === 'Australian Immigrants') {
-            matchingAncestors = filterAustralianImmigrants(deletePrivateProfiles(this.state.ancestorList));
-            this.setState({matchingAncestorsList: matchingAncestors});
+            matchingAncestors = filterAustralianImmigrants(matchingAncestors);
           } else if (this.state.category === 'Canadian Immigrants') {
-            matchingAncestors = filterCanadianImmigrants(deletePrivateProfiles(this.state.ancestorList));
-            this.setState({matchingAncestorsList: matchingAncestors});
+            matchingAncestors = filterCanadianImmigrants(matchingAncestors);
           } else if (this.state.category === 'Location Text') {
-            matchingAncestors = filterLocationText(deletePrivateProfiles(this.state.ancestorList), this.state.locationText);
-            this.setState({matchingAncestorsList: matchingAncestors});
+            matchingAncestors = filterLocationText(matchingAncestors, this.state.locationText);
+          } else if (this.state.category === 'Category Text') {
+            matchingAncestors = await filterCategoryText(this.state.descendant, matchingAncestors, this.state.categoryText);
+          } else if (this.state.category === 'Unknown/Missing Father') {
+            matchingAncestors = filterUnknownFather(matchingAncestors);
+          } else if (this.state.category === 'Unknown/Missing Mother') {
+            matchingAncestors = filterUnknownMother(matchingAncestors);
+          } else if (this.state.category === 'Unsourced') {
+            matchingAncestors = await filterByWikiTreePlus(this.state.descendant, matchingAncestors, 'Unsourced');
+          } else if (this.state.category === 'GEDCOM Junk') {
+            matchingAncestors = await filterByWikiTreePlus(this.state.descendant, matchingAncestors, 'GEDCOM Junk');
+          } else if (this.state.category === 'Five-Star Profiles') {
+            matchingAncestors = await filterByWikiTreePlus(this.state.descendant, matchingAncestors, 'Five-Star Profiles');
           } else {
             if (this.state[this.state.category] === null) { // if no pages saved for the category, need to get them; otherwise use the save pages
-              let categoryPages;
-              if (this.state.category === 'Huguenot') {
-                const huguenotPages = await getCategoryPages('Huguenot');
-                const huguenotAncestorPages = await getCategoryPages('Huguenot Ancestor');
-                const huguenotEmigrantPages = await getCategoryPages('Huguenot Emigrant');
-                const huguenotEmigrantFamilyPages = await getCategoryPages('Huguenot Emigrant Family');
-                const huguenotNonEmigrantPages = await getCategoryPages('Huguenot non-Emigrant');
-                categoryPages = huguenotPages + huguenotAncestorPages + huguenotEmigrantPages +  huguenotEmigrantFamilyPages + huguenotNonEmigrantPages;
-              } else if (this.state.category === 'Quakers') {
-                const quakersProjectPages = await getCategoryPages('Quakers Project');
-                const quakersStickerPages = await getCategoryPages('Quakers Sticker');
-                categoryPages = quakersProjectPages + quakersStickerPages;
-              } else if (this.state.category === 'American Revolution') {
-                const amRevProjectPages = await getCategoryPages('American Revolution Project');
-                const amRevStickerPages = await getCategoryPages('American Revolution Sticker');
-                const nsdarPages = await getCategoryPages('NSDAR');
-                const nssarPages = await getCategoryPages('NSSAR');
-                categoryPages = amRevProjectPages + amRevStickerPages + nsdarPages + nssarPages;
-              } else if (this.state.category === 'US Civil War') {
-                const usCivilWarProjectPages = await getCategoryPages('US Civil War Project');
-                const usCivilWarStickerPages = await getCategoryPages('US Civil War Sticker');
-                categoryPages = usCivilWarProjectPages + usCivilWarStickerPages;
-              } else if (this.state.category === 'European Aristocrats') {
-                const britishAristoPages = await getCategoryPages('British Aristo');
-                console.log('british aristo done');
-                const euroAristoPages = await getCategoryPages('EuroAristo');
-                console.log('euro aristo done');
-                const euroAristocratPages = await getCategoryPages('European Aristocrat');
-                console.log('euro aristocrat done');
-                const euroRoyalOrAristoPages = await getCategoryPages('European Royals and Aristocrats');
-                console.log('royal aristo done');
-                categoryPages = britishAristoPages + euroAristoPages + euroAristocratPages + euroRoyalOrAristoPages;
-              } else if (this.state.category === 'French and Indian War') {
-                const fandIWarProjectPages = await getCategoryPages('French and Indian War Project');
-                const fandIWarStickerPages = await getCategoryPages('French and Indian War Sticker');
-                categoryPages = fandIWarProjectPages + fandIWarStickerPages;
-              } else if (this.state.category === 'Mexican-American War') {
-                const mexAmWarProjectPages = await getCategoryPages('Mexican-American War Project');
-                const mexAmWarStickerPages = await getCategoryPages('Mexican-American War Sticker');
-                categoryPages = mexAmWarProjectPages + mexAmWarStickerPages;
-              } else if (this.state.category === 'Native Americans') {
-                const nativeAmProjectPages = await getCategoryPages('Native Americans Project');
-                const nativeAmStickerPages = await getCategoryPages('Native Americans Sticker');
-                categoryPages = nativeAmProjectPages + nativeAmStickerPages;
-              } else if (this.state.category === 'New Netherland Settlers') {
-                const newNetherlandSettlerPages = await getCategoryPages('New Netherland Settler');
-                const newNetherlandSettlerStickerPages = await getCategoryPages('New Netherland Settler Sticker');
-                categoryPages = newNetherlandSettlerPages + newNetherlandSettlerStickerPages;
-              } else {
-                categoryPages = await getCategoryPages(this.state.category);
-              }
-              await this.setState({[this.state.category]: categoryPages});
+              const categoryArefs = await getAllRelatedCategoryArefs(this.state.category);
+              await this.setState({[this.state.category]: categoryArefs});
             }
-            matchingAncestors = filterCategoryPages(deletePrivateProfiles(this.state.ancestorList), this.state[this.state.category]);
-            await this.setState({matchingAncestorsList: matchingAncestors});
+            matchingAncestors = filterCategoryArefs(matchingAncestors, this.state[this.state.category]);
           }
         }
+        await this.setState({matchingAncestorsList: matchingAncestors});
+        this.setState({lastGenerations: this.state.generations});
         this.setState({lastCategory: this.state.category});
-        if (this.state.category === 'All Ahnentafel') {
+        this.setState({lastAhnentafel: this.state.ahnentafel});
+        if (this.state.fullname) {
+          this.setState({displayName: 'BirthName'});
+        } else {
+          this.setState({displayName: 'BirthNamePrivate'});
+        }
+        if (this.state.lastAhnentafel) {
           let sortedMatchingAncestorsList = sortByAhnen(this.state.matchingAncestorsList, 'forward');
           this.setState({lastSort: 'Ahnen'});
-          this.setState({outputTable: <AhnenTable tableData={sortedMatchingAncestorsList} descendant={this.state.descendant} generations={this.state.generations} category={this.state.category}/>});
+          this.setState({outputTable: <AhnenTable tableData={sortedMatchingAncestorsList} displayName={this.state.displayName}/>});
         } else {
           let sortedMatchingAncestorsList = sortByName(this.state.matchingAncestorsList, 'forward');
           this.setState({lastSort: 'Name'});
-          this.setState({outputTable: <Table tableData={sortedMatchingAncestorsList} descendant={this.state.descendant} generations={this.state.generations} category={this.state.category}/>});
+          this.setState({outputTable: <Table tableData={sortedMatchingAncestorsList} displayName={this.state.displayName}/>});
         }
         this.setState({processingStatus: 'Done'});
       }   
@@ -270,10 +285,10 @@ class App extends React.Component {
       this.setState({lastSort: 'Name'});
     }
     this.setState({matchingAncestorsList: newSortedMatchingAncestors});
-    if (this.state.category === 'All Ahnentafel') {
-      this.setState({outputTable: <AhnenTable tableData={newSortedMatchingAncestors} descendant={this.state.descendant} generations={this.state.generations} category={this.state.category}/>});
+    if (this.state.lastAhnentafel) {
+      this.setState({outputTable: <AhnenTable tableData={newSortedMatchingAncestors} displayName={this.state.displayName}/>});
     } else {
-      this.setState({outputTable: <Table tableData={newSortedMatchingAncestors} descendant={this.state.descendant} generations={this.state.generations} category={this.state.category}/>});
+      this.setState({outputTable: <Table tableData={newSortedMatchingAncestors} displayName={this.state.displayName}/>});
     }
   }
 
@@ -287,10 +302,10 @@ class App extends React.Component {
       this.setState({lastSort: 'DOB'});
     }
     this.setState({matchingAncestorsList: newSortedMatchingAncestors});
-    if (this.state.category === 'All Ahnentafel') {
-      this.setState({outputTable: <AhnenTable tableData={newSortedMatchingAncestors} descendant={this.state.descendant} generations={this.state.generations} category={this.state.category}/>});
+    if (this.state.lastAhnentafel) {
+      this.setState({outputTable: <AhnenTable tableData={newSortedMatchingAncestors} displayName={this.state.displayName}/>});
     } else {
-      this.setState({outputTable: <Table tableData={newSortedMatchingAncestors} descendant={this.state.descendant} generations={this.state.generations} category={this.state.category}/>});
+      this.setState({outputTable: <Table tableData={newSortedMatchingAncestors} displayName={this.state.displayName}/>});
     }  
   }
 
@@ -304,10 +319,10 @@ class App extends React.Component {
       this.setState({lastSort: 'DOD'});
     }
     this.setState({matchingAncestorsList: newSortedMatchingAncestors});
-    if (this.state.category === 'All Ahnentafel') {
-      this.setState({outputTable: <AhnenTable tableData={newSortedMatchingAncestors} descendant={this.state.descendant} generations={this.state.generations} category={this.state.category}/>});
+    if (this.state.lastAhnentafel) {
+      this.setState({outputTable: <AhnenTable tableData={newSortedMatchingAncestors} displayName={this.state.displayName}/>});
     } else {
-      this.setState({outputTable: <Table tableData={newSortedMatchingAncestors} descendant={this.state.descendant} generations={this.state.generations} category={this.state.category}/>});
+      this.setState({outputTable: <Table tableData={newSortedMatchingAncestors} displayName={this.state.displayName}/>});
     }
   }
 
@@ -321,10 +336,10 @@ class App extends React.Component {
       this.setState({lastSort: 'POB'});
     }
     this.setState({matchingAncestorsList: newSortedMatchingAncestors});
-    if (this.state.category === 'All Ahnentafel') {
-      this.setState({outputTable: <AhnenTable tableData={newSortedMatchingAncestors} descendant={this.state.descendant} generations={this.state.generations} category={this.state.category}/>});
+    if (this.state.lastAhnentafel) {
+      this.setState({outputTable: <AhnenTable tableData={newSortedMatchingAncestors} displayName={this.state.displayName}/>});
     } else {
-      this.setState({outputTable: <Table tableData={newSortedMatchingAncestors} descendant={this.state.descendant} generations={this.state.generations} category={this.state.category}/>});
+      this.setState({outputTable: <Table tableData={newSortedMatchingAncestors} displayName={this.state.displayName}/>});
     }  
   }
 
@@ -338,10 +353,10 @@ class App extends React.Component {
       this.setState({lastSort: 'POD'});
     }
     this.setState({matchingAncestorsList: newSortedMatchingAncestors});
-    if (this.state.category === 'All Ahnentafel') {
-      this.setState({outputTable: <AhnenTable tableData={newSortedMatchingAncestors} descendant={this.state.descendant} generations={this.state.generations} category={this.state.category}/>});
+    if (this.state.lastAhnentafel) {
+      this.setState({outputTable: <AhnenTable tableData={newSortedMatchingAncestors} displayName={this.state.displayName}/>});
     } else {
-      this.setState({outputTable: <Table tableData={newSortedMatchingAncestors} descendant={this.state.descendant} generations={this.state.generations} category={this.state.category}/>});
+      this.setState({outputTable: <Table tableData={newSortedMatchingAncestors} displayName={this.state.displayName}/>});
     }  
   }
 
@@ -355,20 +370,20 @@ class App extends React.Component {
       this.setState({lastSort: 'Ahnen'});
     }
     this.setState({matchingAncestorsList: newSortedMatchingAncestors});
-    if (this.state.category === 'All Ahnentafel') {
-      this.setState({outputTable: <AhnenTable tableData={newSortedMatchingAncestors} descendant={this.state.descendant} generations={this.state.generations} category={this.state.category}/>});
+    if (this.state.lastAhnentafel) {
+      this.setState({outputTable: <AhnenTable tableData={newSortedMatchingAncestors} displayName={this.state.displayName}/>});
     } else {
-      this.setState({outputTable: <Table tableData={newSortedMatchingAncestors} descendant={this.state.descendant} generations={this.state.generations} category={this.state.category}/>});
+      this.setState({outputTable: <Table tableData={newSortedMatchingAncestors} displayName={this.state.displayName}/>});
     }
   }
 
   getDownloadData(matchingAncestorsList) {
     let downloadData;
-    if (this.state.lastCategory === 'All Ahnentafel') {
+    if (this.state.lastAhnentafel) {
       downloadData = [['Gen-Ahen', 'Name', 'Birth Date', 'Birth Location', 'Death Date', 'Death Location']];
       for (let i=0; i<matchingAncestorsList.length; i++) {
         const ancestor = matchingAncestorsList[i];
-        const ancestorLink = `=HYPERLINK(""https://www.wikitree.com/wiki/${ancestor['Name']}""` + `,""${ancestor['BirthNamePrivate']}"")`;
+        const ancestorLink = `=HYPERLINK(""https://www.wikitree.com/wiki/${ancestor['Name']}""` + `,""${ancestor[this.state.displayName]}"")`;
         const ancestorDownloadData = [[ancestor['Generation'] + '-' + ancestor['Ahnen'], ancestorLink, ancestor['BirthDate'], ancestor['BirthLocation'], ancestor['DeathDate'], ancestor['DeathLocation']]];
         downloadData = downloadData.concat(ancestorDownloadData);
       }
@@ -376,7 +391,7 @@ class App extends React.Component {
       downloadData = [['Name', 'Birth Date', 'Birth Location', 'Death Date', 'Death Location']];
       for (let i=0; i<matchingAncestorsList.length; i++) {
         const ancestor = matchingAncestorsList[i];
-        const ancestorLink = `=HYPERLINK(""https://www.wikitree.com/wiki/${ancestor['Name']}""` + `,""${ancestor['BirthNamePrivate']}"")`;
+        const ancestorLink = `=HYPERLINK(""https://www.wikitree.com/wiki/${ancestor['Name']}""` + `,""${ancestor[this.state.displayName]}"")`;
         const ancestorDownloadData = [[ancestorLink, ancestor['BirthDate'], ancestor['BirthLocation'], ancestor['DeathDate'], ancestor['DeathLocation']]];
         downloadData = downloadData.concat(ancestorDownloadData);
       }
@@ -384,42 +399,33 @@ class App extends React.Component {
     return downloadData;
   }
 
+  onClickPrematureDownload() {
+    if (this.state.ancestorList === null) {
+      alert('A list cannot be downloaded until it has first been generated');
+    } else if (this.state.processingStatus !== 'Done') {
+      alert('A list cannot be downnloaded until generation of the list has been completed');
+    } else if (this.state.matchingAncestorsList.length === 0) {
+      alert('A list cannot be downloaded unless it contains at least one ancestor');
+    }
+  }
+
   render() {
-    const categoryOptions = [
-      {value:'All', label: 'All - All ancestors'},
-      {value:'All Ahnentafel', label: 'All Ahnentafel - All ancestors, listed with generation and ahnentafel number; includes duplicate copies of an ancestor if Descendant is descended from the ancestor by multiple lines'},
-      {value:'American Immigrants', label: 'American Immigrants - Ancestors who immigrated or may have immigrated to America (USA or areas that became a part thereof), as indicated by the birth and death locations on their profiles'},
-      {value:'American Revolution', label: 'American Revolution - Ancestors who participated in the American Revolution, as indicated by the 1776 sticker or project template on their profile or their inclusion in the NSDAR or NSSAR Patriot Ancestor categories'},
-      {value:'Australian Immigrants', label: 'Australian Immigrants - Ancestors who immigrated or may have immigrated to Australia (or areas that became a part thereof), as indicated by the birth and death locations on their profiles'},
-      {value:'Canadian Immigrants', label: 'Canadian Immigrants - Ancestors who immigrated or may have immigrated to Canada (or areas that became a part thereof), as indicated by the birth and death locations on their profiles'},
-      {value:'European Aristocrats', label: 'European Aristocrats - Ancestors who were European aristocrats, as indicated by the presence of the EuroAristo sticker or the British Isles Aristo, European Aristocrat, or European Royals and Aristocrats template on their profile'},
-      {value:'Filles du Roi', label: 'Filles du Roi - Ancestors who were among the Filles du Roi, as indicated by the presence of the Filles du Roi template on their profile'},
-      {value:'French and Indian War', label: 'French and Indian War - Ancestors who participated in the French and Indian War, as indicated by the presence of the French and Indian War sticker or project template on their profile'},
-      {value:'Huguenot', label: 'Huguenot - Ancestors who were Huguenots, as indicated by the presence of the Huguenot, Huguenot Ancestor, Huguenot Emigrant, Huguenot Emigrant Family or Huguenot non-Emigrant template on their profile'},
-      {value:'Jamestown', label: 'Jamestown - Ancestors who are Jamestowne Society Qualifying Ancestors, as indicated by their inclusion in the Jamestowne Society Qualifying Ancestors category'},
-      {value:'Location Text', label: 'Location Text - Ancestors whose Birth or Death Location fields contain the search terms you enter. When this category is selected, a text box will open up to enter the search terms.'},
-      {value:'Magna Carta Gateway', label: 'Magna Carta Gateway - Ancestors who were U.S. immigrants descended from a Magna Carta Surety Baron, as indicated by their inclusion in the Gateway Ancestors category'},
-      {value:'Mayflower Passengers', label: 'Mayflower Passengers - Ancestors who were passengers on the Mayflower, as indicated by the presence of the Mayflower Passenger template on their profile'},
-      {value:'Mexican-American War', label: 'Mexican-American War - Ancestors who participated in the Mexican-American War, as indicated by the presence of the Mexican-American War sticker or project template on their profile'},
-      {value:'Native Americans', label: 'Native Americans - Ancestors who were Native Americans, as indicated by the presence of the Native American sticker or project template on their profile'},
-      {value:'New England Witches', label: 'New England Witches - New England ancestors accused as being witches, as indicated by their inclusion in the Accused Witches of New England category'},
-      {value:'New Netherland Settlers', label: 'New Netherland Settlers - Ancestors who lived in New Netherland before 1675, as indicated by the presence of the New Netherland Settler sticker or project template on their profile'},
-      {value:'Notables', label: 'Notables - Ancestors who have the Notables sticker on their profile'},
-      {value:'Orphans', label: 'Orphans - Ancestors whose profiles do not currently have a Profile Manager'},
-      {value:'Palatine Migration', label: 'Palatine Migration - Ancestors who immigrated to America from a German-speaking area of Europe in 1700-1776, as indicated by the presence of the Palatine Migration template on their profile'},
-      {value:'Puritan Great Migration', label: 'Puritan Great Migration - Ancestors who immigrated to New England in 1621-1640, as indicated by the presence of the Puritan Great Migration template on their profile'},
-      {value:'Quakers', label: 'Quakers - Ancestors who were Quakers, as indicated by the presence of the Quakers sticker or project template on their profile'},
-      {value:'US Civil War', label: 'U.S. Civil War - Ancestors who participated in the U.S. Civil War, as indicated by the presence of the US Civil War sticker or project template on their profile'}
-    ];
-    const generationOptions = ['1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20'];
-    
+  
     let status;
     if (this.state.processingStatus === 'Collecting') {
       status = <div className={styles.statusElipsis}>Collecting ancestors</div>;
     } else if (this.state.processingStatus === 'Filtering') {
       status = <div className={styles.statusElipsis}>Collecting criteria information and filtering ancestors</div>;
     } else if (this.state.processingStatus === 'Done') {
-      status = <div className={styles.status}>{this.state.lastDescendant} (<a href={`https://www.wikitree.com/wiki/${this.state.lastDescendant}`} target='_blank'>{this.state.descendantJson['BirthNamePrivate']}</a>) has {this.state.matchingAncestorsList.length} {this.state.matchingAncestorsList.length === 1 ? 'ancestor' : 'ancestors'} within {this.state.lastGenerations} {this.state.lastGenerations > 1 ? 'generations' : 'generation'} {this.state.lastCategory === 'All' || this.state.lastCategory === 'All Ahnentafel' ? '' : `who meet the ${this.state.lastCategory} list criteria`}</div>
+      let meetsCategory;
+      if (this.state.lastCategory === 'All') {
+        meetsCategory = '';
+      } else if (removeDuplicates(this.state.matchingAncestorsList).length !== 1) {
+        meetsCategory = `who meet the ${this.state.lastCategory} list criteria`;
+      } else {
+        meetsCategory = `who meets the ${this.state.lastCategory} list criteria`;
+      }
+      status = <div className={styles.status}>{this.state.lastDescendant} (<a href={`https://www.wikitree.com/wiki/${this.state.lastDescendant}`} target='_blank'>{this.state.descendantJson['BirthNamePrivate']}</a>) has {removeDuplicates(this.state.matchingAncestorsList).length} {removeDuplicates(this.state.matchingAncestorsList).length === 1 ? 'ancestor' : 'ancestors'} within {this.state.lastGenerations} {this.state.lastGenerations > 1 ? 'generations' : 'generation'} {meetsCategory}</div>
     } else {
       status = <div></div>;
     }
@@ -430,7 +436,7 @@ class App extends React.Component {
       downloadFileName = `${downloadFileName.replace(/\./g, '')}.csv`;
       downloadButton = <CSVLink data={this.getDownloadData(this.state.matchingAncestorsList)} filename={downloadFileName}><button className={styles.downloadButton}>Download List</button></CSVLink>;
     } else {
-      downloadButton = '';
+      downloadButton = <button className={styles.downloadButton} onClick={this.onClickPrematureDownload}>Download List</button>;
     }
 
     let locationTextBox;
@@ -440,10 +446,17 @@ class App extends React.Component {
       locationTextBox = '';
     }
 
+    let categoryTextBox;
+    if (this.state.category === 'Category Text') {
+      categoryTextBox = <td><textarea className={styles.categoryTextBox} type="text" name="categoryText" onChange={(e) => this.setState({categoryText: e.target.value})} placeholder="Enter profile search term(s). Multiple search terms may be entered, separated by commas - e.g. entering War, American Revolution will list all ancestors who are in a category whose name includes either War or American Revolution. Case and periods are ignored - e.g., U.S.A. and usa are treated the same. To omit certain categories that include a term, start the term with a ! - e.g. entering War, !Civil War will list all ancestors in a category whose name includes War but not Civil War."/></td>
+    } else {
+      categoryTextBox = '';
+    }
+
     let tableHeadings;
     if (this.state.matchingAncestorsList === null || this.state.matchingAncestorsList.length === 0 ) {
       tableHeadings = <div></div>;
-    } else if (this.state.lastCategory === 'All Ahnentafel') {
+    } else if (this.state.lastAhnentafel) {
       tableHeadings = 
         <thead><tr>
         <th className={styles.thahnen}><button onClick={this.onClickAhnenSort} className={styles.sortButton}>Gen-Ahnen</button></th>
@@ -506,18 +519,27 @@ class App extends React.Component {
               </tr>
               <tr>
                 <td className={styles.label}>Number of ancestor generations back:</td>
-                <td className={styles.gens}><Dropdown value={String(this.state.generations ? String(this.state.generations) : 'Select a number from 1-20')} options={generationOptions} onChange={(option) => this.setState({generations: Number(option.value)})} placeholder="Select a number from 1-20" width="50"/></td>
+                <td><Dropdown value={String(this.state.generations ? String(this.state.generations) : 'Select a number from 1-20')} options={this.state.generationOptions} onChange={(option) => this.setState({generations: Number(option.value)})} placeholder="Select a number from 1-20" width="50"/></td>
                 <td></td>
               </tr>
               <tr className={styles.categoryTr}>
                 <td className={styles.label}>List type/criteria:</td>
-                <td className={styles.category}><Dropdown value={this.state.category} options={categoryOptions} onChange={(option) => this.setState({category: option.value})} placeholder="Select list type/criteria"/></td>
-                <td>{locationTextBox}</td> 
+                <td><Dropdown value={this.state.category} options={this.state.categoryOptions} onChange={(option) => this.setState({category: option.value})} placeholder="Select list type/criteria"/></td>
+                <td>{locationTextBox}{categoryTextBox}</td> 
               </tr>
               <tr>
+                <td className={styles.label}>Optional display features:</td>
+                <td><input type="checkbox" name="ahnentafelCheckbox" onClick={(e) => this.setState({ahnentafel: e.target.checked})}/>
+                    <label for="ahnentafelCheckbox">Include generation and ahnentafel number column</label></td>
+                <td><input type="checkbox" name="fullnameCheckbox" onClick={(e) => this.setState({fullname: e.target.checked})}/>
+                    <label for="ahnentafelCheckbox">Show full name at birth (includes middle name)</label></td>
+              </tr>
+              <tr className={styles.buttonsTr}>
                 <td></td>
-                <td className={styles.submit}><button onClick={this.onClickSubmit} className={styles.getListButton}>Get List</button></td>
-                <td>{downloadButton}</td>
+                <td className={styles.buttonsTd}><button onClick={this.onClickSubmit} className={styles.getListButton}>Generate List</button>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                {downloadButton}</td>
+                <td></td>
               </tr>
             </tbody>
           </table>

@@ -54,33 +54,26 @@
     padding-top: 20px;
 }
 
-.submit {
-    padding-top: 10px;
-    padding-bottom: 10px;
-    margin-right: 100px;
-}
-
-.gens {
-    width: 400px;
-}
-
-.category {
-    width: 200px;
-}
-
 .categoryTr {
     vertical-align: top;
     height: 110px;
 }
 
+.buttonsTr {
+    height: 40px;
+}
+
+.buttonsTd {
+    text-align: center;
+    width: 200px;
+}
+
 .getListButton {
-    width: 110px;
     font-size: 16px;
 }
 
 .downloadButton {
     font-size: 16px;
-    margin-left: 4px;
 }
 
 .idTextBox {

@@ -16,6 +16,7 @@ export async function getAncestorsJson(descendantName, numGens) {
     try {
         const response = await fetch(url);
         const jsonResponse = await response.json();
+        const ancestors = jsonResponse[0]['ancestors'].slice(1); //This is here just to throw an error if the response is no good
         return jsonResponse;
     } catch(err) {
         alert('Unable to collect ancestors. The Wikitree ID may be incorrect or Descendant\'s profile may Unlisted or Private. The app will only work for a Descendant whose privacy level is set to Private with Public Family Tree, Private with Public Biography and Family Tree, Public, or Open.');
@@ -89,7 +90,6 @@ async function getAdditionalAncestors(ancestorsMissingParents, additionalGens) {
         additionalAncestors = removeDuplicates(additionalAncestors);
         return additionalAncestors;
     })
-    console.log(4);
     return result;
 }
 
@@ -139,6 +139,9 @@ export function replaceUndefinedFields(ancestors) {
         }
         if (ancestors[i]['FirstName'] === undefined) {
             ancestors[i]['FirstName'] = ancestors[i]['RealName'];
+        }
+        if (ancestors[i]['BirthName'] === undefined) {
+            ancestors[i]['BirthName'] = ancestors[i]['BirthNamePrivate'];
         }
     }
     return ancestors;

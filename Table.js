@@ -6,7 +6,7 @@ export class Table extends React.Component {
   createRows(data) {
     let rows = [];
     for (let i = 0; i < data.length; i++) {
-      rows.push(<tr key={i}><td className={styles.ancestor}><a href={`https://www.wikitree.com/wiki/${data[i]['Name']}`} target='_blank'>{data[i]['BirthNamePrivate']}</a></td>
+      rows.push(<tr key={i}><td className={styles.ancestor}><a href={`https://www.wikitree.com/wiki/${data[i]['Name']}`} target='_blank'>{data[i][this.props.displayName]}</a></td>
       <td className={styles.date}>{data[i]['BirthDate']}</td>
       <td className={styles.location}>{data[i]['BirthLocation']}</td>
       <td className={styles.date}>{data[i]['DeathDate']}</td>
