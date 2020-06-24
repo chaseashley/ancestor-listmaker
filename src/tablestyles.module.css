@@ -1,0 +1,24 @@
+
+.ancestor {
+    white-space: nowrap;
+    width: 10%;
+    font-size: 1em;
+    text-align: left;
+}
+
+.date {
+    white-space: nowrap;
+    font-size: 0.9em;
+    text-align: center;
+}
+
+.location {
+    font-size: 0.9em;
+    text-align: left;
+}
+
+.ahnen {
+    white-space: nowrap;
+    font-size: 0.9em;
+    text-align:center;
+}
