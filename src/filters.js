@@ -198,9 +198,9 @@ export function removeDuplicates(arr) {
 
 export async function filterCategoryText(descendant, ancestors, categoryText) {
     //uppercase text and remove commas
-    categoryText = categoryText.replace(/[&\/\\#+()$~%":*?<>{}]/g, '');
+    categoryText = categoryText.replace(/[&\/\\#()$~%":*?<>{}]/g, '');
     categoryText = categoryText.replace(/'/g,'%27');
-    categoryText = categoryText.replace('.','').toUpperCase();
+    categoryText = categoryText.replace('.','');
     
     //parse location text by commas
     let searchTerms = categoryText.split(',');
@@ -212,16 +212,18 @@ export async function filterCategoryText(descendant, ancestors, categoryText) {
         for (let i=0; i<searchTerms.length; i++) {
             searchTerm = searchTerms[i].trim();
             if (searchTerm[0] === '!') {
-                databaseSearch = `${databaseSearch}+NOT+CategoryWord%3D${searchTerm.slice(1).trim()}`;
+                databaseSearch = `${databaseSearch}+NOT+Ancestors%3D${descendant}+CategoryWord%3D${searchTerm.slice(1).trim()}`;
+            } else if (searchTerm[0] === '+') {
+                databaseSearch = `${databaseSearch}+Ancestors%3D${descendant}+CategoryWord%3D${searchTerm.slice(1).trim()}`;
             } else {
-                databaseSearch = `${databaseSearch}+OR+CategoryWord%3D${searchTerm}`;
+                databaseSearch = `${databaseSearch}+OR+Ancestors%3D${descendant}+CategoryWord%3D${searchTerm}`;
             }
         }
         if (databaseSearch !== '') {
-            if (databaseSearch.slice(0,4) == '+OR+') {
-                databaseSearch = `Ancestors%3D${descendant}+${databaseSearch.slice(4)}`;
+            if (databaseSearch.slice(0,4) == '+NOT+') {
+                databaseSearch = `Ancestors%3D${descendant}+${databaseSearch.slice(5)}`;
             } else {
-                databaseSearch = `Ancestors%3D${descendant}+${databaseSearch.slice(1)}`;
+                databaseSearch = `Ancestors%3D${descendant}+${databaseSearch.slice(4)}`;
             }
         } else {
             return null;
