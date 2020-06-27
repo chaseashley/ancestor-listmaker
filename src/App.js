@@ -30,7 +30,9 @@ class Main extends React.Component {
       category: null,
       lastCategory: null,
       locationText: '',
+      lastLocationText: '',
       categoryText: '',
+      lastCategoryText: '',
       generations: null,
       lastGenerations: null,
       ahnentafel: false,
@@ -150,8 +152,6 @@ class Main extends React.Component {
           ancestors = addGensAndAhnens(this.state.descendantJson, ancestors);
           this.setState({ancestorList: ancestors});
           this.setAncestorListsState(this.state.generations-1, ancestors);
-          this.setState({lastDescendant: this.state.descendant});
-          this.setState({lastGenerations: this.state.generations});
         }
       } else if ((this.state.descendant === this.state.lastDescendant) && (this.state.generations !== this.state.lastGenerations)){ //same descendant, but diff number of gens, so need to get ancestors for that number of gens
         if (this.state.ancestorLists[this.state.generations-1] !== null) {
@@ -191,48 +191,62 @@ class Main extends React.Component {
           this.setAncestorListsState(this.state.generations-1, ancestors);
         }
         this.setState({ancestorList: ancestors});
-        this.setState({lastGenerations: this.state.generations});
       }
     }
 
     //Then filter the ancestors against the specified category/criteria and create a table of the matches
     if (this.state.ancestorList !== null) {
       await this.setState({processingStatus: 'Filtering'});
-      let matchingAncestors = deletePrivateProfiles(this.state.ancestorList);
-      if (this.state.ahnentafel === false) {
-        matchingAncestors = removeDuplicates(matchingAncestors);
-      }
-      if (this.state.category !== 'All') {
-        if (this.state.category === 'Orphans') {
-          matchingAncestors = filterOrphans(matchingAncestors);
-        } else if (this.state.category === 'American Immigrants') {
-          matchingAncestors = filterUSImmigrants(matchingAncestors);
-        } else if (this.state.category === 'Australian Immigrants') {
-          matchingAncestors = filterAustralianImmigrants(matchingAncestors);
-        } else if (this.state.category === 'Canadian Immigrants') {
-          matchingAncestors = filterCanadianImmigrants(matchingAncestors);
-        } else if (this.state.category === 'Location Text') {
-          matchingAncestors = filterLocationText(matchingAncestors, this.state.locationText);
-        } else if (this.state.category === 'Category Text') {
-          matchingAncestors = await filterCategoryText(this.state.descendant, matchingAncestors, this.state.categoryText);
-        } else if (this.state.category === 'Unknown/Missing Father') {
-          matchingAncestors = filterUnknownFather(matchingAncestors);
-        } else if (this.state.category === 'Unknown/Missing Mother') {
-          matchingAncestors = filterUnknownMother(matchingAncestors);
-        } else if (this.state.category === 'Unsourced') {
-          matchingAncestors = await filterByWikiTreePlus(this.state.descendant, matchingAncestors, 'Unsourced');
-        } else if (this.state.category === 'GEDCOM Junk') {
-          matchingAncestors = await filterByWikiTreePlus(this.state.descendant, matchingAncestors, 'GEDCOM Junk');
-        } else if (this.state.category === 'Five-Star Profiles') {
-          matchingAncestors = await filterByWikiTreePlus(this.state.descendant, matchingAncestors, 'Five-Star Profiles');
-        } else {
-          if (this.state[this.state.category] === null) { // if no pages saved for the category, need to get them; otherwise use the save pages
-            const categoryArefs = await getAllRelatedCategoryArefs(this.state.category);
-            await this.setState({[this.state.category]: categoryArefs});
-          }
-          matchingAncestors = filterCategoryArefs(matchingAncestors, this.state[this.state.category]);
+      let matchingAncestors;
+      if (this.state.descendant !== this.state.lastDescendant || this.state.category !== this.state.lastCategory || this.state.generations !== this.state.lastGenerations ||
+        (this.state.category==='Location Text' && this.state.locationText !== this.state.lastLocationText) || 
+        (this.state.category==='Category Text' && this.state.categoryText !== this.state.lastcategoryText) ){
+        matchingAncestors = await(this.state.ancestorList);
+        if (this.state.ahnentafel === false) {
+          matchingAncestors = removeDuplicates(matchingAncestors);
         }
+        if (this.state.category !== 'All') {
+          if (this.state.category === 'Orphans') {
+            matchingAncestors = filterOrphans(matchingAncestors);
+          } else if (this.state.category === 'American Immigrants') {
+            matchingAncestors = filterUSImmigrants(matchingAncestors);
+          } else if (this.state.category === 'Australian Immigrants') {
+            matchingAncestors = filterAustralianImmigrants(matchingAncestors);
+          } else if (this.state.category === 'Canadian Immigrants') {
+            matchingAncestors = filterCanadianImmigrants(matchingAncestors);
+          } else if (this.state.category === 'Location Text') {
+            matchingAncestors = filterLocationText(matchingAncestors, this.state.locationText);
+          } else if (this.state.category === 'Category Text') {
+            matchingAncestors = await filterCategoryText(this.state.descendantJson, matchingAncestors, this.state.categoryText);
+          } else if (this.state.category === 'Unknown/Missing Father') {
+            matchingAncestors = filterUnknownFather(matchingAncestors);
+          } else if (this.state.category === 'Unknown/Missing Mother') {
+            matchingAncestors = filterUnknownMother(matchingAncestors);
+          } else if (this.state.category === 'Unsourced') {
+            matchingAncestors = await filterByWikiTreePlus(this.state.descendantJson, matchingAncestors, 'Unsourced');
+          } else if (this.state.category === 'GEDCOM Junk') {
+            matchingAncestors = await filterByWikiTreePlus(this.state.descendantJson, matchingAncestors, 'GEDCOM Junk');
+          } else if (this.state.category === 'Five-Star Profiles') {
+            matchingAncestors = await filterByWikiTreePlus(this.state.descendantJson, matchingAncestors, 'Five-Star Profiles');
+          } else {
+            if (this.state[this.state.category] === null) { // if no pages saved for the category, need to get them; otherwise use the save pages
+              const categoryArefs = await getAllRelatedCategoryArefs(this.state.category);
+              await this.setState({[this.state.category]: categoryArefs});
+            }
+            matchingAncestors = filterCategoryArefs(matchingAncestors, this.state[this.state.category]);
+          }
+        }
+
+
+//NEED TO TREAT CATEGORY AS NOT SAME IF TEXT CHANGED
+
+        await this.setState({lastCategory: this.state.category});
+        await this.setState({lastCategoryText: this.state.categoryText});
+        await this.setState({lastLocationText: this.state.locationText});
+      } else {
+        matchingAncestors = this.state.matchingAncestorsList;
       }
+        
       if (this.state.ahnentafel) {
         matchingAncestors = sortByAhnen(matchingAncestors, 'forward');
         await this.setState({lastSort: 'Ahnen'});
@@ -240,13 +254,14 @@ class Main extends React.Component {
         matchingAncestors = sortByName(matchingAncestors, 'forward');
         await this.setState({lastSort: 'Name'});
       }
-      await this.setState({matchingAncestorsList: matchingAncestors});
+      await this.setState({lastDescendant: this.state.descendant});
       await this.setState({lastGenerations: this.state.generations});
-      await this.setState({lastCategory: this.state.category});
+      await this.setState({matchingAncestorsList: matchingAncestors});
       await this.setState({lastAhnentafel: this.state.ahnentafel});
       await this.setState({lastFullname: this.state.fullname});
       await this.setState({processingStatus: 'Done'});
-    }   
+    } 
+
   }
 
   async onClickNameSort() {
@@ -395,14 +410,14 @@ class Main extends React.Component {
 
     let locationTextBox;
     if (this.state.category === 'Location Text') {
-      locationTextBox = <td><textarea className={styles.categoryTextBox} type="text" name="locationText" value={this.state.locationText} onChange={(e) => this.setState({locationText: e.target.value})} placeholder="Enter location search term(s). Multiple search terms may be entered, separated by commas - e.g. entering Italy, Italia will list all profiles that have either Italy or Italia in a location field. Case and periods are ignored - e.g., U.S.A. and usa are treated the same. To omit profiles that include a term, start the term with a ! - e.g. entering !England will list all profiles that do not have England in a location field, while entering France, !Nouvelle-France will list all profiles with France but not Nouvelle-France in a location field."/></td>
+      locationTextBox = <td><textarea className={styles.categoryTextBox} type="text" name="locationText" value={this.state.locationText} onChange={(e) => this.setState({locationText: e.target.value})} placeholder="Enter Birth and Death Location field search term(s). Multiple search terms may be entered, separated by commas. To limit search terms to the Birth Location or Death Location, precede the terms with B: or D: To exclude certain terms, precede them with a ! As examples, entering New England will generate a list of all ancestors whose profiles have New England in either the Birth Location or the Death Location field; entering !New England will gnerate a list of all ancestors whose profiles do not have New England in either the Birth Location or Death Location field; entering B:Germany,D:England,!New England will generate a list of ancestors with Germany in the Birth Location field and England (but not New England) in the Death Location field. Case and periods are ignored - e.g., USA and u.s.a are treated the same."/></td>
     } else {
       locationTextBox = '';
     }
 
     let categoryTextBox;
     if (this.state.category === 'Category Text') {
-      categoryTextBox = <td><textarea className={styles.categoryTextBox} type="text" name="categoryText" value={this.state.categoryText} onChange={(e) => this.setState({categoryText: e.target.value})} placeholder="Enter profile search term(s). Multiple search terms may be entered, separated by commas - e.g. entering War,American Revolution will list all ancestors who are in a category whose name includes either War or American Revolution. Case and periods are ignored - e.g., U.S.A. and usa are treated the same. To omit certain categories that include a term, start the term with a ! - e.g. entering War,!Civil War will list all ancestors in a category whose name includes War but not Civil War. To require that the category name include two terms that are not necessarily together or in a particular order, precede the second term with a plus sign - e.g. entering Texas,+Cemetery will list all ancestors in a category whose name includes both Texas and Cemetery."/></td>
+      categoryTextBox = <td><textarea className={styles.categoryTextBox} type="text" name="categoryText" value={this.state.categoryText} onChange={(e) => this.setState({categoryText: e.target.value})} placeholder="Enter category search term(s). Multiple search terms may be entered, separated by commas. To exclude certain terms, precede them with a ! To require that a second term be included, precede it with a + As examples, entering War,American Revolution will generate a list all ancestors in a category whose name includes either War or American Revolution; entering War,!Civil War will generate a list of all ancestors in a category whose name includes War but not Civil War; entering Texas,+Cemetery will generate a list all ancestors in a category whose name includes both Texas and Cemetery. Case and periods are ignored - e.g., USA and u.s.a are treated the same."/></td>
     } else {
       categoryTextBox = '';
     }
