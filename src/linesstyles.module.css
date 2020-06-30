@@ -37,60 +37,113 @@
 
 .table {
     table-layout: auto;
+    width: 100%;
     padding-bottom: 20px;
     font-family: Arial;
-    border-collapse: separate;
-    margin-bottom: -20px;
+    border-collapse: collapse;
 }
 
-.ancestor {
+.thline {
+    background:rgb(56, 83, 56);
+    color: white;
     white-space: nowrap;
-    width: 10%;
+    text-align:center;
+    border-left: 1px solid black;
+    border-right: 1px solid black;
+}
+
+.th1gen {
+    background:rgb(56, 83, 56);
+    color: white;
+    text-align:center;
+    border-left: 2px solid white;
+    border-right: 2px solid white;
+}
+
+.th1name {
+    background:rgb(56, 83, 56);
+    color: white;
+    white-space: nowrap;
+    text-align:center;
+    border-left: 2px solid white;
+    border-right: 2px solid white;
+}
+
+.th1date {
+    background: rgb(56, 83, 56);
+    color: white;
+    white-space: nowrap;
+    text-align:center;
+    border-left: 2px solid white;
+    border-right: 2px solid white;
+}
+
+.th1location {
+    background: rgb(56, 83, 56);
+    color: white;
+    text-align: center;
+    border-left: 2px solid white;
+    border-right: 2px solid white;
+}
+
+.th2gen {
+    background:rgb(100, 146, 100);
+    color: white;
+    text-align:center;
+    border-left: 1px solid black;
+    border-right: 1px solid white;
+}
+
+.th2name {
+    background:rgb(100, 146, 100);
+    color: white;
+    white-space: nowrap;
+    text-align:center;
+    border-left: 1px solid white;
+    border-right: 1px solid black;
+}
+
+.gen1 {
+    white-space: nowrap;
+    font-size: 0.9em;
+    text-align:center;
+    border-left: 2px solid white;
+    border-right: 2px solid white;
+}
+
+.name1 {
+    white-space: nowrap;
     font-size: 1em;
     text-align: left;
+    border-left: 2px solid white;
+    border-right: 2px solid white;
 }
 
-.date {
+.date1 {
     white-space: nowrap;
     font-size: 0.9em;
     text-align: center;
 }
 
-.location {
+.location1 {
     font-size: 0.9em;
     text-align: left;
 }
 
-.ahnen {
+.gen2 {
     white-space: nowrap;
     font-size: 0.9em;
-    text-align:center;
-}
-
-.thahnen {
-    background:rgb(56, 83, 56);
-    color: white;
-    text-align:center;
-}
-
-.thname {
-    background:rgb(56, 83, 56);
-    color: white;
-    white-space: nowrap;
-    text-align:center;
-}
-
-.thdate {
-    background: rgb(56, 83, 56);
-    color: white;
-    white-space: nowrap;
-    text-align:center;
-}
-
-.thlocation {
-    background: rgb(56, 83, 56);
-    color: white;
     text-align: center;
+    border-left: 1px solid black;
+    border-right: 1px solid white;
+}
+
+.name2 {
+    white-space: nowrap;
+    font-size: 1em;
+    text-align: left;
+    border-left: 1px solid white;
+    border-right: 1px solid black;
 }
 
 .table tr:nth-child(even) {

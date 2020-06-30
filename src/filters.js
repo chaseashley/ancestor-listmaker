@@ -267,6 +267,8 @@ async function getWtPlusIdArray(descendant, filterName) {
         databaseSearch = `Ancestors%3D${descendant}+GEDCOMJunk`;
     } else if (filterName === 'Five-Star Profiles') {
         databaseSearch = `Ancestors%3D${descendant}+Stars%3D5stars`;
+    } else if (filterName === 'Witches') {
+        databaseSearch = `Ancestors%3D${descendant}+CategoryWord%3Dwitches+CategoryWord%3Daccused`;
     }
     const wtplusJson = await getWtPlusJson(databaseSearch);
 
