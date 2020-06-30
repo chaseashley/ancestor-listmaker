@@ -556,6 +556,14 @@ class Main extends React.Component {
   }
 */
 
+componentDidMount() {
+  const url = window.location.href;
+  if (url.includes('id=')) {
+    const startLoc = url.indexOf('id=') + 3;
+    this.setState({descendant: url.slice(startLoc)});
+  }
+}
+
 }
 
 export default Main;

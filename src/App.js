@@ -13,7 +13,7 @@ const NoMatchPage = () => {
 class App extends Component {
 
     render() {
-
+        /*
         const startingState = {
             firstMount: true,
             descendant: null,
@@ -38,6 +38,7 @@ class App extends Component {
             ancestorLists: [null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
         }
         db.table('main').put(JSON.stringify(startingState),0);
+        */
 
         return (      
             <BrowserRouter>
