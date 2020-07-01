@@ -30,7 +30,7 @@ class Main extends React.Component {
       descendant: '',
       lastDescendant: '',
       category: null,
-      lastCategory: '',
+      lastCategory: null,
       locationText: '',
       lastLocationText: '',
       categoryText: '',
