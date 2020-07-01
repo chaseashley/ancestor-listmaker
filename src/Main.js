@@ -529,7 +529,7 @@ class Main extends React.Component {
                 <td>{locationTextBox}{categoryTextBox}</td> 
               </tr>
               <tr>
-                <td className={styles.label}>Generation and ahnentafel number column:</td>
+                <td className={styles.label}>Optional display features:</td>
                 <td>
                 <input type='radio' name='ahnen' id="omit" onChange={this.onChangeAhnen} checked={!this.state.ahnentafel}/>
                 <label for="include">Omit</label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
