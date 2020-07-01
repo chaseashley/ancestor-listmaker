@@ -13,9 +13,8 @@ const NoMatchPage = () => {
 class App extends Component {
 
     render() {
-        /*
+
         const startingState = {
-            firstMount: true,
             descendant: null,
             lastDescendant: null,
             category: null,
@@ -29,7 +28,7 @@ class App extends Component {
             ahnentafel: false,
             lastAhnentafel: false,
             fullname: false,
-            lastFullname: false,
+            multiples: false,
             descendantJson: null,
             ancestorList: null,
             matchingAncestorsList: null,
@@ -38,7 +37,6 @@ class App extends Component {
             ancestorLists: [null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
         }
         db.table('main').put(JSON.stringify(startingState),0);
-        */
 
         return (      
             <BrowserRouter>

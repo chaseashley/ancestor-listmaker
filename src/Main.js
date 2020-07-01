@@ -5,7 +5,7 @@ import 'react-dropdown/style.css';
 import { CSVLink } from "react-csv";
 import { getAncestorsJson, getAdditionalGens, replaceUndefinedFields, deletePrivateProfiles } from './ancestors';
 import { getAllRelatedCategoryArefs } from "./categoryPages";
-import { filterCategoryText, filterByWikiTreePlus, filterUnknownFather, filterUnknownMother, filterOrphans, filterLocationText, filterUSImmigrants, filterAustralianImmigrants, filterCanadianImmigrants, filterCategoryArefs, removeDuplicates } from './filters';
+import { getMultiples, filterCategoryText, filterByWikiTreePlus, filterUnknownFather, filterUnknownMother, filterOrphans, filterLocationText, filterUSImmigrants, filterAustralianImmigrants, filterCanadianImmigrants, filterCategoryArefs, removeDuplicates } from './filters';
 import { Table } from './Table';
 import { sortByName, sortByDOB, sortByDOD, sortByPOB, sortByPOD, sortByAhnen } from './sort';
 import { AhnenTable } from './AhnenTable';
@@ -25,10 +25,11 @@ class Main extends React.Component {
     this.onClickAhnenSort = this.onClickAhnenSort.bind(this);
     this.getDownloadData = this.getDownloadData.bind(this);
     this.onClickPrematureDownload = this.onClickPrematureDownload.bind(this);
+    this.onChangeAhnen = this.onChangeAhnen.bind(this);
     this.state = {
       descendant: '',
       lastDescendant: '',
-      category: '',
+      category: null,
       lastCategory: '',
       locationText: '',
       lastLocationText: '',
@@ -39,10 +40,11 @@ class Main extends React.Component {
       ahnentafel: false,
       lastAhnentafel: false,
       fullname: false,
-      lastFullname: false,
+      multiples: false,
       descendantJson: null,
       ancestorList: null,
       matchingAncestorsList: null,
+      matchingMultiples: null,
       processingStatus: null,
       lastSort: '',
       ancestorLists: [null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null], //1-20 gens
@@ -129,7 +131,7 @@ class Main extends React.Component {
   async onClickSubmit() { // the Find Ancestors button click event
 
     // First get named descendant's ancestors for the specified number of generations
-    if (this.state.descendant === '' || this.state.category === '' || this.state.generations === null) {
+    if (this.state.descendant === '' || this.state.category === null || this.state.generations === null) {
       alert('Make sure a Wikitree ID has been entered in the top text box and the number of generations and a category have been selected');
     } else if ((this.state.descendant !== null && this.state.category !== null && this.state.generations !== null) &&
         ((this.state.descendant !== this.state.lastDescendant) || (this.state.category !== this.state.lastCategory) || (this.state.generations !== this.state.lastGenerations))) {
@@ -199,7 +201,7 @@ class Main extends React.Component {
     if (this.state.ancestorList !== null) {
       await this.setState({processingStatus: 'Filtering'});
       let matchingAncestors;
-      if (this.state.descendant !== this.state.lastDescendant || this.state.category !== this.state.lastCategory || this.state.generations !== this.state.lastGenerations ||
+      if (this.state.descendant !== this.state.lastDescendant || this.state.category !== this.state.lastCategory || this.state.generations !== this.state.lastGenerations || this.state.ahnentafel !== this.state.lastAhnentafel ||
         (this.state.category==='Location Text' && this.state.locationText !== this.state.lastLocationText) || 
         (this.state.category==='Category Text' && this.state.categoryText !== this.state.lastcategoryText) ){
         matchingAncestors = await(this.state.ancestorList);
@@ -229,7 +231,7 @@ class Main extends React.Component {
           } else if (this.state.category === 'Witches') {
             matchingAncestors = await filterByWikiTreePlus(this.state.descendantJson, matchingAncestors, 'Witches');
           } else {
-            if (this.state[this.state.category] === '') { // if no pages saved for the category, need to get them; otherwise use the save pages
+            if (this.state[this.state.category] === null) { // if no pages saved for the category, need to get them; otherwise use the save pages
               const categoryArefs = await getAllRelatedCategoryArefs(this.state.category);
               await this.setState({[this.state.category]: categoryArefs});
             }
@@ -244,6 +246,7 @@ class Main extends React.Component {
       }
       
       matchingAncestors = deletePrivateProfiles(matchingAncestors);
+      this.state.matchingMultiples = getMultiples(matchingAncestors);
       if (this.state.ahnentafel) {
         matchingAncestors = sortByAhnen(matchingAncestors, 'forward');
         await this.setState({lastSort: 'Ahnen'});
@@ -255,8 +258,7 @@ class Main extends React.Component {
       await this.setState({lastDescendant: this.state.descendant});
       await this.setState({lastGenerations: this.state.generations});
       await this.setState({matchingAncestorsList: matchingAncestors});
-      await this.setState({lastAhnentafel: this.state.ahnentafel});
-      await this.setState({lastFullname: this.state.fullname});
+      await this.setState({lastAhnentafel: this.state.ahnentafel})
       await this.setState({processingStatus: 'Done'});
     } 
 
@@ -334,6 +336,14 @@ class Main extends React.Component {
     this.setState({matchingAncestorsList: newSortedMatchingAncestors});
   }
 
+  onChangeAhnen() {
+    if (this.state.ahnentafel===false) {
+      this.setState({ahnentafel: true});
+    } else {
+      this.setState({ahnentafel: false});
+    }
+  }
+
   getDownloadData(matchingAncestorsList) {
     let downloadData;
     if (this.state.lastAhnentafel) {
@@ -341,7 +351,7 @@ class Main extends React.Component {
       for (let i=0; i<matchingAncestorsList.length; i++) {
         const ancestor = matchingAncestorsList[i];
         let ancestorLink;
-        if (this.state.lastFullname) {
+        if (this.state.fullname) {
           ancestorLink = `=HYPERLINK(""https://www.wikitree.com/wiki/${ancestor['Name']}""` + `,""${ancestor['BirthName']}"")`;
         } else {
           ancestorLink = `=HYPERLINK(""https://www.wikitree.com/wiki/${ancestor['Name']}""` + `,""${ancestor['BirthNamePrivate']}"")`;
@@ -354,7 +364,7 @@ class Main extends React.Component {
       for (let i=0; i<matchingAncestorsList.length; i++) {
         const ancestor = matchingAncestorsList[i];
         let ancestorLink;
-        if (this.state.lastFullname) {
+        if (this.state.fullname) {
           ancestorLink = `=HYPERLINK(""https://www.wikitree.com/wiki/${ancestor['Name']}""` + `,""${ancestor['BirthName']}"")`;
         } else {
           ancestorLink = `=HYPERLINK(""https://www.wikitree.com/wiki/${ancestor['Name']}""` + `,""${ancestor['BirthNamePrivate']}"")`;
@@ -394,9 +404,27 @@ class Main extends React.Component {
       } else {
         meetsCategory = `who meets the ${this.state.lastCategory} list criteria`;
       }
-      status = <div className={styles.status}>{this.state.lastDescendant} (<a href={`https://www.wikitree.com/wiki/${this.state.lastDescendant}`} target='_blank'>{this.state.descendantJson['BirthNamePrivate']}</a>) has {removeDuplicates(this.state.matchingAncestorsList).length} {removeDuplicates(this.state.matchingAncestorsList).length === 1 ? 'ancestor' : 'ancestors'} within {this.state.lastGenerations} {this.state.lastGenerations > 1 ? 'generations' : 'generation'} {meetsCategory}</div>
+      status = <div className={styles.status}>{this.state.lastDescendant} (<a href={`https://www.wikitree.com/wiki/${this.state.lastDescendant}`} target='_blank'>{this.state.descendantJson['BirthNamePrivate']}</a>) has {(this.state.matchingAncestorsList.length > removeDuplicates(this.state.matchingAncestorsList)) ? ' unique ':''} {removeDuplicates(this.state.matchingAncestorsList).length} {removeDuplicates(this.state.matchingAncestorsList).length === 1 ? 'ancestor' : 'ancestors'} within {this.state.lastGenerations} {this.state.lastGenerations > 1 ? 'generations' : 'generation'} {meetsCategory}</div>
     } else {
       status = <div></div>;
+    }
+
+    let displayOptions;
+    if (this.state.processingStatus === 'Done') {
+      displayOptions = 
+        <table className={styles.optionsTable}>
+          <tr>
+            <td className={styles.label}>Optional display features:</td>
+            <td><input type="checkbox" name="fullnameCheckbox" checked={this.state.fullname} onChange={(e) => this.setState({fullname: e.target.checked})}/>
+                <label for="ahnentafelCheckbox">Show full name at birth (includes middle name)</label>
+              </td>
+            <td><input type="checkbox" name="multiplesCheckbox" checked={this.state.multiples} onChange={(e) => this.setState({multiples: e.target.checked})}/>
+              <label for="multipleCheckbox">Show number of lines to same ancestor (if multiple lines of descent)</label>
+            </td> 
+          </tr>
+        </table>
+    } else {
+      displayOptions = <div></div>;
     }
 
     let downloadButton;
@@ -410,7 +438,7 @@ class Main extends React.Component {
 
     let locationTextBox;
     if (this.state.category === 'Location Text') {
-      locationTextBox = <td><textarea className={styles.categoryTextBox} type="text" name="locationText" value={this.state.locationText} onChange={(e) => this.setState({locationText: e.target.value})} placeholder="Enter Birth and Death Location field search term(s). Multiple search terms may be entered, separated by commas. To limit search terms to the Birth Location or Death Location, precede the terms with B: or D: To exclude certain terms, precede them with a ! As examples, entering New England will generate a list of all ancestors whose profiles have New England in either the Birth Location or the Death Location field; entering !New England will gnerate a list of all ancestors whose profiles do not have New England in either the Birth Location or Death Location field; entering B:Germany,D:England,!New England will generate a list of ancestors with Germany in the Birth Location field and England (but not New England) in the Death Location field. Case and periods are ignored - e.g., USA and u.s.a are treated the same."/></td>
+      locationTextBox = <td><textarea className={styles.categoryTextBox} type="text" name="locationText" value={this.state.locationText} onChange={(e) => this.setState({locationText: e.target.value})} placeholder="Enter Birth and Death Location field search term(s). Multiple search terms may be entered, separated by commas. To limit search terms to the Birth Location or Death Location, precede the terms with b: or d: To exclude certain terms, precede them with a ! As examples, entering New England will generate a list of all ancestors whose profiles have New England in either the Birth Location or the Death Location field; entering !New England will generate a list of all ancestors whose profiles do not have New England in either the Birth Location or Death Location field; entering b:Germany,d:England,!New England will generate a list of ancestors with Germany in the Birth Location field and England (but not New England) in the Death Location field. Case and periods are ignored - e.g., USA and u.s.a are treated the same."/></td>
     } else {
       locationTextBox = '';
     }
@@ -449,9 +477,9 @@ class Main extends React.Component {
     let displayedTable;
     if (this.state.processingStatus ==='Done') {
       if (this.state.lastAhnentafel) {
-        displayedTable = <AhnenTable tableData={this.state.matchingAncestorsList} fullname={this.state.lastFullname} descendantJson={this.state.descendantJson} ancestorList={this.state.ancestorList} generations={this.state.lastGenerations}/>;
+        displayedTable = <AhnenTable tableData={this.state.matchingAncestorsList} fullname={this.state.fullname} descendantJson={this.state.descendantJson} ancestorList={this.state.ancestorList} generations={this.state.lastGenerations} multiples={this.state.multiples} multiplesArray={this.state.matchingMultiples}/>;
       } else {
-        displayedTable = <Table tableData={this.state.matchingAncestorsList} fullname={this.state.lastFullname} descendantJson={this.state.descendantJson} ancestorList={this.state.ancestorList} generations={this.state.lastGenerations}/>;
+        displayedTable = <Table tableData={this.state.matchingAncestorsList} fullname={this.state.fullname} descendantJson={this.state.descendantJson} ancestorList={this.state.ancestorList} generations={this.state.lastGenerations} multiples={this.state.multiples} multiplesArray={this.state.matchingMultiples}/>;
       }  
     } else {
       displayedTable = <div></div>;
@@ -501,11 +529,13 @@ class Main extends React.Component {
                 <td>{locationTextBox}{categoryTextBox}</td> 
               </tr>
               <tr>
-                <td className={styles.label}>Optional display features:</td>
-                <td><input type="checkbox" name="ahnentafelCheckbox" checked={this.state.ahnentafel} onChange={(e) => this.setState({ahnentafel: e.target.checked})}/>
-                    <label for="ahnentafelCheckbox">Include generation and ahnentafel number column</label></td>
-                <td><input type="checkbox" name="fullnameCheckbox" checked={this.state.fullname} onChange={(e) => this.setState({fullname: e.target.checked})}/>
-                    <label for="ahnentafelCheckbox">Show full name at birth (includes middle name)</label></td>
+                <td className={styles.label}>Generation and ahnentafel number column:</td>
+                <td>
+                <input type='radio' name='ahnen' id="omit" onChange={this.onChangeAhnen} checked={!this.state.ahnentafel}/>
+                <label for="include">Omit</label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <input type='radio' name='ahnen' id="include" onChange={this.onChangeAhnen} checked={this.state.ahnentafel}/>
+                <label for="omit">Include</label>
+                </td>
               </tr>
               <tr className={styles.buttonsTr}>
                 <td></td>
@@ -518,6 +548,7 @@ class Main extends React.Component {
           </table>
         </div>
         {status}
+        {displayOptions}
         <div className={styles.tableDiv}>
           <table className={styles.table}>
             {tableHeadings}
@@ -529,7 +560,6 @@ class Main extends React.Component {
     )
   }
 
-  /*
   componentWillUnmount() {
     db.table('main').put(JSON.stringify(this.state),0);
   }
@@ -554,15 +584,6 @@ class Main extends React.Component {
       }
     });
   }
-*/
-
-componentDidMount() {
-  const url = window.location.href;
-  if (url.includes('id=')) {
-    const startLoc = url.indexOf('id=') + 3;
-    this.setState({descendant: url.slice(startLoc)});
-  }
-}
 
 }
 

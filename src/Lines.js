@@ -3,6 +3,7 @@ import styles from './linesstyles.module.css';
 import { getAllAncestralLines } from './ancestralLine';
 import db from './db';
 import { CSVLink } from "react-csv";
+import { Link } from "react-router-dom";
 
 class Lines extends React.Component {
 
@@ -13,7 +14,9 @@ class Lines extends React.Component {
       endAncestor: this.props.location.endAncestor,
       ancestorList: this.props.location.ancestorList,
       descendantJson: this.props.location.descendantJson,
-      ancestralLines: null
+      fullname: this.props.location.fullname,
+      ancestralLines: null,
+      maxLineLength: 0
     }
   }
 
@@ -25,6 +28,7 @@ class Lines extends React.Component {
         this.setState(JSON.parse(storedState));
       } else {
         this.createAncestralLines(this.props.location.endAncestor,this.props.location.ancestorList, this.props.location.descendantJson);
+        this.getMaxLineLength(this.state.ancestralLines)
       }
     });
   }
@@ -46,7 +50,7 @@ class Lines extends React.Component {
         maxLength = ancestralLines[i].length;
       }
     }
-    return maxLength;
+    this.setState({maxLineLength: maxLength});
   }
 
   createHeadingsRow1(ancestralLines) {
@@ -95,14 +99,14 @@ class Lines extends React.Component {
   createTableRows(ancestralLines) {
     if (ancestralLines !== null) {
       let rows = [];
-      const maxLineLength = this.getMaxLineLength(ancestralLines);
+      const maxLineLength = this.state.maxLineLength;
       for (let i = 0; i < maxLineLength; i++) {
         let row = [];
         if (ancestralLines.length === 1) {
           row.push(
             <>
             <td className={styles.gen1}>{ancestralLines[0][i]['Generation']}</td>
-            <td className={styles.name1}><a href={`https://www.wikitree.com/wiki/${ancestralLines[0][i]['Name']}`} target='_blank'>{ancestralLines[0][i]['BirthNamePrivate']}</a></td>
+            <td className={styles.name1}><a href={`https://www.wikitree.com/wiki/${ancestralLines[0][i]['Name']}`} target='_blank'>{this.state.fullname ? ancestralLines[0][i]['BirthName'] : ancestralLines[0][i]['BirthNamePrivate']}</a></td>
             <td className={styles.date1}>{ancestralLines[0][i]['BirthDate']}</td>
             <td className={styles.location1}>{ancestralLines[0][i]['BirthLocation']}</td>
             <td className={styles.date1}>{ancestralLines[0][i]['DeathDate']}</td>
@@ -115,7 +119,7 @@ class Lines extends React.Component {
               row.push(
                 <>
                 <td className={styles.gen2}>{ancestralLines[j][i]['Generation']}</td>
-                <td className={styles.name2}><a href={`https://www.wikitree.com/wiki/${ancestralLines[j][i]['Name']}`} target='_blank'>{ancestralLines[j][i]['BirthNamePrivate']}</a></td>
+                <td className={styles.name2}><a href={`https://www.wikitree.com/wiki/${ancestralLines[j][i]['Name']}`} target='_blank'>{(this.state.fullname) ? ancestralLines[j][i]['BirthName'] : ancestralLines[j][i]['BirthNamePrivate']}</a></td>
                 </>
               );
             } else {
@@ -142,8 +146,7 @@ class Lines extends React.Component {
       }
     }
     downloadData.push(headings);
-    const maxLineLength = this.getMaxLineLength(ancestralLines);
-    for (let i = 0; i < maxLineLength; i++) {
+    for (let i = 0; i < this.state.maxLineLength; i++) {
       let row;
       if (ancestralLines.length === 1) {
         row = [ancestralLines[0][i]['Generation'],
@@ -172,7 +175,7 @@ class Lines extends React.Component {
   createDownloadButton(ancestralLines, descendantJson, endAncestor) {
     let downloadFileName = `${descendantJson['BirthNamePrivate']} - ${endAncestor['BirthNamePrivate']} Lines`;
     downloadFileName = `${downloadFileName.replace(/\./g, '')}.csv`;
-    const downloadButton = <CSVLink data={this.getDownloadData(ancestralLines)} filename={downloadFileName}><button className={styles.downloadButton}>Download List</button></CSVLink>;
+    const downloadButton = <CSVLink data={this.getDownloadData(ancestralLines)} filename={downloadFileName}><button className={styles.button}>Download List</button></CSVLink>;
     return downloadButton;
   }
 
@@ -198,15 +201,21 @@ class Lines extends React.Component {
     if (this.state.ancestralLines === null) {
       pageBody = <div></div>;
     } else {
-      console.log(JSON.stringify(this.state.tableRows));
       pageBody = <div>
         <div className={styles.description}>
-          The table below shows the {(this.state.ancestralLines.length===1) ? 'only': this.state.ancestralLines.length} {(this.state.ancestralLines.length===1) ? 'line': 'lines'} of descent from {this.state.endAncestor['BirthNamePrivate']} to {this.state.descendantJson['BirthNamePrivate']} that are present on WikiTree and that 
-          involve persons within {this.state.generations} generations. Lines going back more than {this.state.generations} generations are included so long as each other person in the line has a line that connects to {this.state.descendantJson['BirthNamePrivate']} within {this.state.generations} generations. Note that, if the connection with {this.state.endAncestor['BirthNamePrivate']} is toward the end of the generational range, expanding the range back more generations may reveal additional lines.
-          <tr className={styles.buttonsTr}>
-              <td>{downloadButton}</td>
-          </tr>
+          The table below shows the {(this.state.ancestralLines.length===1) ? 'only': this.state.ancestralLines.length} {(this.state.ancestralLines.length===1) ? 'line': 'lines'} of descent from {this.state.endAncestor['BirthNamePrivate']} to {this.state.descendantJson['BirthNamePrivate']} that {(this.state.ancestralLines.length===1) ? 'is' : 'are'} present on WikiTree{((this.state.generations - this.state.maxLineLength+1) > 2) ? '' : ` and 
+          that ${(this.state.ancestralLines.length===1) ? 'consists' : 'consist'} of persons within ${this.state.generations} generations of ${this.state.descendantJson['BirthNamePrivate']}`}. {(this.state.maxLineLength <= this.state.generations+1) ? '' : `Lines going back more than ${this.state.generations} generations are included if each person in the line has a line that connects them to ${this.state.descendantJson['BirthNamePrivate']} within ${this.state.generations} generations.`}
+          {(this.state.generations <= 5 || (this.state.generations - this.state.maxLineLength+1) > Math.ceil(this.state.generations/10)) ? '' : ` Note that it is possible that expanding the range back more generations may reveal additional lines.`}
         </div>
+        <table className={styles.formTable}>
+          <tr className={styles.buttonsTr}>
+                <td className={styles.buttonSpacer}></td>
+                <td className={styles.buttonsTd}><Link to={{ pathname: '/'}}><button className={styles.button}>Return to List</button></Link>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                {downloadButton}</td>
+                <td></td>
+            </tr>
+        </table>
         <div className={styles.contact}>
           If you have any questions, comments, suggestions or problems, please post a comment on <a href='https://www.wikitree.com/wiki/Ashley-1950' target='_blank'>Chase Ashley's WikiTree page</a>.
         </div>

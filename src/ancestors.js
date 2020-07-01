@@ -167,6 +167,9 @@ export function replaceUndefinedFields(ancestors) {
         if (ancestors[i]['BirthName'] === undefined) {
             ancestors[i]['BirthName'] = ancestors[i]['BirthNamePrivate'];
         }
+        if (ancestors[i]['Name'] === undefined) {
+            ancestors[i]['Name'] = 'Private';
+        }
     }
     return ancestors;
 }

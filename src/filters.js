@@ -302,6 +302,18 @@ export function removeDuplicates(arr) {
       }, []);
 }
 
+export function getMultiples(ancestors) {
+    const counter = {};
+    for (let i=0; i<ancestors.length; i++) {
+        if (counter.hasOwnProperty(ancestors[i]['Id'])) {
+            counter[ancestors[i]['Id']]++
+        } else {
+            counter[ancestors[i]['Id']] = 1;
+        }
+    }
+    return counter;
+}
+
 export async function filterCategoryText(descendantJson, ancestors, categoryText) {
     //uppercase text and remove commas
     categoryText = categoryText.replace(/[&\/\\#()$~%":*?<>{}]/g, '');
