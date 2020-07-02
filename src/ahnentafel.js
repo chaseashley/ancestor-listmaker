@@ -1,4 +1,5 @@
-export function addGensAndAhnens(child, ancestors) {
+export function addGensAndAhnens(child, ancestorsWithoutAhnens) {
+    let ancestors = ancestorsWithoutAhnens.slice()
     for (let i=0; i<ancestors.length; i++) {
         ancestors[i]['Ahnen'] = -1;
       }

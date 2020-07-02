@@ -5,7 +5,7 @@ import 'react-dropdown/style.css';
 import { CSVLink } from "react-csv";
 import { getAncestorsJson, getAdditionalGens, replaceUndefinedFields, deletePrivateProfiles } from './ancestors';
 import { getAllRelatedCategoryArefs } from "./categoryPages";
-import { getMultiples, filterCategoryText, filterByWikiTreePlus, filterUnknownFather, filterUnknownMother, filterOrphans, filterLocationText, filterUSImmigrants, filterAustralianImmigrants, filterCanadianImmigrants, filterCategoryArefs, removeDuplicates } from './filters';
+import { getMultiples, filterMCSuretyBarons, filterCategoryText, filterByWikiTreePlus, filterUnknownFather, filterUnknownMother, filterOrphans, filterLocationText, filterUSImmigrants, filterAustralianImmigrants, filterCanadianImmigrants, filterCategoryArefs, removeDuplicates } from './filters';
 import { Table } from './Table';
 import { sortByName, sortByDOB, sortByDOD, sortByPOB, sortByPOD, sortByAhnen } from './sort';
 import { AhnenTable } from './AhnenTable';
@@ -40,7 +40,9 @@ class Main extends React.Component {
       ahnentafel: false,
       lastAhnentafel: false,
       fullname: false,
+      lastFullname: false,
       multiples: false,
+      lastMultiples: false,
       descendantJson: null,
       ancestorList: null,
       matchingAncestorsList: null,
@@ -82,6 +84,7 @@ class Main extends React.Component {
         {value:'Jamestown', label: 'Jamestown - Ancestors who are Jamestowne Society Qualifying Ancestors, as indicated by their inclusion in the Jamestowne Society Qualifying Ancestors category'},
         {value:'Location Text', label: 'Location Text - Ancestors whose Birth or Death Location fields contain the search terms you enter. When this list option is selected, a text box will appear in which to enter the search terms.'},
         {value:'Magna Carta Gateway', label: 'Magna Carta Gateway - Ancestors who were U.S. immigrants descended from a Magna Carta Surety Baron, as indicated by their inclusion in the Gateway Ancestors category'},
+        {value:'Magna Carta Surety Barons', label: 'Magna Carta Surety Barons - Ancestors who were Magna Carta Surety Barons. Generally only useful if Descendant is at least 3 gens before living people since the Barons are generally at last 23 gens back from living people.'},
         {value:'Mayflower Passengers', label: 'Mayflower Passengers - Ancestors who were passengers on the Mayflower, as indicated by the presence of the Mayflower Passenger template on their profile'},
         {value:'Mexican-American War', label: 'Mexican-American War - Ancestors who participated in the Mexican-American War, as indicated by the presence of the Mexican-American War sticker or project template on their profile'},
         {value:'Native Americans', label: 'Native Americans - Ancestors who were Native Americans, as indicated by the presence of the Native American sticker or project template on their profile'},
@@ -143,19 +146,19 @@ class Main extends React.Component {
         if (ancestorsJson === null) { //will be null if there is a problem getting ancestors - eg ID number is not valid
           this.setState({processingStatus: null}); 
         } else {
+          ancestorsJson = removeDuplicates(ancestorsJson);
+          ancestorsJson = replaceUndefinedFields(ancestorsJson);
           ancestors = ancestorsJson.slice(1); //strip response down to array of ancestor objects
-          ancestors = removeDuplicates(ancestors);
           this.setState({descendantJson: ancestorsJson[0]});
           this.nullAncestorListsState();
           if (this.state.generations > 10 ) {
             this.setAncestorListsState(9,ancestors);
             ancestors = await getAdditionalGens(ancestors, this.state.generations-10);
           }
-          ancestors = replaceUndefinedFields(ancestors);
-          ancestors = addGensAndAhnens(this.state.descendantJson, ancestors);
-          this.setState({ancestorList: ancestors});
           this.setAncestorListsState(this.state.generations-1, ancestors);
         }
+        let ancestorList = addGensAndAhnens(this.state.descendantJson, ancestors);
+        this.setState({ancestorList: ancestorList});
       } else if ((this.state.descendant === this.state.lastDescendant) && (this.state.generations !== this.state.lastGenerations)){ //same descendant, but diff number of gens, so need to get ancestors for that number of gens
         if (this.state.ancestorLists[this.state.generations-1] !== null) {
           ancestors = this.state.ancestorLists[this.state.generations-1];
@@ -165,8 +168,9 @@ class Main extends React.Component {
             if (ancestorsJson === null) {
               this.setState({processingStatus: null}); 
             } else {
+              ancestorsJson = removeDuplicates(ancestorsJson);
+              ancestorsJson = replaceUndefinedFields(ancestorsJson);
               ancestors = ancestorsJson.slice(1); //strip response down to array of ancestor objects
-              ancestors = removeDuplicates(ancestors);
               this.setState({descendantJson: ancestorsJson[0]});
             }
           } else { // if gens >=10 use the next lower stored value
@@ -176,8 +180,9 @@ class Main extends React.Component {
               if (ancestorsJson === null) { //will be null if problem fetching ancestors - eg if Wikitree ID is invalid
                 this.setState({processingStatus: null}); 
               } else {
+                ancestorsJson = removeDuplicates(ancestorsJson);
+                ancestorsJson = replaceUndefinedFields(ancestorsJson);
                 ancestors = ancestorsJson.slice(1); //strip response down to array of ancestor objects
-                ancestors = removeDuplicates(ancestors);
                 this.setState({descendantJson: ancestorsJson[0]});
                 this.setAncestorListsState(9,ancestors);
                 if (this.state.generations > 10) {
@@ -189,11 +194,10 @@ class Main extends React.Component {
               ancestors = await getAdditionalGens(ancestors, this.state.generations-nextLowestStoredGen);
             }
           }
-          ancestors = replaceUndefinedFields(ancestors);
-          ancestors = addGensAndAhnens(this.state.descendantJson, ancestors);
           this.setAncestorListsState(this.state.generations-1, ancestors);
         }
-        this.setState({ancestorList: ancestors});
+        let ancestorList = addGensAndAhnens(this.state.descendantJson, ancestors);
+        this.setState({ancestorList: ancestorList});
       }
     }
 
@@ -201,10 +205,12 @@ class Main extends React.Component {
     if (this.state.ancestorList !== null) {
       await this.setState({processingStatus: 'Filtering'});
       let matchingAncestors;
-      if (this.state.descendant !== this.state.lastDescendant || this.state.category !== this.state.lastCategory || this.state.generations !== this.state.lastGenerations || this.state.ahnentafel !== this.state.lastAhnentafel ||
+      if (this.state.descendant !== this.state.lastDescendant || this.state.category !== this.state.lastCategory ||
+        this.state.generations !== this.state.lastGenerations || this.state.ahnentafel !== this.state.lastAhnentafel ||
+        this.state.fullname !== this.state.lastFullname || this.state.multiples !== this.state.lastMultiples ||
         (this.state.category==='Location Text' && this.state.locationText !== this.state.lastLocationText) || 
         (this.state.category==='Category Text' && this.state.categoryText !== this.state.lastcategoryText) ){
-        matchingAncestors = await(this.state.ancestorList);
+        matchingAncestors = this.state.ancestorList.slice();
         if (this.state.category !== 'All') {
           if (this.state.category === 'Orphans') {
             matchingAncestors = filterOrphans(matchingAncestors);
@@ -216,8 +222,10 @@ class Main extends React.Component {
             matchingAncestors = filterCanadianImmigrants(matchingAncestors);
           } else if (this.state.category === 'Location Text') {
             matchingAncestors = filterLocationText(matchingAncestors, this.state.locationText);
+            await this.setState({lastLocationText: this.state.locationText});
           } else if (this.state.category === 'Category Text') {
             matchingAncestors = await filterCategoryText(this.state.descendantJson, matchingAncestors, this.state.categoryText);
+            await this.setState({lastCategoryText: this.state.categoryText});
           } else if (this.state.category === 'Unknown/Missing Father') {
             matchingAncestors = filterUnknownFather(matchingAncestors);
           } else if (this.state.category === 'Unknown/Missing Mother') {
@@ -230,6 +238,8 @@ class Main extends React.Component {
             matchingAncestors = await filterByWikiTreePlus(this.state.descendantJson, matchingAncestors, 'Five-Star Profiles');
           } else if (this.state.category === 'Witches') {
             matchingAncestors = await filterByWikiTreePlus(this.state.descendantJson, matchingAncestors, 'Witches');
+          } else if (this.state.category === 'Magna Carta Surety Barons') {
+            matchingAncestors = filterMCSuretyBarons(matchingAncestors);
           } else {
             if (this.state[this.state.category] === null) { // if no pages saved for the category, need to get them; otherwise use the save pages
               const categoryArefs = await getAllRelatedCategoryArefs(this.state.category);
@@ -238,27 +248,26 @@ class Main extends React.Component {
             matchingAncestors = filterCategoryArefs(matchingAncestors, this.state[this.state.category]);
           }
         }
+        matchingAncestors = deletePrivateProfiles(matchingAncestors);
+        this.state.matchingMultiples = getMultiples(matchingAncestors);
+        if (this.state.ahnentafel) {
+          matchingAncestors = sortByAhnen(matchingAncestors, 'forward');
+          await this.setState({lastSort: 'Ahnen'});
+        } else {
+          matchingAncestors = removeDuplicates(matchingAncestors);
+          matchingAncestors = sortByName(matchingAncestors, 'forward');
+          await this.setState({lastSort: 'Name'});
+        }
+        await this.setState({lastDescendant: this.state.descendant});
+        await this.setState({lastGenerations: this.state.generations});
         await this.setState({lastCategory: this.state.category});
-        await this.setState({lastCategoryText: this.state.categoryText});
-        await this.setState({lastLocationText: this.state.locationText});
+        await this.setState({matchingAncestorsList: matchingAncestors});
+        await this.setState({lastAhnentafel: this.state.ahnentafel})
+        await this.setState({lastFullname: this.state.fullname})
+        await this.setState({lastMultiples: this.state.multiples})  
       } else {
         matchingAncestors = this.state.matchingAncestorsList;
       }
-      
-      matchingAncestors = deletePrivateProfiles(matchingAncestors);
-      this.state.matchingMultiples = getMultiples(matchingAncestors);
-      if (this.state.ahnentafel) {
-        matchingAncestors = sortByAhnen(matchingAncestors, 'forward');
-        await this.setState({lastSort: 'Ahnen'});
-      } else {
-        matchingAncestors = removeDuplicates(matchingAncestors);
-        matchingAncestors = sortByName(matchingAncestors, 'forward');
-        await this.setState({lastSort: 'Name'});
-      }
-      await this.setState({lastDescendant: this.state.descendant});
-      await this.setState({lastGenerations: this.state.generations});
-      await this.setState({matchingAncestorsList: matchingAncestors});
-      await this.setState({lastAhnentafel: this.state.ahnentafel})
       await this.setState({processingStatus: 'Done'});
     } 
 
@@ -351,7 +360,7 @@ class Main extends React.Component {
       for (let i=0; i<matchingAncestorsList.length; i++) {
         const ancestor = matchingAncestorsList[i];
         let ancestorLink;
-        if (this.state.fullname) {
+        if (this.state.lastFullname) {
           ancestorLink = `=HYPERLINK(""https://www.wikitree.com/wiki/${ancestor['Name']}""` + `,""${ancestor['BirthName']}"")`;
         } else {
           ancestorLink = `=HYPERLINK(""https://www.wikitree.com/wiki/${ancestor['Name']}""` + `,""${ancestor['BirthNamePrivate']}"")`;
@@ -364,7 +373,7 @@ class Main extends React.Component {
       for (let i=0; i<matchingAncestorsList.length; i++) {
         const ancestor = matchingAncestorsList[i];
         let ancestorLink;
-        if (this.state.fullname) {
+        if (this.state.lastFullname) {
           ancestorLink = `=HYPERLINK(""https://www.wikitree.com/wiki/${ancestor['Name']}""` + `,""${ancestor['BirthName']}"")`;
         } else {
           ancestorLink = `=HYPERLINK(""https://www.wikitree.com/wiki/${ancestor['Name']}""` + `,""${ancestor['BirthNamePrivate']}"")`;
@@ -396,35 +405,35 @@ class Main extends React.Component {
     } else if (this.state.processingStatus === 'Reloading') {
       status = <div className={styles.statusElipsis}>Reloading ancestor data</div>;
     } else if (this.state.processingStatus === 'Done') {
+      let sumOfCopies = 0;
+      for (let [key, value] of Object.entries(this.state.matchingMultiples)) {
+        sumOfCopies = sumOfCopies + value;
+      }
+      const uniqueMatches = removeDuplicates(this.state.matchingAncestorsList).length;
+      const numberOfDupes = sumOfCopies - uniqueMatches;
       let meetsCategory;
       if (this.state.lastCategory === 'All') {
         meetsCategory = '';
-      } else if (removeDuplicates(this.state.matchingAncestorsList).length !== 1) {
-        meetsCategory = `who meet the ${this.state.lastCategory} list criteria`;
+      } else if (uniqueMatches !== 1) {
+        meetsCategory = ` who meet the ${this.state.lastCategory} list criteria`;
       } else {
-        meetsCategory = `who meets the ${this.state.lastCategory} list criteria`;
+        meetsCategory = ` who meets the ${this.state.lastCategory} list criteria`;
       }
-      status = <div className={styles.status}>{this.state.lastDescendant} (<a href={`https://www.wikitree.com/wiki/${this.state.lastDescendant}`} target='_blank'>{this.state.descendantJson['BirthNamePrivate']}</a>) has {(this.state.matchingAncestorsList.length > removeDuplicates(this.state.matchingAncestorsList)) ? ' unique ':''} {removeDuplicates(this.state.matchingAncestorsList).length} {removeDuplicates(this.state.matchingAncestorsList).length === 1 ? 'ancestor' : 'ancestors'} within {this.state.lastGenerations} {this.state.lastGenerations > 1 ? 'generations' : 'generation'} {meetsCategory}</div>
+      let talkAboutDupes;
+      if (numberOfDupes === 0 || (!this.state.lastAhnentafel && !this.state.lastMultiples)) {
+        talkAboutDupes = false;
+      } else {
+        talkAboutDupes = true;
+      }
+      let duplicatesPhrase;
+      if (talkAboutDupes) {
+        duplicatesPhrase = ` and ${numberOfDupes} duplicate ${(numberOfDupes>1)?'ancestors (additional lines of descent from a unique ancestor)':'ancestor (an additional line of descent from a unique ancestor)'}`;
+      } else {
+        duplicatesPhrase = '';
+      }
+      status = <div className={styles.status}>{this.state.lastDescendant} (<a href={`https://www.wikitree.com/wiki/${this.state.lastDescendant}`} target='_blank'>{this.state.descendantJson['BirthNamePrivate']}</a>) has {uniqueMatches} {(talkAboutDupes) ? ' unique ':''} {uniqueMatches === 1 ? 'ancestor' : 'ancestors'}{duplicatesPhrase} within {this.state.lastGenerations} {this.state.lastGenerations > 1 ? 'generations' : 'generation'}{meetsCategory}</div>
     } else {
       status = <div></div>;
-    }
-
-    let displayOptions;
-    if (this.state.processingStatus === 'Done') {
-      displayOptions = 
-        <table className={styles.optionsTable}>
-          <tr>
-            <td className={styles.label}>Optional display features:</td>
-            <td><input type="checkbox" name="fullnameCheckbox" checked={this.state.fullname} onChange={(e) => this.setState({fullname: e.target.checked})}/>
-                <label for="ahnentafelCheckbox">Show full name at birth (includes middle name)</label>
-              </td>
-            <td><input type="checkbox" name="multiplesCheckbox" checked={this.state.multiples} onChange={(e) => this.setState({multiples: e.target.checked})}/>
-              <label for="multipleCheckbox">Show number of lines to same ancestor (if multiple lines of descent)</label>
-            </td> 
-          </tr>
-        </table>
-    } else {
-      displayOptions = <div></div>;
     }
 
     let downloadButton;
@@ -477,9 +486,9 @@ class Main extends React.Component {
     let displayedTable;
     if (this.state.processingStatus ==='Done') {
       if (this.state.lastAhnentafel) {
-        displayedTable = <AhnenTable tableData={this.state.matchingAncestorsList} fullname={this.state.fullname} descendantJson={this.state.descendantJson} ancestorList={this.state.ancestorList} generations={this.state.lastGenerations} multiples={this.state.multiples} multiplesArray={this.state.matchingMultiples}/>;
+        displayedTable = <AhnenTable tableData={this.state.matchingAncestorsList} fullname={this.state.lastFullname} descendantJson={this.state.descendantJson} ancestorList={this.state.ancestorList} generations={this.state.lastGenerations} multiples={this.state.lastMultiples} multiplesArray={this.state.matchingMultiples}/>;
       } else {
-        displayedTable = <Table tableData={this.state.matchingAncestorsList} fullname={this.state.fullname} descendantJson={this.state.descendantJson} ancestorList={this.state.ancestorList} generations={this.state.lastGenerations} multiples={this.state.multiples} multiplesArray={this.state.matchingMultiples}/>;
+        displayedTable = <Table tableData={this.state.matchingAncestorsList} fullname={this.state.lastFullname} descendantJson={this.state.descendantJson} ancestorList={this.state.ancestorList} generations={this.state.lastGenerations} multiples={this.state.lastMultiples} multiplesArray={this.state.matchingMultiples}/>;
       }  
     } else {
       displayedTable = <div></div>;
@@ -530,12 +539,16 @@ class Main extends React.Component {
               </tr>
               <tr>
                 <td className={styles.label}>Optional display features:</td>
-                <td>
-                <input type='radio' name='ahnen' id="omit" onChange={this.onChangeAhnen} checked={!this.state.ahnentafel}/>
-                <label for="include">Omit</label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                <input type='radio' name='ahnen' id="include" onChange={this.onChangeAhnen} checked={this.state.ahnentafel}/>
-                <label for="omit">Include</label>
-                </td>
+                <td><input type="checkbox" name="ahnentafelCheckbox" checked={this.state.ahnentafel} onChange={(e) => this.setState({ahnentafel: e.target.checked})}/>
+                    <label for="ahnentafelCheckbox">Include generation and ahnentafel number column</label></td>
+                <td><input type="checkbox" name="fullnameCheckbox" checked={this.state.fullname} onChange={(e) => this.setState({fullname: e.target.checked})}/>
+                    <label for="ahnentafelCheckbox">Show full name at birth (includes middle name)</label></td>
+              </tr>
+              <tr>
+                <td></td>
+                <td colSpan='2' ><input type="checkbox" name="multiplesCheckbox" checked={this.state.multiples} onChange={(e) => this.setState({multiples: e.target.checked})}/>
+                  <label for="multipleCheckbox">Show number of lines to same ancestor (if multiple lines of descent)</label>
+                </td> 
               </tr>
               <tr className={styles.buttonsTr}>
                 <td></td>
@@ -548,7 +561,6 @@ class Main extends React.Component {
           </table>
         </div>
         {status}
-        {displayOptions}
         <div className={styles.tableDiv}>
           <table className={styles.table}>
             {tableHeadings}

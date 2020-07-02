@@ -106,7 +106,7 @@ class Lines extends React.Component {
           row.push(
             <>
             <td className={styles.gen1}>{ancestralLines[0][i]['Generation']}</td>
-            <td className={styles.name1}><a href={`https://www.wikitree.com/wiki/${ancestralLines[0][i]['Name']}`} target='_blank'>{this.state.fullname ? ancestralLines[0][i]['BirthName'] : ancestralLines[0][i]['BirthNamePrivate']}</a></td>
+            <td className={styles.name1}>{(ancestralLines[0][i]['Id']<0) ? 'Private' : <a href={`https://www.wikitree.com/wiki/${ancestralLines[0][i]['Name']}`} target='_blank'>{this.state.fullname ? ancestralLines[0][i]['BirthName'] : ancestralLines[0][i]['BirthNamePrivate']}</a>}</td>
             <td className={styles.date1}>{ancestralLines[0][i]['BirthDate']}</td>
             <td className={styles.location1}>{ancestralLines[0][i]['BirthLocation']}</td>
             <td className={styles.date1}>{ancestralLines[0][i]['DeathDate']}</td>
@@ -119,7 +119,7 @@ class Lines extends React.Component {
               row.push(
                 <>
                 <td className={styles.gen2}>{ancestralLines[j][i]['Generation']}</td>
-                <td className={styles.name2}><a href={`https://www.wikitree.com/wiki/${ancestralLines[j][i]['Name']}`} target='_blank'>{(this.state.fullname) ? ancestralLines[j][i]['BirthName'] : ancestralLines[j][i]['BirthNamePrivate']}</a></td>
+                <td className={styles.name2}>{(ancestralLines[j][i]['Id']<0) ? 'Private' : <a href={`https://www.wikitree.com/wiki/${ancestralLines[j][i]['Name']}`} target='_blank'>{(this.state.fullname) ? ancestralLines[j][i]['BirthName'] : ancestralLines[j][i]['BirthNamePrivate']}</a>}</td>
                 </>
               );
             } else {
@@ -205,16 +205,16 @@ class Lines extends React.Component {
         <div className={styles.description}>
           The table below shows the {(this.state.ancestralLines.length===1) ? 'only': this.state.ancestralLines.length} {(this.state.ancestralLines.length===1) ? 'line': 'lines'} of descent from {this.state.endAncestor['BirthNamePrivate']} to {this.state.descendantJson['BirthNamePrivate']} that {(this.state.ancestralLines.length===1) ? 'is' : 'are'} present on WikiTree{((this.state.generations - this.state.maxLineLength+1) > 2) ? '' : ` and 
           that ${(this.state.ancestralLines.length===1) ? 'consists' : 'consist'} of persons within ${this.state.generations} generations of ${this.state.descendantJson['BirthNamePrivate']}`}. {(this.state.maxLineLength <= this.state.generations+1) ? '' : `Lines going back more than ${this.state.generations} generations are included if each person in the line has a line that connects them to ${this.state.descendantJson['BirthNamePrivate']} within ${this.state.generations} generations.`}
-          {(this.state.generations <= 5 || (this.state.generations - this.state.maxLineLength+1) > Math.ceil(this.state.generations/10)) ? '' : ` Note that it is possible that expanding the range back more generations may reveal additional lines.`}
+          {(this.state.generations <= 5 || (this.state.generations - this.state.maxLineLength+1) > Math.ceil(this.state.generations/10)) ? '' : ` Note that it is possible that expanding the range back more generations might reveal additional lines.`}
         </div>
-        <table className={styles.formTable}>
+        <table className={styles.formTable}><tbody>
           <tr className={styles.buttonsTr}>
                 <td className={styles.buttonSpacer}></td>
                 <td className={styles.buttonsTd}><Link to={{ pathname: '/'}}><button className={styles.button}>Return to List</button></Link>
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 {downloadButton}</td>
                 <td></td>
-            </tr>
+            </tr></tbody>
         </table>
         <div className={styles.contact}>
           If you have any questions, comments, suggestions or problems, please post a comment on <a href='https://www.wikitree.com/wiki/Ashley-1950' target='_blank'>Chase Ashley's WikiTree page</a>.
@@ -233,7 +233,7 @@ class Lines extends React.Component {
       <div className={styles.page}>
         <div className={styles.topBox}>
           <h1 className={styles.h1}>
-            Ancestor ListMaker
+            Ancestor Listmaker
           </h1>
         </div>
         {pageBody}
