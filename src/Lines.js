@@ -12,7 +12,7 @@ class Lines extends React.Component {
     this.state = {
       generations: this.props.location.generations,
       endAncestor: this.props.location.endAncestor,
-      ancestorList: this.props.location.ancestorList,
+      ancestors: this.props.location.ancestors,
       descendantJson: this.props.location.descendantJson,
       fullname: this.props.location.fullname,
       ancestralLines: null,
@@ -24,19 +24,17 @@ class Lines extends React.Component {
     db.table('lines')
     .toArray()
     .then((storedState) => {
-      if (storedState !== null && this.props.location.ancestorList === undefined) {
+      if (storedState !== null && this.props.location.ancestors === undefined) {
         this.setState(JSON.parse(storedState));
       } else {
-        this.createAncestralLines(this.props.location.endAncestor,this.props.location.ancestorList, this.props.location.descendantJson);
+        this.createAncestralLines(this.props.location.endAncestor,this.props.location.ancestors, this.props.location.descendantJson);
         this.getMaxLineLength(this.state.ancestralLines)
       }
     });
   }
 
-  createAncestralLines(endAncestor,ancestorList,descendantJson) {
-    const ancestorListWithDescendant = ancestorList.slice();
-    ancestorListWithDescendant.unshift(descendantJson);
-    const ancestralLines = getAllAncestralLines(endAncestor, ancestorListWithDescendant);
+  createAncestralLines(endAncestor,ancestors,descendantJson) {
+    const ancestralLines = getAllAncestralLines(endAncestor, ancestors);
     ancestralLines.sort(function (a, b) {
       return a.length - b.length;
     });

@@ -1,5 +1,4 @@
 /* This module contains functions for retrieving a list of ancetors back a specificied number of generations */
-import { removeDuplicates } from './filters';
 const fetch = require("node-fetch");
 
 /* Makes a getAncestors call to the wikitree api in order to fetch all ancestors of descendantName back numGen
@@ -111,7 +110,6 @@ async function getAdditionalAncestors(ancestorsMissingParents, additionalGens) {
             let additionalAncestorSelectedData = additionalAncestor[0]['ancestors'].slice(1);
             additionalAncestors = additionalAncestors.concat(additionalAncestorSelectedData);
         })
-        additionalAncestors = removeDuplicates(additionalAncestors);
         return additionalAncestors;
     })
     return result;
@@ -139,7 +137,6 @@ export async function getAdditionalGens(ancestors, nextGens){
     const ancestorsMissingParents = createAncestorsMissingParents(ancestors);
     const additionalAncestors = await getAdditionalAncestors(ancestorsMissingParents, nextGens);
     ancestors = ancestors.concat(additionalAncestors);
-    ancestors = removeDuplicates(ancestors);
     return ancestors;
 }
 

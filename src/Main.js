@@ -44,8 +44,8 @@ class Main extends React.Component {
       multiples: false,
       lastMultiples: false,
       descendantJson: null,
-      ancestorList: null,
-      matchingAncestorsList: null,
+      ancestors: null,
+      matchingAncestors: null,
       matchingMultiples: null,
       processingStatus: null,
       lastSort: '',
@@ -142,14 +142,12 @@ class Main extends React.Component {
       this.setState({processingStatus: 'Collecting'});
       let ancestors;
       if (this.state.descendant !== this.state.lastDescendant) { //new descendant, so null out the saved lists and start from scratch
-        let ancestorsJson = await getAncestorsJson(this.state.descendant, this.state.generations);
-        if (ancestorsJson === null) { //will be null if there is a problem getting ancestors - eg ID number is not valid
+        ancestors = await getAncestorsJson(this.state.descendant, this.state.generations);
+        if (ancestors === null) { //will be null if there is a problem getting ancestors - eg ID number is not valid
           this.setState({processingStatus: null}); 
         } else {
-          ancestorsJson = removeDuplicates(ancestorsJson);
-          ancestorsJson = replaceUndefinedFields(ancestorsJson);
-          ancestors = ancestorsJson.slice(1); //strip response down to array of ancestor objects
-          this.setState({descendantJson: ancestorsJson[0]});
+          ancestors = replaceUndefinedFields(ancestors);
+          this.setState({descendantJson: ancestors[0]});
           this.nullAncestorListsState();
           if (this.state.generations > 10 ) {
             this.setAncestorListsState(9,ancestors);
@@ -157,33 +155,29 @@ class Main extends React.Component {
           }
           this.setAncestorListsState(this.state.generations-1, ancestors);
         }
-        let ancestorList = addGensAndAhnens(this.state.descendantJson, ancestors);
-        this.setState({ancestorList: ancestorList});
+        ancestors = addGensAndAhnens(this.state.descendantJson, ancestors);
+        this.setState({ancestors: ancestors});
       } else if ((this.state.descendant === this.state.lastDescendant) && (this.state.generations !== this.state.lastGenerations)){ //same descendant, but diff number of gens, so need to get ancestors for that number of gens
         if (this.state.ancestorLists[this.state.generations-1] !== null) {
           ancestors = this.state.ancestorLists[this.state.generations-1];
         } else {
           if (this.state.generations <10) { //if less then 10, gens don't bother checking lower stored, just get
-            let ancestorsJson = await getAncestorsJson(this.state.descendant, this.state.generations);
-            if (ancestorsJson === null) {
+            ancestors = await getAncestorsJson(this.state.descendant, this.state.generations);
+            if (ancestors === null) {
               this.setState({processingStatus: null}); 
             } else {
-              ancestorsJson = removeDuplicates(ancestorsJson);
-              ancestorsJson = replaceUndefinedFields(ancestorsJson);
-              ancestors = ancestorsJson.slice(1); //strip response down to array of ancestor objects
-              this.setState({descendantJson: ancestorsJson[0]});
+              ancestors = replaceUndefinedFields(ancestors);
+              this.setState({descendantJson: ancestors[0]});
             }
           } else { // if gens >=10 use the next lower stored value
             const nextLowestStoredGen = this.nextLowestStoredGeneration(this.state.generations);
             if (nextLowestStoredGen < 10) { //nothing saved worth using, so start froms scratch
-              let ancestorsJson = await getAncestorsJson(this.state.descendant, this.state.generations);
-              if (ancestorsJson === null) { //will be null if problem fetching ancestors - eg if Wikitree ID is invalid
+              ancestors = await getAncestorsJson(this.state.descendant, this.state.generations);
+              if (ancestors === null) { //will be null if problem fetching ancestors - eg if Wikitree ID is invalid
                 this.setState({processingStatus: null}); 
               } else {
-                ancestorsJson = removeDuplicates(ancestorsJson);
-                ancestorsJson = replaceUndefinedFields(ancestorsJson);
-                ancestors = ancestorsJson.slice(1); //strip response down to array of ancestor objects
-                this.setState({descendantJson: ancestorsJson[0]});
+                ancestors = replaceUndefinedFields(ancestors);
+                this.setState({descendantJson: ancestors[0]});
                 this.setAncestorListsState(9,ancestors);
                 if (this.state.generations > 10) {
                   ancestors = await getAdditionalGens(ancestors, this.state.generations-10);
@@ -196,13 +190,13 @@ class Main extends React.Component {
           }
           this.setAncestorListsState(this.state.generations-1, ancestors);
         }
-        let ancestorList = addGensAndAhnens(this.state.descendantJson, ancestors);
-        this.setState({ancestorList: ancestorList});
+        ancestors = addGensAndAhnens(this.state.descendantJson, ancestors);
+        this.setState({ancestors: ancestors});
       }
     }
 
     //Then filter the ancestors against the specified category/criteria and create a table of the matches
-    if (this.state.ancestorList !== null) {
+    if (this.state.ancestors !== null) {
       await this.setState({processingStatus: 'Filtering'});
       let matchingAncestors;
       if (this.state.descendant !== this.state.lastDescendant || this.state.category !== this.state.lastCategory ||
@@ -210,7 +204,7 @@ class Main extends React.Component {
         this.state.fullname !== this.state.lastFullname || this.state.multiples !== this.state.lastMultiples ||
         (this.state.category==='Location Text' && this.state.locationText !== this.state.lastLocationText) || 
         (this.state.category==='Category Text' && this.state.categoryText !== this.state.lastcategoryText) ){
-        matchingAncestors = this.state.ancestorList.slice();
+        matchingAncestors = this.state.ancestors.slice(1); //take of Descendant so doesn't display in list of ancestors
         if (this.state.category !== 'All') {
           if (this.state.category === 'Orphans') {
             matchingAncestors = filterOrphans(matchingAncestors);
@@ -261,12 +255,12 @@ class Main extends React.Component {
         await this.setState({lastDescendant: this.state.descendant});
         await this.setState({lastGenerations: this.state.generations});
         await this.setState({lastCategory: this.state.category});
-        await this.setState({matchingAncestorsList: matchingAncestors});
+        await this.setState({matchingAncestors: matchingAncestors});
         await this.setState({lastAhnentafel: this.state.ahnentafel})
         await this.setState({lastFullname: this.state.fullname})
         await this.setState({lastMultiples: this.state.multiples})  
       } else {
-        matchingAncestors = this.state.matchingAncestorsList;
+        matchingAncestors = this.state.matchingAncestors;
       }
       await this.setState({processingStatus: 'Done'});
     } 
@@ -276,73 +270,73 @@ class Main extends React.Component {
   async onClickNameSort() {
     let newSortedMatchingAncestors;
     if (this.state.lastSort === 'Name') {
-      newSortedMatchingAncestors = await sortByName(this.state.matchingAncestorsList, 'backward');
+      newSortedMatchingAncestors = await sortByName(this.state.matchingAncestors, 'backward');
       this.setState({lastSort: null});
     } else {
-      newSortedMatchingAncestors = await sortByName(this.state.matchingAncestorsList, 'forward');
+      newSortedMatchingAncestors = await sortByName(this.state.matchingAncestors, 'forward');
       this.setState({lastSort: 'Name'});
     }
-    this.setState({matchingAncestorsList: newSortedMatchingAncestors});
+    this.setState({matchingAncestors: newSortedMatchingAncestors});
   }
 
   async onClickDOBSort() {
     let newSortedMatchingAncestors;
     if (this.state.lastSort === 'DOB') {
-      newSortedMatchingAncestors = sortByDOB(this.state.matchingAncestorsList, false);
+      newSortedMatchingAncestors = sortByDOB(this.state.matchingAncestors, false);
       this.setState({lastSort: null});
     } else {
-      newSortedMatchingAncestors = sortByDOB(this.state.matchingAncestorsList, true);
+      newSortedMatchingAncestors = sortByDOB(this.state.matchingAncestors, true);
       this.setState({lastSort: 'DOB'});
     }
-    this.setState({matchingAncestorsList: newSortedMatchingAncestors});
+    this.setState({matchingAncestors: newSortedMatchingAncestors});
   }
 
   async onClickDODSort() {
     let newSortedMatchingAncestors;
     if (this.state.lastSort === 'DOD') {
-      newSortedMatchingAncestors = sortByDOD(this.state.matchingAncestorsList, false);
+      newSortedMatchingAncestors = sortByDOD(this.state.matchingAncestors, false);
       this.setState({lastSort: null});
     } else {
-      newSortedMatchingAncestors = sortByDOD(this.state.matchingAncestorsList, true);
+      newSortedMatchingAncestors = sortByDOD(this.state.matchingAncestors, true);
       this.setState({lastSort: 'DOD'});
     }
-    this.setState({matchingAncestorsList: newSortedMatchingAncestors});
+    this.setState({matchingAncestors: newSortedMatchingAncestors});
   }
 
   async onClickPOBSort() {
     let newSortedMatchingAncestors;
     if (this.state.lastSort === 'POB') {
-      newSortedMatchingAncestors = sortByPOB(this.state.matchingAncestorsList, false);
+      newSortedMatchingAncestors = sortByPOB(this.state.matchingAncestors, false);
       this.setState({lastSort: null});
     } else {
-      newSortedMatchingAncestors = sortByPOB(this.state.matchingAncestorsList, true);
+      newSortedMatchingAncestors = sortByPOB(this.state.matchingAncestors, true);
       this.setState({lastSort: 'POB'});
     }
-    this.setState({matchingAncestorsList: newSortedMatchingAncestors});
+    this.setState({matchingAncestors: newSortedMatchingAncestors});
   }
 
   async onClickPODSort() {
     let newSortedMatchingAncestors;
     if (this.state.lastSort === 'POD') {
-      newSortedMatchingAncestors = sortByPOD(this.state.matchingAncestorsList, false);
+      newSortedMatchingAncestors = sortByPOD(this.state.matchingAncestors, false);
       this.setState({lastSort: null});
     } else {
-      newSortedMatchingAncestors = sortByPOD(this.state.matchingAncestorsList, true);
+      newSortedMatchingAncestors = sortByPOD(this.state.matchingAncestors, true);
       this.setState({lastSort: 'POD'});
     }
-    this.setState({matchingAncestorsList: newSortedMatchingAncestors});
+    this.setState({matchingAncestors: newSortedMatchingAncestors});
   }
 
   async onClickAhnenSort() {
     let newSortedMatchingAncestors;
     if (this.state.lastSort === 'Ahnen') {
-      newSortedMatchingAncestors = await sortByAhnen(this.state.matchingAncestorsList, false);
+      newSortedMatchingAncestors = await sortByAhnen(this.state.matchingAncestors, false);
       this.setState({lastSort: null});
     } else {
-      newSortedMatchingAncestors = await sortByAhnen(this.state.matchingAncestorsList, true);
+      newSortedMatchingAncestors = await sortByAhnen(this.state.matchingAncestors, true);
       this.setState({lastSort: 'Ahnen'});
     }
-    this.setState({matchingAncestorsList: newSortedMatchingAncestors});
+    this.setState({matchingAncestors: newSortedMatchingAncestors});
   }
 
   onChangeAhnen() {
@@ -353,12 +347,12 @@ class Main extends React.Component {
     }
   }
 
-  getDownloadData(matchingAncestorsList) {
+  getDownloadData(matchingAncestors) {
     let downloadData;
     if (this.state.lastAhnentafel) {
       downloadData = [['Gen-Ahen', 'Name', 'Birth Date', 'Birth Location', 'Death Date', 'Death Location']];
-      for (let i=0; i<matchingAncestorsList.length; i++) {
-        const ancestor = matchingAncestorsList[i];
+      for (let i=0; i<matchingAncestors.length; i++) {
+        const ancestor = matchingAncestors[i];
         let ancestorLink;
         if (this.state.lastFullname) {
           ancestorLink = `=HYPERLINK(""https://www.wikitree.com/wiki/${ancestor['Name']}""` + `,""${ancestor['BirthName']}"")`;
@@ -370,8 +364,8 @@ class Main extends React.Component {
       }
     } else {
       downloadData = [['Name', 'Birth Date', 'Birth Location', 'Death Date', 'Death Location']];
-      for (let i=0; i<matchingAncestorsList.length; i++) {
-        const ancestor = matchingAncestorsList[i];
+      for (let i=0; i<matchingAncestors.length; i++) {
+        const ancestor = matchingAncestors[i];
         let ancestorLink;
         if (this.state.lastFullname) {
           ancestorLink = `=HYPERLINK(""https://www.wikitree.com/wiki/${ancestor['Name']}""` + `,""${ancestor['BirthName']}"")`;
@@ -386,7 +380,7 @@ class Main extends React.Component {
   }
 
   onClickPrematureDownload() {
-    if (this.state.ancestorList === null) {
+    if (this.state.ancestors === null) {
       alert('A list cannot be downloaded until it has first been generated');
     } else if (this.state.processingStatus !== 'Done') {
       alert('A list cannot be downnloaded until generation of the list has been completed');
@@ -409,7 +403,7 @@ class Main extends React.Component {
       for (let [key, value] of Object.entries(this.state.matchingMultiples)) {
         sumOfCopies = sumOfCopies + value;
       }
-      const uniqueMatches = removeDuplicates(this.state.matchingAncestorsList).length;
+      const uniqueMatches = removeDuplicates(this.state.matchingAncestors).length;
       const numberOfDupes = sumOfCopies - uniqueMatches;
       let meetsCategory;
       if (this.state.lastCategory === 'All') {
@@ -437,10 +431,10 @@ class Main extends React.Component {
     }
 
     let downloadButton;
-    if (this.state.processingStatus ==='Done' && this.state.matchingAncestorsList.length !== 0) {
+    if (this.state.processingStatus ==='Done' && this.state.matchingAncestors.length !== 0) {
       let downloadFileName = `${this.state.descendant} - ${this.state.generations} Generations - ${this.state.category}`;
       downloadFileName = `${downloadFileName.replace(/\./g, '')}.csv`;
-      downloadButton = <CSVLink data={this.getDownloadData(this.state.matchingAncestorsList)} filename={downloadFileName}><button className={styles.downloadButton}>Download List</button></CSVLink>;
+      downloadButton = <CSVLink data={this.getDownloadData(this.state.matchingAncestors)} filename={downloadFileName}><button className={styles.downloadButton}>Download List</button></CSVLink>;
     } else {
       downloadButton = <button className={styles.downloadButton} onClick={this.onClickPrematureDownload}>Download List</button>;
     }
@@ -460,7 +454,7 @@ class Main extends React.Component {
     }
 
     let tableHeadings;
-    if (this.state.processingStatus !=='Done' || this.state.matchingAncestorsList === null || this.state.matchingAncestorsList.length === 0 ) {
+    if (this.state.processingStatus !=='Done' || this.state.matchingAncestors === null || this.state.matchingAncestors.length === 0 ) {
       tableHeadings = <div></div>;
     } else if (this.state.lastAhnentafel) {
       tableHeadings = 
@@ -486,16 +480,16 @@ class Main extends React.Component {
     let displayedTable;
     if (this.state.processingStatus ==='Done') {
       if (this.state.lastAhnentafel) {
-        displayedTable = <AhnenTable tableData={this.state.matchingAncestorsList} fullname={this.state.lastFullname} descendantJson={this.state.descendantJson} ancestorList={this.state.ancestorList} generations={this.state.lastGenerations} multiples={this.state.lastMultiples} multiplesArray={this.state.matchingMultiples}/>;
+        displayedTable = <AhnenTable tableData={this.state.matchingAncestors} fullname={this.state.lastFullname} descendantJson={this.state.descendantJson} ancestors={this.state.ancestors} generations={this.state.lastGenerations} multiples={this.state.lastMultiples} multiplesArray={this.state.matchingMultiples}/>;
       } else {
-        displayedTable = <Table tableData={this.state.matchingAncestorsList} fullname={this.state.lastFullname} descendantJson={this.state.descendantJson} ancestorList={this.state.ancestorList} generations={this.state.lastGenerations} multiples={this.state.lastMultiples} multiplesArray={this.state.matchingMultiples}/>;
+        displayedTable = <Table tableData={this.state.matchingAncestors} fullname={this.state.lastFullname} descendantJson={this.state.descendantJson} ancestors={this.state.ancestors} generations={this.state.lastGenerations} multiples={this.state.lastMultiples} multiplesArray={this.state.matchingMultiples}/>;
       }  
     } else {
       displayedTable = <div></div>;
     }
 
     let bottomLine;
-    if (this.state.processingStatus !=='Done' || this.state.matchingAncestorsList === null || this.state.matchingAncestorsList.length === 0 ) {
+    if (this.state.processingStatus !=='Done' || this.state.matchingAncestors === null || this.state.matchingAncestors.length === 0 ) {
       bottomLine = <div></div>;
     } else {
       bottomLine = <p className={styles.bottomLine}></p>
