@@ -1,10 +1,10 @@
-export function addGensAndAhnens(child, ancestors) {
+export function addGensAndAhnens(ancestors) {
     for (let i=0; i<ancestors.length; i++) {
         ancestors[i]['Ahnen'] = -1;
       }
-      child['Ahnen'] = 1;
-      ancestors = (assignAhnens(child, ancestors));
-      child['Generation'] = 0;
+      ancestors[0]['Ahnen'] = 1;
+      ancestors = (assignAhnens(ancestors[0], ancestors));
+      ancestors[0]['Generation'] = 0;
       for (let i = 0; i<ancestors.length; i++) {
         ancestors[i]['Generation'] = Math.floor(Math.log2(ancestors[i]['Ahnen']));
       }

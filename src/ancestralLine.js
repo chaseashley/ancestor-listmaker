@@ -34,5 +34,5 @@ function getNextAncestor(ancestor, ancestors) {
         if (ancestors[i]['Ahnen'] === Math.floor(ancestor['Ahnen']/2)) {
             return ancestors[i];
         }
-    }
+    }console.log(ancestor['Name'], ancestor['Ahnen'], ancestors[0]['Name'], ancestors[0]['Ahnen']);
 }

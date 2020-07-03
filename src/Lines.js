@@ -27,13 +27,15 @@ class Lines extends React.Component {
       if (storedState !== null && this.props.location.ancestors === undefined) {
         this.setState(JSON.parse(storedState));
       } else {
-        this.createAncestralLines(this.props.location.endAncestor,this.props.location.ancestors, this.props.location.descendantJson);
+        this.createAncestralLines(this.props.location.endAncestor,this.props.location.ancestors);
         this.getMaxLineLength(this.state.ancestralLines)
+        db.table('lines').put(JSON.stringify(this.state),0)
+          .catch(function(e){alert('Ancestral lines cannot be stored. Therefore, if you wish to return to this ancestral lines page, use a link in the ancestors list rather than the forward return arrow')});
       }
     });
   }
 
-  createAncestralLines(endAncestor,ancestors,descendantJson) {
+  createAncestralLines(endAncestor,ancestors) {
     const ancestralLines = getAllAncestralLines(endAncestor, ancestors);
     ancestralLines.sort(function (a, b) {
       return a.length - b.length;
@@ -54,7 +56,7 @@ class Lines extends React.Component {
   createHeadingsRow1(ancestralLines) {
     let headingsRow1;
     if (ancestralLines.length === 1) {
-      headingsRow1 = <div></div>;
+      headingsRow1 = <tr></tr>;
     } else {
       let headings1 = [];
       for (let i = 0; i < ancestralLines.length; i++) {
@@ -237,10 +239,6 @@ class Lines extends React.Component {
         {pageBody}
       </div>
     );
-  }
-
-  componentWillUnmount() {
-    db.table('lines').put(JSON.stringify(this.state),0);
   }
   
   componentDidMount() {

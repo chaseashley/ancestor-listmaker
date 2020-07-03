@@ -84,7 +84,7 @@ class Main extends React.Component {
         {value:'Jamestown', label: 'Jamestown - Ancestors who are Jamestowne Society Qualifying Ancestors, as indicated by their inclusion in the Jamestowne Society Qualifying Ancestors category'},
         {value:'Location Text', label: 'Location Text - Ancestors whose Birth or Death Location fields contain the search terms you enter. When this list option is selected, a text box will appear in which to enter the search terms.'},
         {value:'Magna Carta Gateway', label: 'Magna Carta Gateway - Ancestors who were U.S. immigrants descended from a Magna Carta Surety Baron, as indicated by their inclusion in the Gateway Ancestors category'},
-        {value:'Magna Carta Surety Barons', label: 'Magna Carta Surety Barons - Ancestors who were Magna Carta Surety Barons. Generally only useful if Descendant is at least 3 gens before living people since the Barons are generally at last 23 gens back from living people.'},
+        {value:'Magna Carta Surety Barons', label: 'Magna Carta Surety Barons - Ancestors who were Magna Carta Surety Barons. Generally only useful if Descendant is at least 3 gens before living people since the Barons are generally at least 23 gens back from living people.'},
         {value:'Mayflower Passengers', label: 'Mayflower Passengers - Ancestors who were passengers on the Mayflower, as indicated by the presence of the Mayflower Passenger template on their profile'},
         {value:'Mexican-American War', label: 'Mexican-American War - Ancestors who participated in the Mexican-American War, as indicated by the presence of the Mexican-American War sticker or project template on their profile'},
         {value:'Native Americans', label: 'Native Americans - Ancestors who were Native Americans, as indicated by the presence of the Native American sticker or project template on their profile'},
@@ -111,24 +111,11 @@ class Main extends React.Component {
     this.setState({ancestorLists: newAncestorListsState}) //set the new state
   }
 
-  setAhnenAncestorListsState(i, ahnenAncestors) {
-    const newAhnenAncestorListsState = this.state.ahnenAncestorLists.slice(); //copy the array
-    newAhnenAncestorListsState[i] = ahnenAncestors;
-    this.setState({ahnenAncestorLists: newAhnenAncestorListsState}) //set the new state
-  }
-
   nullAncestorListsState() {
     this.setState({ancestorLists: [null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null]}); //1-20 gens
     this.setState({ahnenAncestorLists: [null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null]}); //1-20 gens
   }
 
-  nextLowestStoredGeneration(gens) { //find next lowest generation that has a stored ancestorList
-    let i = gens-2; //gens-2 is index next lower number of gens
-    while (this.state.ancestorLists[i] === null && i >= 9) {
-      i = i-1;
-    }
-    return i+1; //return generations, not index
-  }
   ////////////////
 
   async onClickSubmit() { // the Find Ancestors button click event
@@ -155,7 +142,8 @@ class Main extends React.Component {
           }
           this.setAncestorListsState(this.state.generations-1, ancestors);
         }
-        ancestors = addGensAndAhnens(this.state.descendantJson, ancestors);
+        await this.setState({processingStatus: 'CalculatingAhnentafel'});
+        ancestors = addGensAndAhnens(ancestors);
         this.setState({ancestors: ancestors});
       } else if ((this.state.descendant === this.state.lastDescendant) && (this.state.generations !== this.state.lastGenerations)){ //same descendant, but diff number of gens, so need to get ancestors for that number of gens
         if (this.state.ancestorLists[this.state.generations-1] !== null) {
@@ -170,8 +158,7 @@ class Main extends React.Component {
               this.setState({descendantJson: ancestors[0]});
             }
           } else { // if gens >=10 use the next lower stored value
-            const nextLowestStoredGen = this.nextLowestStoredGeneration(this.state.generations);
-            if (nextLowestStoredGen < 10) { //nothing saved worth using, so start froms scratch
+            if (this.state.ancestorLists[9] === null) { //nothing saved worth using, so start froms scratch
               ancestors = await getAncestorsJson(this.state.descendant, this.state.generations);
               if (ancestors === null) { //will be null if problem fetching ancestors - eg if Wikitree ID is invalid
                 this.setState({processingStatus: null}); 
@@ -184,13 +171,14 @@ class Main extends React.Component {
                 }
               }
             } else {//is a nextLowestStoredGen >= 10
-              ancestors = this.state.ancestorLists[nextLowestStoredGen-1];
-              ancestors = await getAdditionalGens(ancestors, this.state.generations-nextLowestStoredGen);
+              ancestors = this.state.ancestorLists[9];
+              ancestors = await getAdditionalGens(ancestors, this.state.generations-10);
             }
           }
           this.setAncestorListsState(this.state.generations-1, ancestors);
         }
-        ancestors = addGensAndAhnens(this.state.descendantJson, ancestors);
+        await this.setState({processingStatus: 'CalculatingAhnentafel'});
+        ancestors = addGensAndAhnens(ancestors);
         this.setState({ancestors: ancestors});
       }
     }
@@ -263,8 +251,9 @@ class Main extends React.Component {
         matchingAncestors = this.state.matchingAncestors;
       }
       await this.setState({processingStatus: 'Done'});
-    } 
-
+      db.table('main').put(JSON.stringify(this.state),0)
+        .catch(function(e){alert('Table data cannot be stored. Therefore, if you use a link in the table to view an ancestral line and return to this page, you will need to generate the table again if you wish to see it.')});
+    }
   }
 
   async onClickNameSort() {
@@ -277,6 +266,7 @@ class Main extends React.Component {
       this.setState({lastSort: 'Name'});
     }
     this.setState({matchingAncestors: newSortedMatchingAncestors});
+    db.table('main').put(JSON.stringify(this.state),0).catch(function(e){console.log('Dixie IndexedDB error:',e)});
   }
 
   async onClickDOBSort() {
@@ -289,6 +279,7 @@ class Main extends React.Component {
       this.setState({lastSort: 'DOB'});
     }
     this.setState({matchingAncestors: newSortedMatchingAncestors});
+    db.table('main').put(JSON.stringify(this.state),0).catch(function(e){console.log('Dixie IndexedDB error:',e)});
   }
 
   async onClickDODSort() {
@@ -301,6 +292,7 @@ class Main extends React.Component {
       this.setState({lastSort: 'DOD'});
     }
     this.setState({matchingAncestors: newSortedMatchingAncestors});
+    db.table('main').put(JSON.stringify(this.state),0).catch(function(e){console.log('Dixie IndexedDB error:',e)});
   }
 
   async onClickPOBSort() {
@@ -313,6 +305,7 @@ class Main extends React.Component {
       this.setState({lastSort: 'POB'});
     }
     this.setState({matchingAncestors: newSortedMatchingAncestors});
+    db.table('main').put(JSON.stringify(this.state),0).catch(function(e){console.log('Dixie IndexedDB error:',e)});
   }
 
   async onClickPODSort() {
@@ -325,6 +318,7 @@ class Main extends React.Component {
       this.setState({lastSort: 'POD'});
     }
     this.setState({matchingAncestors: newSortedMatchingAncestors});
+    db.table('main').put(JSON.stringify(this.state),0).catch(function(e){console.log('Dixie IndexedDB error:',e)});
   }
 
   async onClickAhnenSort() {
@@ -337,6 +331,7 @@ class Main extends React.Component {
       this.setState({lastSort: 'Ahnen'});
     }
     this.setState({matchingAncestors: newSortedMatchingAncestors});
+    db.table('main').put(JSON.stringify(this.state),0).catch(function(e){console.log('Dixie IndexedDB error:',e)});
   }
 
   onChangeAhnen() {
@@ -394,6 +389,8 @@ class Main extends React.Component {
     let status;
     if (this.state.processingStatus === 'Collecting') {
       status = <div className={styles.statusElipsis}>Collecting ancestors</div>;
+    } else if (this.state.processingStatus === 'CalculatingAhnentafel') {
+      status = <div className={styles.statusElipsis}>Calculating generation and ahnentafel numbers</div>;
     } else if (this.state.processingStatus === 'Filtering') {
       status = <div className={styles.statusElipsis}>Collecting criteria information and filtering ancestors</div>;
     } else if (this.state.processingStatus === 'Reloading') {
@@ -455,7 +452,7 @@ class Main extends React.Component {
 
     let tableHeadings;
     if (this.state.processingStatus !=='Done' || this.state.matchingAncestors === null || this.state.matchingAncestors.length === 0 ) {
-      tableHeadings = <div></div>;
+      tableHeadings = <thead></thead>;
     } else if (this.state.lastAhnentafel) {
       tableHeadings = 
         <thead><tr>
@@ -485,7 +482,7 @@ class Main extends React.Component {
         displayedTable = <Table tableData={this.state.matchingAncestors} fullname={this.state.lastFullname} descendantJson={this.state.descendantJson} ancestors={this.state.ancestors} generations={this.state.lastGenerations} multiples={this.state.lastMultiples} multiplesArray={this.state.matchingMultiples}/>;
       }  
     } else {
-      displayedTable = <div></div>;
+      displayedTable = <tbody></tbody>;
     }
 
     let bottomLine;
@@ -564,10 +561,6 @@ class Main extends React.Component {
         </div>
       </div>
     )
-  }
-
-  componentWillUnmount() {
-    db.table('main').put(JSON.stringify(this.state),0);
   }
   
   async setReloadStatus() {
