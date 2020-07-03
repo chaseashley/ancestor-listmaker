@@ -11,18 +11,29 @@ export function addGensAndAhnens(child, ancestors) {
     return ancestors;
 }
 
-
 function assignAhnens(child, ancestors) {
 
-    let father = ancestors.find(ancestor => (ancestor['Id'] === child['Father'] && ancestor['Ahnen'] === -1));
-    let mother = ancestors.find(ancestor => (ancestor['Id'] === child['Mother'] && ancestor['Ahnen'] === -1));
-    if (father) {
-        father['Ahnen'] = (2 * child['Ahnen']);
-        assignAhnens(father, ancestors);
+    let father = ancestors.find(ancestor => ancestor['Id'] === child['Father']);
+    let mother = ancestors.find(ancestor => ancestor['Id'] === child['Mother']);
+    let unassignedFather = ancestors.find(ancestor => ancestor['Id'] === child['Father']);
+    let unassignedMother = ancestors.find(ancestor => ancestor['Id'] === child['Mother']);
+    if (unassignedFather) {
+        unassignedFather['Ahnen'] = (2 * child['Ahnen']);
+        assignAhnens(unassignedFather, ancestors);
+    } else {
+        const dupeFather = JSON.parse(JSON.stringify(father));
+        dupeFather['Ahnen'] = 2 * child['Ahnen'];
+        ancestors.push(dupeFather);
+        assignAhnens(dupeFather, ancestors);
     }
-    if (mother) {
-        mother['Ahnen'] = (2 * child['Ahnen']) + 1;
-        assignAhnens(mother, ancestors);
+    if (unassignedMother) {
+        unassignedMother['Ahnen'] = (2 * child['Ahnen']) + 1;
+        assignAhnens(unassignedMother, ancestors);
+    } else {
+        const dupeMother = JSON.parse(JSON.stringify(mother));
+        dupeMother['Ahnen'] = (2 * child['Ahnen']) + 1;
+        ancestors.push(dupeMother);
+        assignAhnens(dupeMother, ancestors);
     }
     return ancestors
 }
