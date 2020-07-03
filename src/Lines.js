@@ -210,7 +210,7 @@ class Lines extends React.Component {
         <table className={styles.formTable}><tbody>
           <tr className={styles.buttonsTr}>
                 <td className={styles.buttonSpacer}></td>
-                <td className={styles.buttonsTd}><Link to={{ pathname: '/'}}><button className={styles.button}>Return to List</button></Link>
+                <td className={styles.buttonsTd}><Link to={{ pathname: '/apps/ashley1950/listmaker/'}}><button className={styles.button}>Return to List</button></Link>
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 {downloadButton}</td>
                 <td></td>

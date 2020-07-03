@@ -347,7 +347,7 @@ class Main extends React.Component {
     if (this.state.lastAhnentafel) {
       downloadData = [['Gen-Ahen', 'Name', 'Birth Date', 'Birth Location', 'Death Date', 'Death Location']];
       for (let i=0; i<matchingAncestors.length; i++) {
-        const ancestor = matchingAncestors[i];
+        const ancestor = this.state.matchingAncestors[i];
         let ancestorLink;
         if (this.state.lastFullname) {
           ancestorLink = `=HYPERLINK(""https://www.wikitree.com/wiki/${ancestor['Name']}""` + `,""${ancestor['BirthName']}"")`;
@@ -360,7 +360,7 @@ class Main extends React.Component {
     } else {
       downloadData = [['Name', 'Birth Date', 'Birth Location', 'Death Date', 'Death Location']];
       for (let i=0; i<matchingAncestors.length; i++) {
-        const ancestor = matchingAncestors[i];
+        const ancestor = this.state.matchingAncestors[i];
         let ancestorLink;
         if (this.state.lastFullname) {
           ancestorLink = `=HYPERLINK(""https://www.wikitree.com/wiki/${ancestor['Name']}""` + `,""${ancestor['BirthName']}"")`;
@@ -568,18 +568,16 @@ class Main extends React.Component {
   }
 
   componentDidMount() {
-    this.setReloadStatus();
     db.table('main')
     .toArray()
     .then((storedState) => {
       if (storedState !== null) {
         this.setState(JSON.parse(storedState));
-      } else {
-        const url = window.location.href;
-        if (url.includes('id=')) {
-          const startLoc = url.indexOf('id=') + 3;
-          this.setState({descendant: url.slice(startLoc)});
-        }
+      }
+      const url = window.location.href;
+      if (this.state.descendant === '' && url.includes('?id=')) {
+        const startLoc = url.indexOf('?id=') + 4;
+        this.setState({descendant: url.slice(startLoc)});
       }
     });
   }

@@ -15,8 +15,8 @@ class App extends Component {
     render() {
 
         const startingState = {
-            descendant: null,
-            lastDescendant: null,
+            descendant: '',
+            lastDescendant: '',
             category: null,
             lastCategory: null,
             locationText: '',
@@ -36,13 +36,13 @@ class App extends Component {
             lastSort: null,
             ancestorLists: [null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
         }
-        db.table('main').put(JSON.stringify(startingState),0);
-
+        db.table('main').put(JSON.stringify(startingState),0); //This is to clean out the storage at the start of a session
+        
         return (      
             <BrowserRouter>
             <div>
                 <Switch>
-                    <Route path="/lines" component={Lines} />
+                    <Route path="/apps/ashley1950/listmaker/lines" component={Lines} />
                     <Route path="/:id?" component={Main} />
                     <Route component={NoMatchPage}/>
                 </Switch>
