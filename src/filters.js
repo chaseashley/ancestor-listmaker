@@ -34,7 +34,7 @@ export function filterLocationText(ancestors, locationText) {
     const deathLocStart = locationText.indexOf('D:');
     let birthLoc;
     let birthLocationText;
-    if (birthLocStart == -1) {
+    if (birthLocStart === -1) {
         birthLoc = false;
     } else {
         birthLoc = true;
@@ -47,7 +47,7 @@ export function filterLocationText(ancestors, locationText) {
 
     let deathLoc;
     let deathLocationText;
-    if (deathLocStart == -1) {
+    if (deathLocStart === -1) {
         deathLoc = false;
     } else {
         deathLoc = true;
@@ -358,9 +358,9 @@ export async function filterCategoryText(descendantJson, ancestors, categoryText
                 }
             }
 
-            if (databaseSearch.slice(0,4) == '+NOT+') {
+            if (databaseSearch.slice(0,4) === '+NOT+') {
                 databaseSearch = `${databaseSearch.slice(5)}`;
-            } else if (databaseSearch.slice(0,4) == '+OR+') {
+            } else if (databaseSearch.slice(0,4) === '+OR+') {
                 databaseSearch = `${databaseSearch.slice(4)}`;
             } else {
                 databaseSearch = `${databaseSearch.slice(1)}`;

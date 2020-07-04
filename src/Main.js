@@ -345,7 +345,7 @@ class Main extends React.Component {
   getDownloadData(matchingAncestors) {
     let downloadData;
     if (this.state.lastAhnentafel) {
-      downloadData = [['Gen-Ahen', 'Name', 'Birth Date', 'Birth Location', 'Death Date', 'Death Location']];
+      downloadData = [['Gen-Ahnen', 'Name', 'Birth Date', 'Birth Location', 'Death Date', 'Death Location']];
       for (let i=0; i<matchingAncestors.length; i++) {
         const ancestor = this.state.matchingAncestors[i];
         let ancestorLink;
