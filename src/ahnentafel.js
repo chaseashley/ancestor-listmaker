@@ -13,11 +13,8 @@ export function addGensAndAhnens(ancestors) {
 
 function assignAhnens(child, ancestors) {
     let father = ancestors.find(ancestor => ancestor['Id'] === child['Father']);
-    if (child['Mother'] === 7896775){
-        console.log('child =',child['Name'],child['Ahnen']);
-    }
-    let unassignedFather = ancestors.find(ancestor => ancestor['Id'] === child['Father'] && ancestor['Ahnen'] === -1);
     if (father) {
+        let unassignedFather = ancestors.find(ancestor => ancestor['Id'] === child['Father'] && ancestor['Ahnen'] === -1);
         if (unassignedFather) {
             unassignedFather['Ahnen'] = (2 * child['Ahnen']);
             assignAhnens(unassignedFather, ancestors);
@@ -29,8 +26,8 @@ function assignAhnens(child, ancestors) {
         }
     }
     let mother = ancestors.find(ancestor => ancestor['Id'] === child['Mother']);
-    let unassignedMother = ancestors.find(ancestor => ancestor['Id'] === child['Mother'] && ancestor['Ahnen'] === -1);
     if (mother) {
+        let unassignedMother = ancestors.find(ancestor => ancestor['Id'] === child['Mother'] && ancestor['Ahnen'] === -1);
         if (unassignedMother) {
             unassignedMother['Ahnen'] = (2 * child['Ahnen']) + 1;
             assignAhnens(unassignedMother, ancestors);

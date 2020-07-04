@@ -38,6 +38,8 @@ class App extends Component {
         }
         db.table('main').put(JSON.stringify(startingState),0); //This is to clean out the storage at the start of a session
         
+        localStorage.setItem('scrollPosition', 0);
+
         return (      
             <BrowserRouter>
             <div>

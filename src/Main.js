@@ -568,6 +568,7 @@ class Main extends React.Component {
   }
 
   componentDidMount() {
+    this.setReloadStatus();
     db.table('main')
     .toArray()
     .then((storedState) => {
@@ -579,7 +580,13 @@ class Main extends React.Component {
         const startLoc = url.indexOf('?id=') + 4;
         this.setState({descendant: url.slice(startLoc)});
       }
+      const scrollPosition = localStorage.getItem('scrollPosition');
+      window.scrollTo(0,scrollPosition);
     });
+  }
+
+  componentWillUnmount() {
+    localStorage.setItem('scrollPosition', window.pageYOffset);
   }
 
 }
