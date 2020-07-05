@@ -144,6 +144,9 @@ class Main extends React.Component {
         }
         await this.setState({processingStatus: 'CalculatingAhnentafel'});
         ancestors = addGensAndAhnens(ancestors);
+        if (ancestors === null) {
+          await this.setState({processingStatus: 'null'});
+        }
         this.setState({ancestors: ancestors});
       } else if ((this.state.descendant === this.state.lastDescendant) && (this.state.generations !== this.state.lastGenerations)){ //same descendant, but diff number of gens, so need to get ancestors for that number of gens
         if (this.state.ancestorLists[this.state.generations-1] !== null) {
@@ -179,6 +182,9 @@ class Main extends React.Component {
         }
         await this.setState({processingStatus: 'CalculatingAhnentafel'});
         ancestors = addGensAndAhnens(ancestors);
+        if (ancestors === null) {
+          await this.setState({processingStatus: 'null'});
+        }
         this.setState({ancestors: ancestors});
       }
     }
