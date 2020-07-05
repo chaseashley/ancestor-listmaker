@@ -28,6 +28,7 @@ function assignAhnens(child, ancestors) {
                 const dupeFather = JSON.parse(JSON.stringify(father));
                 dupeFather['Ahnen'] = 2 * child['Ahnen'];
                 ancestors.push(dupeFather);
+                console.log(dupeFather['Name']);
                 if (infiniteLoopCheck(ancestors)) {
                     const infiniteDummy = JSON.parse(JSON.stringify(father));
                     infiniteDummy['Id'] = -666;
@@ -47,6 +48,7 @@ function assignAhnens(child, ancestors) {
                 const dupeMother = JSON.parse(JSON.stringify(mother));
                 dupeMother['Ahnen'] = (2 * child['Ahnen']) + 1;
                 ancestors.push(dupeMother);
+                console.log(dupeMother['Name']);
                 if (infiniteLoopCheck(ancestors)) {
                     const infiniteDummy = JSON.parse(JSON.stringify(mother));
                     infiniteDummy['Id'] = -666;
@@ -63,7 +65,7 @@ function assignAhnens(child, ancestors) {
 function infiniteLoopCheck(ancestors) {
     const len = ancestors.length;
     let errMessage = '';
-    if (len >= 4 && ((ancestors[len-1]['Name'] + ancestors[len-2]['Name']) === (ancestors[len-3]['Name'] + ancestors[len-4]['Name']))) {
+    if (len >= 6 && ((ancestors[len-1]['Name'] + ancestors[len-2]['Name']) === (ancestors[len-3]['Name'] + ancestors[len-4]['Name'])) && ((ancestors[len-1]['Name'] + ancestors[len-2]['Name']) === (ancestors[len-5]['Name'] + ancestors[len-6]['Name']))) {
         errMessage = `${ancestors[len-1]['Name']} and ${ancestors[len-2]['Name']} are creating an infinite loop. Check to make sure that ${ancestors[len-2]['Name']} is not connected as both the parent and child of ${ancestors[len-1]['Name']}`;
     } else if (len >= 6 && ((ancestors[len-1]['Name'] + ancestors[len-2]['Name'] + ancestors[len-3]['Name']) === (ancestors[len-4]['Name'] + ancestors[len-5]['Name'] + ancestors[len-6]['Name']))) {
         errMessage = `${ancestors[len-1]['Name']}, ${ancestors[len-2]['Name']} and ${ancestors[len-3]['Name']} are creating an infinite loop. Check to make sure that ${ancestors[len-3]['Name']} is not connected as both a grandparent and child of ${ancestors[len-1]['Name']}`;
