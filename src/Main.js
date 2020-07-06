@@ -552,7 +552,7 @@ class Main extends React.Component {
                 <td className={styles.buttonsTd}><button onClick={this.onClickSubmit} className={styles.getListButton}>Generate List</button>
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 {downloadButton}</td>
-                <td className={styles.version}>(ver 8p.5.7.20)</td>
+                <td className={styles.version}>(ver 1p.6.7.20)</td>
               </tr>
             </tbody>
           </table>

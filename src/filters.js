@@ -14,7 +14,7 @@ export function filterOrphans(ancestors) {
 
 export function filterMCSuretyBarons(ancestors) {
     let matchingAncestors = [];
-    const baronString = '*Albini-39*Bigod-1*Bigod-2*Bohun-7*Clare-673*Clare-651*Clavering-13*FitzWalter-101*Forz-1*Hardell-1*Huntingfield-11*Lacy-284*Lanvallei-3*Malet-18*Mandeville-10*Marshal-43*Montbegon-6*Montfichet-13*Mowbray-151*Percy-388*Quincy-226*Ros-149*Say-76*De_Vere-309*Vesci-14*';
+    const baronString = '*Albini-39*Bigod-1*Bigod-2*Bohun-7*Clare-673*Clare-651*Clavering-13*FitzWalter-101*Forz-1*Hardell-1*Huntingfield-11*Lacy-284*Lanvallei-3*Malet-18*Mandeville-10*Marshal-43*Montbegon-6*Montfichet-13*Mowbray-151*Percy-388*Quincy-226*Ros-149*Say-76*De_Vere-309*De Vere-309*Vesci-14*';
     for (let i = 0; i < ancestors.length; i++) {
         let ancestorName = ancestors[i]['Name'];
         if (baronString.indexOf(`*${ancestorName}*`) !== -1) {
