@@ -510,8 +510,8 @@ class Main extends React.Component {
           <li>See a sortable list of all ancestors of a particular person (Descendant) for up to 20 
           generations back.</li>
           <li>See sortable lists of all ancestors of Descendent up to 20 generations back who meet selected criteria.</li>
-          <li>Download any of the lists to a .csv 
-          file, which can then be opened in a spreadsheet (e.g., to use as a tracking sheet).</li>
+          <li>Click on the icon next to any ancestor in an ancestor list to see all lines of descent from that ancestor to the Descendant.</li>
+          <li>Download any of the ancestor lists or lines of descent to a .csv file, which can then be opened in a spreadsheet.</li>
         </div>
         <div className={styles.contact}>
           If you have any questions, comments, suggestions or problems, please post a comment on <a href='https://www.wikitree.com/wiki/Ashley-1950' target='_blank'>Chase Ashley's WikiTree page</a>.
@@ -552,7 +552,7 @@ class Main extends React.Component {
                 <td className={styles.buttonsTd}><button onClick={this.onClickSubmit} className={styles.getListButton}>Generate List</button>
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 {downloadButton}</td>
-                <td></td>
+                <td className={styles.version}>(ver 8p.5.7.20)</td>
               </tr>
             </tbody>
           </table>
