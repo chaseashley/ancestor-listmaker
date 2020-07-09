@@ -52,6 +52,7 @@ class Main extends React.Component {
       ancestorLists: [null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null], //1-20 gens
       'American Immigrants': null,
       'American Revolution': null,
+      'Arbroath Signatories': null,
       'European Aristocrats': null,
       'Filles du Roi': null,
       'French and Indian War': null,
@@ -72,6 +73,7 @@ class Main extends React.Component {
         {value:'All', label: 'All - All ancestors'},
         {value:'American Immigrants', label: 'American Immigrants - Ancestors who immigrated or may have immigrated to America (USA or areas that became a part thereof), as indicated by the birth and death locations on their profiles'},
         {value:'American Revolution', label: 'American Revolution - Ancestors who participated in the American Revolution, as indicated by the 1776 sticker or project template on their profile or their inclusion in the NSDAR or NSSAR Patriot Ancestor categories'},
+        {value:'Arbroath Signatories', label: 'Arbroath Signatories - Ancestors who signed the Declaration of Arbroath. Note that since the Declaration was signed in 1320, Signatory ancestors of a living Descendant may be further than 20 generations back.'},
         {value:'Australian Immigrants', label: 'Australian Immigrants - Ancestors who immigrated or may have immigrated to Australia (or areas that became a part thereof), as indicated by the birth and death locations on their profiles'},
         {value:'Canadian Immigrants', label: 'Canadian Immigrants - Ancestors who immigrated or may have immigrated to Canada (or areas that became a part thereof), as indicated by the birth and death locations on their profiles'},
         {value:'Category Text', label: 'Category Text - Ancestors who are in a category whose name contains the search terms you enter. When this list option is selected, a text box will appear in which to enter the search terms.'},
@@ -558,7 +560,7 @@ class Main extends React.Component {
                 <td className={styles.buttonsTd}><button onClick={this.onClickSubmit} className={styles.getListButton}>Generate List</button>
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 {downloadButton}</td>
-                <td className={styles.version}>(ver 10p.8.7.20)</td>
+                <td className={styles.version}>(ver 11p.9.Jul.2020)</td>
               </tr>
             </tbody>
           </table>

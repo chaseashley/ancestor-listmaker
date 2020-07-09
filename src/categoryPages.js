@@ -7,6 +7,7 @@ async function getCategoryArefs(category) {
     const categoryUrl = {
         'American Revolution Project': 'https://www.wikitree.com/index.php?title=Special:Whatlinkshere/Template:1776_Project&limit=500&from=0',
         'American Revolution Sticker': 'https://www.wikitree.com/index.php?title=Special:Whatlinkshere/Template:1776&limit=5000&from=0',
+        'Arbroath Signatories': 'https://www.wikitree.com/wiki/Category:Declaration_of_Arbroath',
         'British Aristo': 'https://www.wikitree.com/index.php?title=Special:Whatlinkshere/Template:British_Isles_Aristo&limit=5000&from=0',
         'EuroAristo': 'https://www.wikitree.com/index.php?title=Special:Whatlinkshere/Template:EuroAristo_Sticker&limit=5000&from=0',
         'European Aristocrat': 'https://www.wikitree.com/index.php?title=Special:Whatlinkshere/Template:European_Aristocrat&limit=5000&from=0',

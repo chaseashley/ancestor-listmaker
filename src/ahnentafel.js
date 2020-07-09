@@ -28,7 +28,6 @@ function assignAhnens(child, ancestors) {
                 const dupeFather = JSON.parse(JSON.stringify(father));
                 dupeFather['Ahnen'] = 2 * child['Ahnen'];
                 ancestors.push(dupeFather);
-                console.log(dupeFather['Name']);
                 if (infiniteLoopCheck(ancestors)) {
                     const infiniteDummy = JSON.parse(JSON.stringify(father));
                     infiniteDummy['Id'] = -666;
@@ -48,7 +47,6 @@ function assignAhnens(child, ancestors) {
                 const dupeMother = JSON.parse(JSON.stringify(mother));
                 dupeMother['Ahnen'] = (2 * child['Ahnen']) + 1;
                 ancestors.push(dupeMother);
-                console.log(dupeMother['Name']);
                 if (infiniteLoopCheck(ancestors)) {
                     const infiniteDummy = JSON.parse(JSON.stringify(mother));
                     infiniteDummy['Id'] = -666;
