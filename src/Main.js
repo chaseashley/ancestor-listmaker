@@ -5,7 +5,7 @@ import 'react-dropdown/style.css';
 import { CSVLink } from "react-csv";
 import { getAncestorsJson, getAdditionalGens, replaceUndefinedFields, deletePrivateProfiles } from './ancestors';
 import { getAllRelatedCategoryArefs } from "./categoryPages";
-import { getMultiples, filterMCSuretyBarons, filterCategoryText, filterByWikiTreePlus, filterUnknownFather, filterUnknownMother, filterOrphans, filterLocationText, filterUSImmigrants, filterAustralianImmigrants, filterCanadianImmigrants, filterCategoryArefs, removeDuplicates } from './filters';
+import { getMultiples, filterEnglishMonarchs, filterCompanionsOfTheConqueror, filterMCSuretyBarons, filterCategoryText, filterByWikiTreePlus, filterUnknownFather, filterUnknownMother, filterOrphans, filterLocationText, filterUSImmigrants, filterAustralianImmigrants, filterCanadianImmigrants, filterCategoryArefs, removeDuplicates } from './filters';
 import { Table } from './Table';
 import { sortByName, sortByDOB, sortByDOD, sortByPOB, sortByPOD, sortByAhnen } from './sort';
 import { AhnenTable } from './AhnenTable';
@@ -75,6 +75,8 @@ class Main extends React.Component {
         {value:'Australian Immigrants', label: 'Australian Immigrants - Ancestors who immigrated or may have immigrated to Australia (or areas that became a part thereof), as indicated by the birth and death locations on their profiles'},
         {value:'Canadian Immigrants', label: 'Canadian Immigrants - Ancestors who immigrated or may have immigrated to Canada (or areas that became a part thereof), as indicated by the birth and death locations on their profiles'},
         {value:'Category Text', label: 'Category Text - Ancestors who are in a category whose name contains the search terms you enter. When this list option is selected, a text box will appear in which to enter the search terms.'},
+        {value:'Companions of the Conqueror', label: 'Companions of the Conqueror - Ancestors who fought with William the Conqueror at the Battle of Hastings. Generally only useful for Descendants born before 1700 since the Companions are at least 30 generations back from living people.'},
+        {value:'English Monarchs', label: 'English Monarchs - Ancestors who were English monarchs'},
         {value:'European Aristocrats', label: 'European Aristocrats - Ancestors who were European aristocrats, as indicated by the presence of the EuroAristo sticker or the British Isles Aristo, European Aristocrat, or European Royals and Aristocrats template on their profile'},
         {value:'Filles du Roi', label: 'Filles du Roi - Ancestors who were among the Filles du Roi, as indicated by the presence of the Filles du Roi template on their profile'},
         {value:'Five-Star Profiles', label: 'Five-Star Profiles - Ancestors whose profiles have had 1,000 or more total page views and 100 or more different visitors in the past year. (Note that the ancestor data used for this list is only updated weekly.)'},
@@ -226,8 +228,12 @@ class Main extends React.Component {
             matchingAncestors = await filterByWikiTreePlus(this.state.descendantJson, matchingAncestors, 'Five-Star Profiles');
           } else if (this.state.category === 'Witches') {
             matchingAncestors = await filterByWikiTreePlus(this.state.descendantJson, matchingAncestors, 'Witches');
+          } else if (this.state.category === 'Companions of the Conqueror') {
+            matchingAncestors = filterCompanionsOfTheConqueror(matchingAncestors);
           } else if (this.state.category === 'Magna Carta Surety Barons') {
             matchingAncestors = filterMCSuretyBarons(matchingAncestors);
+          } else if (this.state.category === 'English Monarchs') {
+            matchingAncestors = filterEnglishMonarchs(matchingAncestors);
           } else {
             if (this.state[this.state.category] === null) { // if no pages saved for the category, need to get them; otherwise use the save pages
               const categoryArefs = await getAllRelatedCategoryArefs(this.state.category);
