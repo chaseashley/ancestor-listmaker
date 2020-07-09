@@ -68,6 +68,7 @@ class Main extends React.Component {
       'Palatine Migration': null,
       'Puritan Great Migration': null,
       'Quakers': null,
+      'Scottish Monarchs': null,
       'US Civil War': null,
       categoryOptions: [
         {value:'All', label: 'All - All ancestors'},
@@ -98,6 +99,7 @@ class Main extends React.Component {
         {value:'Palatine Migration', label: 'Palatine Migration - Ancestors who immigrated to America from a German-speaking area of Europe in 1700-1776, as indicated by the presence of the Palatine Migration template on their profile'},
         {value:'Puritan Great Migration', label: 'Puritan Great Migration - Ancestors who immigrated to New England in 1621-1640, as indicated by the presence of the Puritan Great Migration template on their profile'},
         {value:'Quakers', label: 'Quakers - Ancestors who were Quakers, as indicated by the presence of the Quakers sticker or project template on their profile'},
+        {value:'Scottish Monarchs', label: 'Scottish Monarchs - Ancestors who were Scottish monarchs'},
         {value:'Unknown/Missing Father', label: 'Unknown/Missing Father - Ancestors whose father\'s surname is "Unknown" or who have no father attached to their profile'},
         {value:'Unknown/Missing Mother', label: 'Unknown/Missing Mother - Ancestors whose mother\'s surname is "Unknown" or who have no mother attached to their profile'},
         {value:'Unsourced', label: 'Unsourced - Ancestors whose profiles have the Unsourced template on them. (Note that the ancestor data used for this list is only updated weekly.)'},
@@ -560,7 +562,7 @@ class Main extends React.Component {
                 <td className={styles.buttonsTd}><button onClick={this.onClickSubmit} className={styles.getListButton}>Generate List</button>
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 {downloadButton}</td>
-                <td className={styles.version}>(ver 11p.9.Jul.2020)</td>
+                <td className={styles.version}>(ver 11a.9.Jul.2020)</td>
               </tr>
             </tbody>
           </table>

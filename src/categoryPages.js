@@ -37,6 +37,7 @@ async function getCategoryArefs(category) {
         'Puritan Great Migration': 'https://www.wikitree.com/index.php?title=Special:Whatlinkshere/Template:Puritan_Great_Migration&limit=5000&from=0',
         'Quakers Project': 'https://www.wikitree.com/index.php?title=Special:Whatlinkshere/Template:Quakers_Project&limit=500&from=0',
         'Quakers Sticker': 'https://www.wikitree.com/index.php?title=Special:Whatlinkshere/Template:Quakers_Sticker&limit=5000&from=0',
+        'Scottish Monarchs': 'https://www.wikitree.com/wiki/Category:Scottish_Royalty',
         'US Civil War Project': 'https://www.wikitree.com/index.php?title=Special:Whatlinkshere/Template:US_Civil_War_Project&limit=5000&from=0',
         'US Civil War Sticker': 'https://www.wikitree.com/index.php?title=Special:Whatlinkshere/Template:US_Civil_War&limit=5000&from=0'
         }
