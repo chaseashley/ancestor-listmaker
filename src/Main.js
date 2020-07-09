@@ -264,7 +264,7 @@ class Main extends React.Component {
       }
       await this.setState({processingStatus: 'Done'});
       db.table('main').put(JSON.stringify(this.state),0)
-        .catch(function(e){alert('Table data cannot be stored. Therefore, if you use a link in the table to view an ancestral line and return to this page, you will need to generate the table again if you wish to see it.')});
+        .catch(function(e){alert('The ancestor data is too large to be stored. Therefore, if you use a link in the ancestor list to view an ancestral line and return to this page, you will need to generate the ancestor list again if you wish to see it. If you want to make the ancestor data small enough to be stored, try going back fewer generations.')});
     }
   }
 
@@ -558,7 +558,7 @@ class Main extends React.Component {
                 <td className={styles.buttonsTd}><button onClick={this.onClickSubmit} className={styles.getListButton}>Generate List</button>
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 {downloadButton}</td>
-                <td className={styles.version}>(ver 1p.6.7.20)</td>
+                <td className={styles.version}>(ver 10p.8.7.20)</td>
               </tr>
             </tbody>
           </table>

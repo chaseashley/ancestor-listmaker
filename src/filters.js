@@ -12,11 +12,24 @@ export function filterOrphans(ancestors) {
     return matchingAncestors;
 }
 
+export function filterEnglishMonarchs(ancestors) {
+    let matchingAncestors = [];
+    const kingString = '*Wessex-297*Wessex-31*Wessex-5*Wessex-360*Wessex-30*Wessex-359*Haraldsson-219*Wessex-29*Wessex-28*Svendsson-22*Knudsson-12*Knudsson-13*Wessex-358*Wessex-292*Normandie-32*Normandie-87*Normandie-45*Blois-94*Plantagenet-1627*Plantagenet-248*Plantagenet-143*Plantagenet-167*Plantagenet-2*Plantagenet-378*Plantagenet-70*Plantagenet-864*Lancaster-434*Lancaster-269*Lancaster-401*York-1159*York-1215*York-1245*Tudor-18*Tudor-4*Tudor-3*Tudor-2*Tudor-1*Stuart-2*Stuart-1*Stuart-4*Stuart-19*Stuart-21*Oranje-Nassau-20*Stuart-27*Hannover-19*Hannover-18*Hannover-17*Hannover-16*Hannover-15*Hannover-14*Saxe-Coburg-Gotha-5*Saxe-Coburg-Gotha-6*Sachsen-Coburg_und_Gotha-5*Sachsen-Coburg und Gotha-5*Sachsen-Coburg_und_Gotha-4*Sachsen-Coburg und Gotha-4*';
+    for (let i = 0; i < ancestors.length; i++) {
+        let ancestorName = ancestors[i]['Name'];
+        if (kingString.indexOf(`*${ancestorName}*`) !== -1) {
+            matchingAncestors.push(ancestors[i]);
+        }
+    }
+    return matchingAncestors;
+}
+
 export function filterMCSuretyBarons(ancestors) {
     let matchingAncestors = [];
-    const regex = /Albini-39|Bigod-1|Bigod-2|Bohun-7|Clare-673|Clare-651|Clavering-13|FitzWalter-101|Forz-1|Hardell-1|Huntingfield-11|Lacy-284|Lanvallei-3|Malet-18|Mandeville-10|Marshal-43|Montbegon-6|Montfichet-13|Mowbray-151|Percy-388|Quincy-226|Ros-149|Say-76|De_Vere-309|De Vere-309|Vesci-14/;
+    const baronString = '*Albini-39*Bigod-1*Bigod-2*Bohun-7*Clare-673*Clare-651*Clavering-13*FitzWalter-101*Forz-1*Hardell-1*Huntingfield-11*Lacy-284*Lanvallei-3*Malet-18*Mandeville-10*Marshal-43*Montbegon-6*Montfichet-13*Mowbray-151*Percy-388*Quincy-226*Ros-149*Say-76*De_Vere-309*De Vere-309*Vesci-14*';
     for (let i = 0; i < ancestors.length; i++) {
-        if (regex.test(ancestors[i]['Name'])) {
+        let ancestorName = ancestors[i]['Name'];
+        if (baronString.indexOf(`*${ancestorName}*`) !== -1) {
             matchingAncestors.push(ancestors[i]);
         }
     }
@@ -25,20 +38,10 @@ export function filterMCSuretyBarons(ancestors) {
 
 export function filterCompanionsOfTheConqueror(ancestors) {
     let matchingAncestors = [];
-    const regex = /Aigle-13|Bayeux-54|Beaumont-29|Boulogne-8|Champagne-83|Conteville-2|Ferrières-4|Gael-2|Giffard-6|Malet-2|Montfort-64|Mowbray-201|Patric-6|Thouars-18|Toeni-4|Wadard-4|Warenne-112/;
+    const companionsString = '*Aigle-13*Bayeux-54*Beaumont-29*Boulogne-8*Champagne-83*Conteville-2*Ferrières-4*Gael-2*Giffard-6*Malet-2*Montfort-64*Mowbray-201*Patric-6*Thouars-18*Toeni-4*Wadard-4*Warenne-112*';
     for (let i = 0; i < ancestors.length; i++) {
-        if (regex.test(ancestors[i]['Name'])) {
-            matchingAncestors.push(ancestors[i]);
-        }
-    }
-    return matchingAncestors;
-}
-
-export function filterEnglishMonarchs(ancestors) {
-    let matchingAncestors = [];
-    const regex = /Wessex-297|Wessex-31|Wessex-5|Wessex-360|Wessex-30|Wessex-359|Haraldsson-219|Wessex-29|Wessex-28|Svendsson-22|Knudsson-12|Knudsson-13|Wessex-358|Wessex-292|Normandie-32|Normandie-87|Normandie-45|Blois-94|Plantagenet-1627|Plantagenet-248|Plantagenet-143|Plantagenet-167|Plantagenet-2|Plantagenet-378|Plantagenet-70|Plantagenet-864|Lancaster-434|Lancaster-269|Lancaster-401|York-1159|York-1215|York-1245|Tudor-18|Tudor-4|Tudor-3|Tudor-2|Tudor-1|Stuart-2|Stuart-1|Stuart-4|Stuart-19|Stuart-21|Oranje-Nassau-20|Stuart-27|Hannover-19|Hannover-18|Hannover-17|Hannover-16|Hannover-15|Hannover-14|Saxe-Coburg-Gotha-5|Saxe-Coburg-Gotha-6|Sachsen-Coburg_und_Gotha-5|Sachsen-Coburg und Gotha-5|Sachsen-Coburg_und_Gotha-4|Sachsen-Coburg und Gotha-4/;
-    for (let i = 0; i < ancestors.length; i++) {
-        if (regex.test(ancestors[i]['Name'])) {
+        let ancestorName = ancestors[i]['Name'];
+        if (companionsString.indexOf(`*${ancestorName}*`) !== -1) {
             matchingAncestors.push(ancestors[i]);
         }
     }
