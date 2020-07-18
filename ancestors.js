@@ -1,5 +1,4 @@
 /* This module contains functions for retrieving a list of ancetors back a specificied number of generations */
-import { removeDuplicates } from './filters';
 const fetch = require("node-fetch");
 
 /* Makes a getAncestors call to the wikitree api in order to fetch all ancestors of descendantName back numGen
@@ -16,13 +15,37 @@ export async function getAncestorsJson(descendantName, numGens) {
     try {
         const response = await fetch(url);
         const jsonResponse = await response.json();
-        const ancestors = jsonResponse[0]['ancestors'].slice(1); //This is here just to throw an error if the response is no good
-        return jsonResponse;
+        const condensedAncestorJson = condenseAncestorsJson(jsonResponse);
+        return condensedAncestorJson;
     } catch(err) {
         alert('Unable to collect ancestors. The Wikitree ID may be incorrect or Descendant\'s profile may Unlisted or Private. The app will only work for a Descendant whose privacy level is set to Private with Public Family Tree, Private with Public Biography and Family Tree, Public, or Open.');
         console.log(err);
         return null;
     }
+}
+
+function condenseAncestorsJson(jsonReponse) {
+    const ancestors = jsonReponse[0]['ancestors'];
+    const condensedJsonResponse = [];
+    for (let i=0; i<ancestors.length; i++) {
+        let p = ancestors[i];
+        condensedJsonResponse.push({
+            'Id':p['Id'],
+            'Name':p['Name'],
+            'FirstName':p['FirstName'],
+            'RealName':p['RealName'],
+            'LastNameAtBirth':p['LastNameAtBirth'],
+            'BirthDate':p['BirthDate'],
+            'DeathDate':p['DeathDate'],
+            'BirthLocation':p['BirthLocation'],
+            'DeathLocation':p['DeathLocation'],
+            'Father':p['Father'],
+            'Mother':p['Mother'],
+            'Manager':p['Manager'],
+            'BirthName':p['BirthName'],
+            'BirthNamePrivate':p['BirthNamePrivate']});
+    }
+    return condensedJsonResponse;
 }
 
 /* Checks if each ancestor in the ancestors array has a parent who is not also included in the ancestors
@@ -87,7 +110,6 @@ async function getAdditionalAncestors(ancestorsMissingParents, additionalGens) {
             let additionalAncestorSelectedData = additionalAncestor[0]['ancestors'].slice(1);
             additionalAncestors = additionalAncestors.concat(additionalAncestorSelectedData);
         })
-        additionalAncestors = removeDuplicates(additionalAncestors);
         return additionalAncestors;
     })
     return result;
@@ -115,7 +137,6 @@ export async function getAdditionalGens(ancestors, nextGens){
     const ancestorsMissingParents = createAncestorsMissingParents(ancestors);
     const additionalAncestors = await getAdditionalAncestors(ancestorsMissingParents, nextGens);
     ancestors = ancestors.concat(additionalAncestors);
-    ancestors = removeDuplicates(ancestors);
     return ancestors;
 }
 
@@ -142,6 +163,9 @@ export function replaceUndefinedFields(ancestors) {
         }
         if (ancestors[i]['BirthName'] === undefined) {
             ancestors[i]['BirthName'] = ancestors[i]['BirthNamePrivate'];
+        }
+        if (ancestors[i]['Name'] === undefined) {
+            ancestors[i]['Name'] = 'Private';
         }
     }
     return ancestors;
