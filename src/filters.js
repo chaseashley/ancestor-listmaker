@@ -301,6 +301,8 @@ async function getWtPlusIdArray(descendant, filterName) {
         databaseSearch = `Ancestors%3D${descendant}+Template%3DUnsourced`;
     } else if (filterName === 'GEDCOM Junk') {
         databaseSearch = `Ancestors%3D${descendant}+GEDCOMJunk`;
+    } else if (filterName === 'Source Junk') {
+        databaseSearch = `Ancestors%3D${descendant}+SourceJunk`;
     } else if (filterName === 'Five-Star Profiles') {
         databaseSearch = `Ancestors%3D${descendant}+Stars%3D5stars`;
     } else if (filterName === 'Witches') {

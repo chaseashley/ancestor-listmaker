@@ -100,6 +100,7 @@ class Main extends React.Component {
         {value:'Puritan Great Migration', label: 'Puritan Great Migration - Ancestors who immigrated to New England in 1621-1640, as indicated by the presence of the Puritan Great Migration template on their profile'},
         {value:'Quakers', label: 'Quakers - Ancestors who were Quakers, as indicated by the presence of the Quakers sticker or project template on their profile'},
         {value:'Scottish Monarchs', label: 'Scottish Monarchs - Ancestors who were Scottish monarchs'},
+        {value:'Source Junk', label: 'Source Junk - Ancestors whose profiles contain references to the unreliable sources Family Data Collection or Millenium File. (Note that the ancestor data used for this list is only updated weekly.)'},
         {value:'Unknown/Missing Father', label: 'Unknown/Missing Father - Ancestors whose father\'s surname is "Unknown" or who have no father attached to their profile'},
         {value:'Unknown/Missing Mother', label: 'Unknown/Missing Mother - Ancestors whose mother\'s surname is "Unknown" or who have no mother attached to their profile'},
         {value:'Unsourced', label: 'Unsourced - Ancestors whose profiles have the Unsourced template on them. (Note that the ancestor data used for this list is only updated weekly.)'},
@@ -228,6 +229,8 @@ class Main extends React.Component {
             matchingAncestors = await filterByWikiTreePlus(this.state.descendantJson, matchingAncestors, 'Unsourced');
           } else if (this.state.category === 'GEDCOM Junk') {
             matchingAncestors = await filterByWikiTreePlus(this.state.descendantJson, matchingAncestors, 'GEDCOM Junk');
+          } else if (this.state.category === 'Source Junk') {
+            matchingAncestors = await filterByWikiTreePlus(this.state.descendantJson, matchingAncestors, 'Source Junk');
           } else if (this.state.category === 'Five-Star Profiles') {
             matchingAncestors = await filterByWikiTreePlus(this.state.descendantJson, matchingAncestors, 'Five-Star Profiles');
           } else if (this.state.category === 'Witches') {
@@ -562,7 +565,7 @@ class Main extends React.Component {
                 <td className={styles.buttonsTd}><button onClick={this.onClickSubmit} className={styles.getListButton}>Generate List</button>
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 {downloadButton}</td>
-                <td className={styles.version}>(ver 7p.9.Jul.2020)</td>
+                <td className={styles.version}>(ver 12p.22.Jul.2020)</td>
               </tr>
             </tbody>
           </table>
