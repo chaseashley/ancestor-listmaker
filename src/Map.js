@@ -27,52 +27,49 @@ Geocode.fromAddress("Eiffel Tower").then(
 */
 
 
-class MarkerWithInfoWindow extends Component {
+class PersonMarkers extends Component {
 
     constructor(props) {
         super(props);
-        this.onToggleOpen = this.onToggleOpen.bind(this);
+        this.onClickHandler = this.onClickHandler.bind(this);
+        this.onMouseOverHandler = this.onMouseOverHandler.bind(this);
+        this.onMouseOutHandler = this.onMouseOutHandler.bind(this);
         this.incrementYear = this.incrementYear.bind(this);
         this.state = {
+            year: this.props.earliestBirthYear,
             isOpen: false,
-            year: this.props.earliestBirthYear
+            zIndex: null,
+            clicked: false,
+            mouseOver: false
         }
     }
 
-    onToggleOpen() {
-        this.setState({
-            isOpen: !this.state.isOpen
-        });
+    onClickHandler() {
+        if (this.state.mouseOver && this.state.isOpen) {
+            this.setState({zIndex: Date.now()});
+            this.setState({clicked: true})
+        } else {
+            this.setState({clicked: false})
+        }
+        if (this.state.mouseOver) {
+            this.setState({isOpen: true});
+            this.setState({mouseOver: false});
+        } else {
+            this.setState({isOpen: !this.state.isOpen});
+        }
     }
 
-    incrementYear() {
-        this.setState({year: this.state.year+1});
-      }
-
-    componentDidMount() {
-        setInterval(this.incrementYear, 200);
+    onMouseOverHandler() {
+        if (!this.state.clicked){
+            this.setState({isOpen: true});
+            this.setState({mouseOver: true});
+        }
     }
 
-    render() {
-        return (<Marker
-            visible={this.props.pinTypeVisible && (this.props.birthYear < this.state.year) && (this.state.year < this.props.deathYear)}
-            position={this.props.position}
-            icon={this.props.icon}
-            onClick={this.onToggleOpen}>
-            {this.state.isOpen && <InfoWindow onCloseClick={this.onToggleOpen}>
-                <div>{this.props.content}</div>
-            </InfoWindow>}
-        </Marker>)
-    }
-}
-
-class MigrationLine extends Component {
-
-    constructor(props) {
-        super(props);
-        this.incrementYear = this.incrementYear.bind(this);
-        this.state = {
-            year: this.props.earliestBirthYear
+    onMouseOutHandler() {
+        if (!this.state.clicked){
+            this.setState({isOpen: false});
+            this.setState({mouseOver: true});
         }
     }
 
@@ -81,15 +78,56 @@ class MigrationLine extends Component {
       }
 
     componentDidMount() {
-        setInterval(this.incrementYear, 200);
+        if (this.props.timeSeries) {
+            setInterval(this.incrementYear, 200);
+        }
     }
 
     render() {
-        return (<Polyline
-            visible={this.props.linesVisible && (this.props.birthYear < this.state.year) && (this.state.year < this.props.deathYear)}
-            path={this.props.path}
-            options={{strokeOpacity: 0.3, strokeWeight: 3}}
-            />)
+        let personMarkers;
+        if (this.props.birthPins && (this.props.ancestor.BirthLocation !== '') && this.props.deathPins && (this.props.ancestor.DeathLocation !== '') && this.props.lines) {
+            personMarkers =
+            <>
+                <Marker
+                    visible={!this.props.timeSeries || (this.props.birthYear < this.state.year) && (this.state.year < this.props.deathYear)}
+                    position={{lat: this.props.ancestor.blat, lng: this.props.ancestor.blng}}
+                    icon={"http://maps.google.com/mapfiles/ms/icons/green-dot.png"}
+                    defaultOptions={{ disableAutoPan: true }}
+                    zIndex={(this.state.zIndex !== null) ? this.state.zIndex : 0}
+                    onClick={this.onClickHandler}
+                    onMouseOver={this.onMouseOverHandler}
+                    onMouseOut={this.onMouseOutHandler}
+                >
+                    {this.state.isOpen && <InfoWindow onCloseClick={this.onClickHandler} defaultOptions={{ disableAutoPan: true }}>
+                        <div><a href={`https://www.wikitree.com/wiki/${this.props.ancestor.Name}`} target='_blank'>{this.props.ancestor.BirthNamePrivate}</a>, b. {this.props.ancestor.BirthDate}</div>
+                    </InfoWindow>}
+                </Marker>
+                <Marker
+                    visible={!this.props.timeSeries || (this.props.birthYear < this.state.year) && (this.state.year < this.props.deathYear)}
+                    position={{lat: this.props.ancestor.dlat, lng: this.props.ancestor.dlng}}
+                    icon={"http://maps.google.com/mapfiles/ms/icons/red-dot.png"}
+                    defaultOptions={{ disableAutoPan: true }}
+                    zIndex={(this.state.zIndex !== null) ? this.state.zIndex : 0}
+                    onClick={this.onClickHandler}
+                    onMouseOver={this.onMouseOverHandler}
+                    onMouseOut={this.onMouseOutHandler}
+                >
+                    {this.state.isOpen && <InfoWindow onCloseClick={this.onClickHandler} defaultOptions={{ disableAutoPan: true }}>
+                        <div><a href={`https://www.wikitree.com/wiki/${this.props.ancestor.Name}`} target='_blank'>{this.props.ancestor.BirthNamePrivate}</a>, d. {this.props.ancestor.DeathDate}</div>
+                    </InfoWindow>}
+                </Marker>
+                <Polyline
+                    zIndex={(this.state.zIndex !== null) ? this.state.zIndex : 0}
+                    onClick={this.onClickHandler}
+                    onMouseOver={this.onMouseOverHandler}
+                    onMouseOut={this.onMouseOutHandler}
+                    defaultOptions={{ disableAutoPan: true }, {strokeOpacity: 0.3, strokeWeight: 3}}
+                    visible={!this.props.timeSeries || (this.props.birthYear < this.state.year) && (this.state.year < this.props.deathYear)}
+                    path={[{ lat: this.props.ancestor.blat, lng: this.props.ancestor.blng },{ lat: this.props.ancestor.dlat, lng: this.props.ancestor.dlng }]}
+                />
+            </>
+        }
+        return (<>{personMarkers}</>)
     }
 }
 
@@ -103,10 +141,11 @@ class Map extends Component {
         this.getCoordinatesFromAddressDBText = this.getCoordinatesFromAddressDBText.bind(this);
         this.state = {
             coordinatesLoaded: false,
-            ancestors: this.props.location.ancestors, //should it be this.props.location.ancestors?
+            ancestors: this.props.location.ancestors,
+            timeSeries: false,
             birthPins: true,
-            deathPins: false,
-            lines: false,
+            deathPins: true,
+            lines: true,
             earliestBirthYear: null
         }
     }
@@ -114,10 +153,10 @@ class Map extends Component {
     centerMap(map) {
         let bounds = new google.maps.LatLngBounds();
         this.state.ancestors.forEach(ancestor => {
-            if (this.state.birthPins) {
+            if (this.state.birthPins && ancestor.blat !== undefined) {
                 bounds.extend(new google.maps.LatLng(ancestor.blat, ancestor.blng));
             }
-            if (this.state.deathPins) {
+            if (this.state.deathPins && ancestor.dlat !== undefined) {
                 bounds.extend(new google.maps.LatLng(ancestor.dlat, ancestor.dlng));
             }
         })
@@ -148,27 +187,30 @@ class Map extends Component {
         let misssingCoordinates = [];
         const addressDBText = await(fetch('/coordinates.txt').then(x => x.text()));
         this.state.ancestors.forEach(ancestor => {
-            let birthLocation = this.standardizeAddress(ancestor.BirthLocation);
-            let coordinatesBirthString = this.getCoordinatesFromAddressDBText(addressDBText, birthLocation);
-            if (coordinatesBirthString === '') {
-                console.log(ancestor.BirthNamePrivate,'birth',ancestor.BirthLocation);
-                misssingCoordinates.push([ancestor,'birth', ancestor.BirthLocation]);
-            } else {
-                let blatString = coordinatesBirthString.substring(0,coordinatesBirthString.indexOf(','));
-                ancestor['blat'] = Number(blatString);
-                let blngString = coordinatesBirthString.substring(coordinatesBirthString.indexOf(',')+1);
-                ancestor['blng'] = Number(blngString);
+            if (ancestor.BirthLocation !== '') {
+                let birthLocation = this.standardizeAddress(ancestor.BirthLocation);
+                let coordinatesBirthString = this.getCoordinatesFromAddressDBText(addressDBText, birthLocation);
+                if (coordinatesBirthString === '') {
+                    misssingCoordinates.push([ancestor,'birth', ancestor.BirthLocation]);
+                } else {
+                    let blatString = coordinatesBirthString.substring(0,coordinatesBirthString.indexOf(','));
+                    ancestor['blat'] = Number(blatString);
+                    let blngString = coordinatesBirthString.substring(coordinatesBirthString.indexOf(',')+1);
+                    ancestor['blng'] = Number(blngString);
+                }
             }
-            let deathLocation = this.standardizeAddress(ancestor.DeathLocation)
-            let coordinatesDeathString = this.getCoordinatesFromAddressDBText(addressDBText, deathLocation);
-            if (coordinatesDeathString === '') {
-                console.log(ancestor.BirthNamePrivate,'death',ancestor.BirthLocation);
-                misssingCoordinates.push([ancestor,'death',ancestor.DeathLocation]);
-            } else {
-                let dlatString = coordinatesDeathString.substring(0,coordinatesDeathString.indexOf(','));
-                ancestor['dlat'] = Number(dlatString);
-                let dlngString = coordinatesDeathString.substring(coordinatesDeathString.indexOf(',')+1);
-                ancestor['dlng'] = Number(dlngString);
+            if (ancestor.DeathLocation !== '') {
+                let deathLocation = this.standardizeAddress(ancestor.DeathLocation)
+                let coordinatesDeathString = this.getCoordinatesFromAddressDBText(addressDBText, deathLocation);
+                if (coordinatesDeathString === '') {
+                    console.log(ancestor.BirthNamePrivate,'death',ancestor.BirthLocation);
+                    misssingCoordinates.push([ancestor,'death',ancestor.DeathLocation]);
+                } else {
+                    let dlatString = coordinatesDeathString.substring(0,coordinatesDeathString.indexOf(','));
+                    ancestor['dlat'] = Number(dlatString);
+                    let dlngString = coordinatesDeathString.substring(coordinatesDeathString.indexOf(',')+1);
+                    ancestor['dlng'] = Number(dlngString);
+                }
             }
         });
         this.setState({coordinatesLoaded: true});
@@ -191,50 +233,29 @@ class Map extends Component {
 
     componentDidMount() {
         this.checkAddressesForCoordinates();
-        this.findEarliestBirthYear();
+        if (this.state.timeSeries) {
+            this.findEarliestBirthYear();
+        }
     }
 
     render() {
-        let birthmarkers, deathmarkers, migrationLines;
+        let markers;
         if (this.state.coordinatesLoaded) {
-            const ancestorsWithBirthLocs = this.state.ancestors.filter(ancestor => ancestor.blat !== undefined);
-            birthmarkers = ancestorsWithBirthLocs.map((ancestor, index) => {
-                return <MarkerWithInfoWindow key={index} id={index}
-                            pinTypeVisible={this.state.birthPins}
+            markers = this.state.ancestors.map((ancestor, index) => {
+                console.log(ancestor.BirthNamePrivate,ancestor.blat)
+                return <PersonMarkers key={index} id={index}
+                            ancestor={ancestor}
                             birthYear={Number(ancestor.BirthDate.substring(0,4))}
                             deathYear={Number(ancestor.DeathDate.substring(0,4))}
+                            birthPins={this.state.birthPins}
+                            deathPins={this.state.deathPins}
+                            lines={this.state.lines}
+                            timeSeries={this.state.timeSeries}
                             earliestBirthYear={this.state.earliestBirthYear}
-                            position={{lat: ancestor.blat, lng: ancestor.blng}}
-                            icon={"http://maps.google.com/mapfiles/ms/icons/green-dot.png"}
-                            content={<div><a href={`https://www.wikitree.com/wiki/${ancestor.Name}`} target='_blank'>{ancestor.BirthNamePrivate}</a>, b. {ancestor.BirthDate}</div>}
-                        />
-            })
-            const ancestorsWithDeathLocs = this.state.ancestors.filter(ancestor => ancestor.dlat !== undefined);
-            deathmarkers = ancestorsWithDeathLocs.map((ancestor, index) => {
-                return <MarkerWithInfoWindow key={index} id={index}
-                            pinTypeVisible={this.state.deathPins}
-                            birthYear={Number(ancestor.BirthDate.substring(0,4))}
-                            deathYear={Number(ancestor.DeathDate.substring(0,4))}
-                            earliestBirthYear={this.state.earliestBirthYear}
-                            position={{lat: ancestor.dlat, lng: ancestor.dlng}}
-                            icon={"http://maps.google.com/mapfiles/ms/icons/red-dot.png"}
-                            content={<div><a href={`https://www.wikitree.com/wiki/${ancestor.Name}`} target='_blank'>{ancestor.BirthNamePrivate}</a>, d. {ancestor.DeathDate}</div>}
-                        />
-             })
-             const ancestorsWithBirthAndDeathLocs = this.state.ancestors.filter(ancestor => (ancestor.BirthLocation !== undefined && ancestor.DeathLocation !== undefined));
-             migrationLines = ancestorsWithBirthAndDeathLocs.map((ancestor, index) => {
-                 return <MigrationLine key={index}
-                            linesVisible={this.state.lines}
-                            birthYear={Number(ancestor.BirthDate.substring(0,4))}
-                            deathYear={Number(ancestor.DeathDate.substring(0,4))}
-                            earliestBirthYear={this.state.earliestBirthYear}
-                            path={[{ lat: ancestor.blat, lng: ancestor.blng },{ lat: ancestor.dlat, lng: ancestor.dlng }]}
                         />
             })
         } else {
-            birthmarkers = <div></div>
-            deathmarkers = <div></div>
-            migrationLines = <div></div>
+            markers = <div></div>
         }
 
         const MapWithMarkers = withScriptjs(withGoogleMap(props =>
@@ -244,9 +265,7 @@ class Map extends Component {
                 defaultCenter={{ lat: 0, lng: 0 }}
                 ref={map => map && this.centerMap(map)}
             >
-                {birthmarkers}
-                {deathmarkers}
-                {migrationLines}
+                {markers}
             </GoogleMap>
         ));
 
