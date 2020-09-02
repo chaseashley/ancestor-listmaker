@@ -3,6 +3,7 @@ import styles from './appstyles.module.css';
 import Dropdown from 'react-dropdown';
 import 'react-dropdown/style.css';
 import { CSVLink } from "react-csv";
+import { Link } from "react-router-dom";
 import { getAncestorsJson, getAdditionalGens, replaceUndefinedFields, deletePrivateProfiles } from './ancestors';
 import { getAllRelatedCategoryArefs } from "./categoryPages";
 import { getMultiples, filterEnglishMonarchs, filterCompanionsOfTheConqueror, filterMCSuretyBarons, filterCategoryText, filterByWikiTreePlus, filterUnknownFather, filterUnknownMother, filterOrphans, filterLocationText, filterUSImmigrants, filterAustralianImmigrants, filterCanadianImmigrants, filterCategoryArefs, removeDuplicates } from './filters';
@@ -25,6 +26,7 @@ class Main extends React.Component {
     this.onClickAhnenSort = this.onClickAhnenSort.bind(this);
     this.getDownloadData = this.getDownloadData.bind(this);
     this.onClickPrematureDownload = this.onClickPrematureDownload.bind(this);
+    this.onClickPrematureMap = this.onClickPrematureMap.bind(this);
     this.onChangeAhnen = this.onChangeAhnen.bind(this);
     this.state = {
       descendant: '',
@@ -126,7 +128,6 @@ class Main extends React.Component {
   ////////////////
 
   async onClickSubmit() { // the Find Ancestors button click event
-
     // First get named descendant's ancestors for the specified number of generations
     if (this.state.descendant === '' || this.state.category === null || this.state.generations === null) {
       alert('Make sure a Wikitree ID has been entered in the top text box and the number of generations and a category have been selected');
@@ -272,7 +273,7 @@ class Main extends React.Component {
       await this.setState({processingStatus: 'Done'});
       db.table('main').put(JSON.stringify(this.state),0)
         .catch(function(e){alert('The ancestor data is too large to be stored. Therefore, if you use a link in the ancestor list to view an ancestral line and return to this page, you will need to generate the ancestor list again if you wish to see it. If you want to make the ancestor data small enough to be stored, try going back fewer generations.')});
-    }
+      }
   }
 
   async onClickNameSort() {
@@ -403,8 +404,17 @@ class Main extends React.Component {
     }
   }
 
+  onClickPrematureMap() {
+    if (this.state.ancestors === null) {
+      alert('A list cannot be mapped until it has first been generated');
+    } else if (this.state.processingStatus !== 'Done') {
+      alert('A list cannot be mapped until generation of the list has been completed');
+    } else if (this.state.matchingAncestorsList.length === 0) {
+      alert('A list cannot be mapped\ unless it contains at least one ancestor');
+    }
+  }
+
   render() {
-  
     let status;
     if (this.state.processingStatus === 'Collecting') {
       status = <div className={styles.statusElipsis}>Collecting ancestors</div>;
@@ -444,6 +454,13 @@ class Main extends React.Component {
       status = <div className={styles.status}>{this.state.lastDescendant} (<a href={`https://www.wikitree.com/wiki/${this.state.lastDescendant}`} target='_blank'>{this.state.descendantJson['BirthNamePrivate']}</a>) has {uniqueMatches} {(talkAboutDupes) ? ' unique ':''} {uniqueMatches === 1 ? 'ancestor' : 'ancestors'}{duplicatesPhrase} within {this.state.lastGenerations} {this.state.lastGenerations > 1 ? 'generations' : 'generation'}{meetsCategory}</div>
     } else {
       status = <div></div>;
+    }
+
+    let mapButton;
+    if (this.state.processingStatus ==='Done' && this.state.matchingAncestors.length !== 0) {
+      mapButton = <Link to={{ pathname: '/Map', ancestors: this.state.matchingAncestors}}><button className={styles.mapButton}>Map List</button></Link>;
+    } else {
+      mapButton = <button className={styles.mapButton} onClick={this.onClickPrematureMap}>Map List</button>;
     }
 
     let downloadButton;
@@ -492,14 +509,13 @@ class Main extends React.Component {
         <th className={styles.thlocation}><button onClick={this.onClickPODSort} className={styles.sortButton}>Death Location</button></th>
         </tr></thead>;
     }
-
     let displayedTable;
     if (this.state.processingStatus ==='Done') {
       if (this.state.lastAhnentafel) {
         displayedTable = <AhnenTable tableData={this.state.matchingAncestors} fullname={this.state.lastFullname} descendantJson={this.state.descendantJson} ancestors={this.state.ancestors} generations={this.state.lastGenerations} multiples={this.state.lastMultiples} multiplesArray={this.state.matchingMultiples}/>;
       } else {
         displayedTable = <Table tableData={this.state.matchingAncestors} fullname={this.state.lastFullname} descendantJson={this.state.descendantJson} ancestors={this.state.ancestors} generations={this.state.lastGenerations} multiples={this.state.lastMultiples} multiplesArray={this.state.matchingMultiples}/>;
-      }  
+      }
     } else {
       displayedTable = <tbody></tbody>;
     }
@@ -562,8 +578,10 @@ class Main extends React.Component {
               </tr>
               <tr className={styles.buttonsTr}>
                 <td></td>
-                <td className={styles.buttonsTd}><button onClick={this.onClickSubmit} className={styles.getListButton}>Generate List</button>
-                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <td colSpan='2' className={styles.buttonsTd}><button onClick={this.onClickSubmit} className={styles.getListButton}>Generate List</button>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                {mapButton}
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 {downloadButton}</td>
                 <td className={styles.version}>(ver 12p.22.Jul.2020)</td>
               </tr>

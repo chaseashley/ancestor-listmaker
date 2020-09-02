@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { BrowserRouter, Route, Switch } from 'react-router-dom';
 import Main from './Main';
 import Lines from './Lines';
+import Map from './Map';
 import db from './db';
 
 const NoMatchPage = () => {
@@ -45,6 +46,7 @@ class App extends Component {
             <div>
                 <Switch>
                     <Route path="/apps/ashley1950/listmaker/lines" component={Lines} />
+                    <Route path="/Map" component={Map} />
                     <Route path="/:id?" component={Main} />
                     <Route component={NoMatchPage}/>
                 </Switch>

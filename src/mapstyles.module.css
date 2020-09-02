@@ -1,0 +1,32 @@
+.topBox {
+    background-color: rgb(243, 241, 234);
+    height: 100px;
+}
+
+.h1 {
+    font-size: 2.5em;
+    font-style: italic;
+    font-variant: small-caps;
+    text-align: center;
+    padding-top: 30px;
+}
+
+.description {
+    padding-left: 75px;
+    padding-right: 75px;
+    padding-top: 30px;
+    line-height: 1.5em;
+}
+
+.contact {
+    padding-top: 20px;
+    padding-left: 75px;
+    font-size: 0.9em;
+    padding-bottom: 20px;
+}
+
+.topdiv {
+    padding-left: 30px;
+    padding-right:30px;
+    padding-top: 20px;
+}

@@ -52,7 +52,7 @@ export function filterLocationText(ancestors, locationText) {
     //uppercase text and remove commas
     locationText = locationText.replace(/[&\/\\#+()$~%"*?<>{}]/g, '');
     locationText = locationText.replace(/'/g,'%27');
-    locationText = locationText.replace('.','').toUpperCase();
+    locationText = locationText.replace(/\./,'').toUpperCase();
 
     const birthLocStart = locationText.indexOf('B:');
     const deathLocStart = locationText.indexOf('D:');

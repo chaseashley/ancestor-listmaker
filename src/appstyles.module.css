@@ -65,12 +65,17 @@
 
 .buttonsTd {
     padding-top: 10px;
-    text-align: center;
+    text-align: left;
     width: 200px;
 }
 
 .getListButton {
     font-size: 16px;
+}
+
+.mapButton {
+    font-size: 16px;
+    width: 115px;
 }
 
 .downloadButton {
