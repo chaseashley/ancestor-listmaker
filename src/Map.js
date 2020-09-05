@@ -1,14 +1,13 @@
  /* global google */ 
-import React, { Component } from 'react';
+import React from 'react';
 import {
     withScriptjs,
     withGoogleMap,
-    GoogleMap,
-    Marker,
-    Polyline,
-    InfoWindow
+    GoogleMap
   } from 'react-google-maps';
 import styles from './linesstyles.module.css';
+import StaticMarkers from './StaticMarkers';
+import MovingMarker from './MovingMarker';
 import Geocode from "react-geocode";
 
 const API_KEY='AIzaSyD5VQNhUE4UQlIZbaJo4aHE1pt9zuZFzPw';
@@ -26,111 +25,6 @@ Geocode.fromAddress("Eiffel Tower").then(
 );
 */
 
-
-class PersonMarkers extends Component {
-
-    constructor(props) {
-        super(props);
-        this.onClickHandler = this.onClickHandler.bind(this);
-        this.onMouseOverHandler = this.onMouseOverHandler.bind(this);
-        this.onMouseOutHandler = this.onMouseOutHandler.bind(this);
-        this.incrementYear = this.incrementYear.bind(this);
-        this.state = {
-            year: this.props.earliestBirthYear,
-            isOpen: false,
-            zIndex: null,
-            clicked: false,
-            mouseOver: false
-        }
-    }
-
-    onClickHandler() {
-        if (this.state.mouseOver && this.state.isOpen) {
-            this.setState({zIndex: Date.now()});
-            this.setState({clicked: true})
-        } else {
-            this.setState({clicked: false})
-        }
-        if (this.state.mouseOver) {
-            this.setState({isOpen: true});
-            this.setState({mouseOver: false});
-        } else {
-            this.setState({isOpen: !this.state.isOpen});
-        }
-    }
-
-    onMouseOverHandler() {
-        if (!this.state.clicked){
-            this.setState({isOpen: true});
-            this.setState({mouseOver: true});
-        }
-    }
-
-    onMouseOutHandler() {
-        if (!this.state.clicked){
-            this.setState({isOpen: false});
-            this.setState({mouseOver: true});
-        }
-    }
-
-    incrementYear() {
-        this.setState({year: this.state.year+1});
-      }
-
-    componentDidMount() {
-        if (this.props.timeSeries) {
-            setInterval(this.incrementYear, 200);
-        }
-    }
-
-    render() {
-        let personMarkers;
-        if (this.props.birthPins && (this.props.ancestor.BirthLocation !== '') && this.props.deathPins && (this.props.ancestor.DeathLocation !== '') && this.props.lines) {
-            personMarkers =
-            <>
-                <Marker
-                    visible={!this.props.timeSeries || (this.props.birthYear < this.state.year) && (this.state.year < this.props.deathYear)}
-                    position={{lat: this.props.ancestor.blat, lng: this.props.ancestor.blng}}
-                    icon={"http://maps.google.com/mapfiles/ms/icons/green-dot.png"}
-                    defaultOptions={{ disableAutoPan: true }}
-                    zIndex={(this.state.zIndex !== null) ? this.state.zIndex : 0}
-                    onClick={this.onClickHandler}
-                    onMouseOver={this.onMouseOverHandler}
-                    onMouseOut={this.onMouseOutHandler}
-                >
-                    {this.state.isOpen && <InfoWindow onCloseClick={this.onClickHandler} defaultOptions={{ disableAutoPan: true }}>
-                        <div><a href={`https://www.wikitree.com/wiki/${this.props.ancestor.Name}`} target='_blank'>{this.props.ancestor.BirthNamePrivate}</a>, b. {this.props.ancestor.BirthDate}</div>
-                    </InfoWindow>}
-                </Marker>
-                <Marker
-                    visible={!this.props.timeSeries || (this.props.birthYear < this.state.year) && (this.state.year < this.props.deathYear)}
-                    position={{lat: this.props.ancestor.dlat, lng: this.props.ancestor.dlng}}
-                    icon={"http://maps.google.com/mapfiles/ms/icons/red-dot.png"}
-                    defaultOptions={{ disableAutoPan: true }}
-                    zIndex={(this.state.zIndex !== null) ? this.state.zIndex : 0}
-                    onClick={this.onClickHandler}
-                    onMouseOver={this.onMouseOverHandler}
-                    onMouseOut={this.onMouseOutHandler}
-                >
-                    {this.state.isOpen && <InfoWindow onCloseClick={this.onClickHandler} defaultOptions={{ disableAutoPan: true }}>
-                        <div><a href={`https://www.wikitree.com/wiki/${this.props.ancestor.Name}`} target='_blank'>{this.props.ancestor.BirthNamePrivate}</a>, d. {this.props.ancestor.DeathDate}</div>
-                    </InfoWindow>}
-                </Marker>
-                <Polyline
-                    zIndex={(this.state.zIndex !== null) ? this.state.zIndex : 0}
-                    onClick={this.onClickHandler}
-                    onMouseOver={this.onMouseOverHandler}
-                    onMouseOut={this.onMouseOutHandler}
-                    defaultOptions={{ disableAutoPan: true }, {strokeOpacity: 0.3, strokeWeight: 3}}
-                    visible={!this.props.timeSeries || (this.props.birthYear < this.state.year) && (this.state.year < this.props.deathYear)}
-                    path={[{ lat: this.props.ancestor.blat, lng: this.props.ancestor.blng },{ lat: this.props.ancestor.dlat, lng: this.props.ancestor.dlng }]}
-                />
-            </>
-        }
-        return (<>{personMarkers}</>)
-    }
-}
-
 class Map extends Component {
 
     constructor(props) {
@@ -142,11 +36,13 @@ class Map extends Component {
         this.state = {
             coordinatesLoaded: false,
             ancestors: this.props.location.ancestors,
+            markerType: 'static',
             timeSeries: false,
             birthPins: true,
             deathPins: true,
             lines: true,
-            earliestBirthYear: null
+            earliestBirthYear: null,
+            year: 1825
         }
     }
 
@@ -222,7 +118,6 @@ class Map extends Component {
         this.state.ancestors.forEach(ancestor => {
             if (ancestor.BirthDate !=='') {
                 birthYear = Number(ancestor.BirthDate.substring(0,4));
-                console.log(ancestor.Name, ancestor.BirthDate, birthYear);
                 if (birthYear < earliestBirthYear) {
                     earliestBirthYear = birthYear;
                 }
@@ -240,10 +135,9 @@ class Map extends Component {
 
     render() {
         let markers;
-        if (this.state.coordinatesLoaded) {
+        if (this.state.coordinatesLoaded && (this.state.markerType === 'static')) {
             markers = this.state.ancestors.map((ancestor, index) => {
-                console.log(ancestor.BirthNamePrivate,ancestor.blat)
-                return <PersonMarkers key={index} id={index}
+                return <StaticMarkers key={index} id={index}
                             ancestor={ancestor}
                             birthYear={Number(ancestor.BirthDate.substring(0,4))}
                             deathYear={Number(ancestor.DeathDate.substring(0,4))}
@@ -251,10 +145,23 @@ class Map extends Component {
                             deathPins={this.state.deathPins}
                             lines={this.state.lines}
                             timeSeries={this.state.timeSeries}
-                            earliestBirthYear={this.state.earliestBirthYear}
+                            year={(this.state.timeSeries) ? this.state.earliestBirthYear-2 : this.state.year}
                         />
             })
-        } else {
+        } else if (this.state.coordinatesLoaded && (this.state.markerType === 'moving')) {
+            markers = this.state.ancestors.map((ancestor, index) => {
+                return <MovingMarker key={index} id={index}
+                            ancestor={ancestor}
+                            birthYear={Number(ancestor.BirthDate.substring(0,4))}
+                            deathYear={Number(ancestor.DeathDate.substring(0,4))}
+                            birthPins={this.state.birthPins}
+                            deathPins={this.state.deathPins}
+                            lines={this.state.lines}
+                            timeSeries={this.state.timeSeries}
+                            year={(this.state.timeSeries) ? this.state.earliestBirthYear-2 : this.state.year}
+                        />
+            })
+        }   else {
             markers = <div></div>
         }
 
