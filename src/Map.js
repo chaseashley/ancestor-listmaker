@@ -5,9 +5,8 @@ import {
     withGoogleMap,
     GoogleMap
   } from 'react-google-maps';
-import styles from './linesstyles.module.css';
-import StaticMarkers from './StaticMarkers';
-import MovingMarker from './MovingMarker';
+import styles from './mapstyles.module.css';
+import MarkersWithSlider from './MarkersWithSlider';
 import Geocode from "react-geocode";
 
 const API_KEY='AIzaSyD5VQNhUE4UQlIZbaJo4aHE1pt9zuZFzPw';
@@ -25,24 +24,27 @@ Geocode.fromAddress("Eiffel Tower").then(
 );
 */
 
-class Map extends Component {
+class Map extends React.Component {
 
     constructor(props) {
         super(props);
         this.centerMap = this.centerMap.bind(this);
         this.standardizeAddress = this.standardizeAddress.bind(this);
         this.findEarliestBirthYear = this.findEarliestBirthYear.bind(this);
+        this.findLatestDeathYear = this.findLatestDeathYear.bind(this);
         this.getCoordinatesFromAddressDBText = this.getCoordinatesFromAddressDBText.bind(this);
         this.state = {
             coordinatesLoaded: false,
             ancestors: this.props.location.ancestors,
             markerType: 'static',
-            timeSeries: false,
+            timeSeries: true,
+            animated: true,
+            windowAutoOpen: false,
             birthPins: true,
             deathPins: true,
             lines: true,
             earliestBirthYear: null,
-            year: 1825
+            latestDeathYear: null
         }
     }
 
@@ -126,41 +128,43 @@ class Map extends Component {
         this.setState({earliestBirthYear: earliestBirthYear});
     }
 
+    findLatestDeathYear() {
+        let latestDeathYear = 0;
+        let deathYear;
+        this.state.ancestors.forEach(ancestor => {
+            if (ancestor.DeathDate !=='') {
+                deathYear = Number(ancestor.DeathDate.substring(0,4));
+                if (deathYear > latestDeathYear) {
+                    latestDeathYear = deathYear;
+                }
+            }
+        })
+        this.setState({latestDeathYear: latestDeathYear});
+    }
+
     componentDidMount() {
         this.checkAddressesForCoordinates();
-        if (this.state.timeSeries) {
+        //if (this.state.timeSeries) {
             this.findEarliestBirthYear();
-        }
+            this.findLatestDeathYear();
+        //}
     }
 
     render() {
         let markers;
-        if (this.state.coordinatesLoaded && (this.state.markerType === 'static')) {
-            markers = this.state.ancestors.map((ancestor, index) => {
-                return <StaticMarkers key={index} id={index}
-                            ancestor={ancestor}
-                            birthYear={Number(ancestor.BirthDate.substring(0,4))}
-                            deathYear={Number(ancestor.DeathDate.substring(0,4))}
+        if (this.state.coordinatesLoaded) {
+            markers =   <MarkersWithSlider
+                            ancestors={this.state.ancestors}
                             birthPins={this.state.birthPins}
                             deathPins={this.state.deathPins}
                             lines={this.state.lines}
+                            markerType={this.state.markerType}
                             timeSeries={this.state.timeSeries}
-                            year={(this.state.timeSeries) ? this.state.earliestBirthYear-2 : this.state.year}
+                            animated={this.state.animated}
+                            windowAutoOpen={this.state.windowAutoOpen}
+                            sliderMin={Math.floor(this.state.earliestBirthYear/10)*10}
+                            sliderMax={(Math.floor(this.state.latestDeathYear/10)+1)*10}
                         />
-            })
-        } else if (this.state.coordinatesLoaded && (this.state.markerType === 'moving')) {
-            markers = this.state.ancestors.map((ancestor, index) => {
-                return <MovingMarker key={index} id={index}
-                            ancestor={ancestor}
-                            birthYear={Number(ancestor.BirthDate.substring(0,4))}
-                            deathYear={Number(ancestor.DeathDate.substring(0,4))}
-                            birthPins={this.state.birthPins}
-                            deathPins={this.state.deathPins}
-                            lines={this.state.lines}
-                            timeSeries={this.state.timeSeries}
-                            year={(this.state.timeSeries) ? this.state.earliestBirthYear-2 : this.state.year}
-                        />
-            })
         }   else {
             markers = <div></div>
         }

@@ -5,7 +5,7 @@
 
 .topBox {
     background-color: rgb(243, 241, 234);
-    height: 100px;
+    height: 80px;
 }
 
 .h1 {
@@ -13,7 +13,7 @@
     font-style: italic;
     font-variant: small-caps;
     text-align: center;
-    padding-top: 30px;
+    padding-top: 15px;
 }
 
 .description {
