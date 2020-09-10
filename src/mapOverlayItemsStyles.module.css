@@ -1,0 +1,88 @@
+.optionsOpen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 400px;
+    width: 600px;
+    background: white;
+}
+
+.optionsClosed {
+    position: absolute;
+    top: 0;
+    left: 275px;
+    height: 12px;
+    width: 50px;
+    background: white;
+}
+
+.optionsCloseButton {
+    position: absolute;
+    bottom: 0;
+    left: 295px;
+    width: 15px;
+    height: 15px;
+    margin: 0;
+}
+
+.optionsOpenButton {
+    position: absolute;
+    bottom: 0;
+    left: 18px;
+    width: 15px;
+    height: 15px;
+    margin: 0;
+}
+
+.wrapperStyle {
+    left: 60px;
+    width: 85%;
+    margin: 0;
+    padding: 2em;
+    position: fixed;
+    bottom: 0;
+}
+
+.pauseplayDivStyle {
+    left: 10px;
+    width: 20px;
+    height: 20px;
+    margin: 0;
+    padding: 2em;
+    position: fixed;
+    bottom: -5;
+}
+
+.tooltip {
+    position: relative;
+    display: inline-block;
+    border-bottom: 1px dotted black; /* If you want dots under the hoverable text */
+  }
+  
+  /* Tooltip text */
+  .tooltip .tooltiptext {
+    visibility: hidden;
+    width: 100px;
+    background-color: black;
+    color: #fff;
+    text-align: center;
+    padding: 2px 0;
+    border-radius: 6px;
+   
+    /* Position the tooltip text - see examples below! */
+    position: absolute;
+    z-index: 1;
+  }
+  
+  /* Show the tooltip text when you mouse over the tooltip container */
+  .tooltip:hover .tooltiptext {
+    visibility: visible;
+    font-size: .9em;
+  }
+
+.tooltip .tooltiptext {
+    width: 100px;
+    top: 100%;
+    left: 50%;
+    margin-left: -50px; /* Use half of the width (120/2 = 60), to center the tooltip */
+  }

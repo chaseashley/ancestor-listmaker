@@ -6,7 +6,7 @@ import {
     GoogleMap
   } from 'react-google-maps';
 import styles from './mapstyles.module.css';
-import MarkersWithSlider from './MarkersWithSlider';
+import MapOverlayItems from './MapOverlayItems';
 import Geocode from "react-geocode";
 
 const API_KEY='AIzaSyD5VQNhUE4UQlIZbaJo4aHE1pt9zuZFzPw';
@@ -30,31 +30,20 @@ class Map extends React.Component {
         super(props);
         this.centerMap = this.centerMap.bind(this);
         this.standardizeAddress = this.standardizeAddress.bind(this);
-        this.findEarliestBirthYear = this.findEarliestBirthYear.bind(this);
-        this.findLatestDeathYear = this.findLatestDeathYear.bind(this);
         this.getCoordinatesFromAddressDBText = this.getCoordinatesFromAddressDBText.bind(this);
         this.state = {
             coordinatesLoaded: false,
             ancestors: this.props.location.ancestors,
-            markerType: 'static',
-            timeSeries: true,
-            animated: true,
-            windowAutoOpen: false,
-            birthPins: true,
-            deathPins: true,
-            lines: true,
-            earliestBirthYear: null,
-            latestDeathYear: null
         }
     }
 
     centerMap(map) {
         let bounds = new google.maps.LatLngBounds();
         this.state.ancestors.forEach(ancestor => {
-            if (this.state.birthPins && ancestor.blat !== undefined) {
+            if (ancestor.blat !== undefined) {
                 bounds.extend(new google.maps.LatLng(ancestor.blat, ancestor.blng));
             }
-            if (this.state.deathPins && ancestor.dlat !== undefined) {
+            if (ancestor.dlat !== undefined) {
                 bounds.extend(new google.maps.LatLng(ancestor.dlat, ancestor.dlng));
             }
         })
@@ -114,69 +103,27 @@ class Map extends React.Component {
         this.setState({coordinatesLoaded: true});
     }
 
-    findEarliestBirthYear() {
-        let earliestBirthYear = 3000;
-        let birthYear;
-        this.state.ancestors.forEach(ancestor => {
-            if (ancestor.BirthDate !=='') {
-                birthYear = Number(ancestor.BirthDate.substring(0,4));
-                if (birthYear < earliestBirthYear) {
-                    earliestBirthYear = birthYear;
-                }
-            }
-        })
-        this.setState({earliestBirthYear: earliestBirthYear});
-    }
-
-    findLatestDeathYear() {
-        let latestDeathYear = 0;
-        let deathYear;
-        this.state.ancestors.forEach(ancestor => {
-            if (ancestor.DeathDate !=='') {
-                deathYear = Number(ancestor.DeathDate.substring(0,4));
-                if (deathYear > latestDeathYear) {
-                    latestDeathYear = deathYear;
-                }
-            }
-        })
-        this.setState({latestDeathYear: latestDeathYear});
-    }
-
     componentDidMount() {
         this.checkAddressesForCoordinates();
-        //if (this.state.timeSeries) {
-            this.findEarliestBirthYear();
-            this.findLatestDeathYear();
-        //}
     }
 
     render() {
-        let markers;
+
+        let mapOverlayItems;
         if (this.state.coordinatesLoaded) {
-            markers =   <MarkersWithSlider
-                            ancestors={this.state.ancestors}
-                            birthPins={this.state.birthPins}
-                            deathPins={this.state.deathPins}
-                            lines={this.state.lines}
-                            markerType={this.state.markerType}
-                            timeSeries={this.state.timeSeries}
-                            animated={this.state.animated}
-                            windowAutoOpen={this.state.windowAutoOpen}
-                            sliderMin={Math.floor(this.state.earliestBirthYear/10)*10}
-                            sliderMax={(Math.floor(this.state.latestDeathYear/10)+1)*10}
-                        />
+            mapOverlayItems = <MapOverlayItems ancestors={this.state.ancestors}/>
         }   else {
-            markers = <div></div>
+            mapOverlayItems = <div></div>
         }
 
         const MapWithMarkers = withScriptjs(withGoogleMap(props =>
             <GoogleMap
-                options={{streetViewControl: false, styles: [ { featureType: 'poi', stylers: [{ visibility: 'off' }] } ] }}
+                options={{fullscreenControl: false, mapTypeControl: false, streetViewControl: false, styles: [ { featureType: 'poi', stylers: [{ visibility: 'off' }] } ] }}
                 defaultZoom={7}
                 defaultCenter={{ lat: 0, lng: 0 }}
                 ref={map => map && this.centerMap(map)}
             >
-                {markers}
+                {mapOverlayItems}
             </GoogleMap>
         ));
 
@@ -187,7 +134,7 @@ class Map extends React.Component {
                         Ancestor Listmaker
                     </h1>
                 </div>
-                <div>
+                <div className={styles.mapDiv}>
                     <MapWithMarkers
                         //googleMapURL={`https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=geometry,drawing,places"`}
                         googleMapURL={`https://maps.googleapis.com/maps/api/js?key=${API_KEY}&v=3.exp&libraries=geometry,drawing,places"`}
