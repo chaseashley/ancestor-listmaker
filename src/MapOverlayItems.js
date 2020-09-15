@@ -47,6 +47,7 @@ class MapOverlayItems extends React.Component {
 
     constructor(props) {
         super(props);
+        this.onAllOrTimeSeriesClick = this.onAllOrTimeSeriesClick.bind(this);
         this.findEarliestBirthYear = this.findEarliestBirthYear.bind(this);
         this.findLatestDeathYear = this.findLatestDeathYear.bind(this);
         this.onOptionsOpenCloseClick = this.onOptionsOpenCloseClick.bind(this);
@@ -57,10 +58,10 @@ class MapOverlayItems extends React.Component {
         this.state={
             year: null,
             intervalId: null,
+            timeSeries: false,
             animated: false,
             markerType: 'static',
-            timeSeries: true,
-            windowAutoOpen: false,
+            windowAutoOpen: true,
             birthPins: true,
             deathPins: true,
             lines: true,
@@ -75,13 +76,10 @@ class MapOverlayItems extends React.Component {
     }
 
     componentDidMount () {
-        //if (this.state.timeSeries) {
         const earliestBirthYear = this.findEarliestBirthYear();
         this.setState({sliderMin: (Math.floor(earliestBirthYear/10))*10});
         const latestDeathYear = this.findLatestDeathYear();
         this.setState({sliderMax: ((Math.floor(latestDeathYear/10))+1)*10});
-        this.setState({year: (Math.floor(earliestBirthYear/10))*10});
-        //}
     }
 
     findEarliestBirthYear() {
@@ -144,6 +142,15 @@ class MapOverlayItems extends React.Component {
         }
     }
 
+    onAllOrTimeSeriesClick() {
+        if (this.state.timeSeries) {
+            this.setState({year: null});
+        } else {
+            this.setState({year: this.state.sliderMin});
+        }
+        this.setState({timeSeries: !this.state.timeSeries})
+    }
+
     render() {
 
         let optionsOpenCloseButton;
@@ -167,11 +174,65 @@ class MapOverlayItems extends React.Component {
                 </div></div>
         }
 
+        const allOrTimeSeries = 
+            <div>
+                <label>
+                    <input
+                        type="radio"
+                        name="allOrTimeSeries"
+                        checked={!this.state.timeSeries}
+                        onChange={this.onAllOrTimeSeriesClick}
+                    />
+                    Show all ancestors at once
+                </label>
+                <label>
+                    <input
+                        type="radio"
+                        name="allOrTimeSeries"
+                        checked={this.state.timeSeries}
+                        onChange={this.onAllOrTimeSeriesClick}
+                    />
+                    Show ancestors by time line
+                </label>
+            </div>
+        
+        const windowAutoOpen = 
+            <div>
+                <input type="checkbox" name="windowAutoOpenCheckbox" checked={this.state.windowAutoOpen} onChange={(e) => this.setState({windowAutoOpen: e.target.checked})} disabled={!this.state.timeSeries}/>
+                <label for="windowAutoOpenCheckbox">Automatically show birth/death information when event occurs</label>
+            </div>
+
+        const birthPins = 
+            <div>
+                <input type="checkbox" name="birthPins" checked={this.state.birthPins} onChange={(e) => this.setState({birthPins: e.target.checked})} disabled={this.state.markerType==='Moving'}/>
+                <label for="birthPins">Show birth locations</label>
+            </div>
+
+        const deathPins = 
+            <div>
+                <input type="checkbox" name="deathPins" checked={this.state.deathPins} onChange={(e) => this.setState({deathPins: e.target.checked})} disabled={this.state.markerType==='Moving'}/>
+                <label for="birthPins">Show death locations</label>
+            </div>
+
+        const lines = 
+            <div>
+                <input type="checkbox" name="lines" checked={this.state.lines} onChange={(e) => this.setState({lines: e.target.checked})} disabled={this.state.markerType==='Moving' || !this.state.birthPins || !this.state.deathPins}/>
+                <label for="lines">Show migration lines between birth and death locations</label>
+            </div>
+
         let optionsBox;
         if (this.state.optionsOpen) {
-            optionsBox = <div className={styles.optionsOpen}>{optionsOpenCloseButton}</div>
+            optionsBox = <div className={styles.optionsOpen}>
+                {allOrTimeSeries}
+                {birthPins}
+                {deathPins}
+                {lines}
+                {windowAutoOpen}
+                {optionsOpenCloseButton}
+            </div>
         } else {
-            optionsBox = <div className={styles.optionsClosed}>{optionsOpenCloseButton}</div>
+            optionsBox = <div className={styles.optionsClosed}>{optionsOpenCloseButton}
+            </div>
         }
 
         let markers;
@@ -206,7 +267,9 @@ class MapOverlayItems extends React.Component {
         }
 
         let pauseplay;
-        if (this.state.animated) {
+        if (!this.state.timeSeries) {
+            pauseplay = <></>;
+        } else if (this.state.animated) {
             pauseplay =
                 <div style={pauseplayDivStyle}>
                     <svg className="button" viewBox="0 0 60 60" onClick={this.onPausePlayClick}>
@@ -214,7 +277,7 @@ class MapOverlayItems extends React.Component {
                         <polygon points="25,0 40,0 40,60 25,60" fill="#404040"/>
                     </svg>
                 </div>
-        } else {
+        } else { //not timeSeries and not animated
             pauseplay =
                 <div style={pauseplayDivStyle}>
                     <svg className="button" viewBox="0 0 60 60" onClick={this.onPausePlayClick}>
@@ -224,7 +287,9 @@ class MapOverlayItems extends React.Component {
         }
 
         let slider;
-        if (this.state.animated) {
+        if (!this.state.timeSeries) {
+            slider = <></>;
+        } else if (this.state.animated) {
             slider = 
                 <div className={styles.wrapperStyle}>
                     <Slider

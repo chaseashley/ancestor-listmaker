@@ -173,8 +173,8 @@ class StaticMarkers extends Component {
     */
 
     render() {
-        const bWindowAutoOpen = this.props.windowAutoOpen && ((this.props.birthYear-2.5) <= this.props.year && (this.props.birthYear + 2.5) >= this.props.year) ? true : false;
-        const dWindowAutoOpen = this.props.windowAutoOpen && ((this.props.deathYear-2.5) <= this.props.year && (this.props.deathYear + 2.5) >= this.props.year) ? true : false;
+        const bWindowAutoOpen = this.props.windowAutoOpen && ((this.props.birthYear-5) <= this.props.year && (this.props.birthYear + 5) >= this.props.year) ? true : false;
+        const dWindowAutoOpen = this.props.windowAutoOpen && ((this.props.deathYear-5) <= this.props.year && (this.props.deathYear + 5) >= this.props.year) ? true : false;
         
         let personMarkers;
         if (this.props.birthPins && (this.props.ancestor.BirthLocation !== '') && this.props.deathPins && (this.props.ancestor.DeathLocation !== '') && this.props.lines) {

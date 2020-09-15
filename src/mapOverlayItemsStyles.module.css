@@ -5,7 +5,18 @@
     height: 400px;
     width: 600px;
     background: white;
+    transition: left .1s, width .1s, height .1s;
+    padding: 20px;
 }
+
+/*
+.allOrTimeSeries {
+    position: absolute;
+    margin: 20px;
+    width: 400;
+    height: 300;
+}
+*/
 
 .optionsClosed {
     position: absolute;
@@ -14,11 +25,12 @@
     height: 12px;
     width: 50px;
     background: white;
+    transition: left .1s, width .1s, height .1s;
 }
 
 .optionsCloseButton {
     position: absolute;
-    bottom: 0;
+    top: 298px;
     left: 295px;
     width: 15px;
     height: 15px;
@@ -82,7 +94,7 @@
 
 .tooltip .tooltiptext {
     width: 100px;
-    top: 100%;
+    bottom: 100%;
     left: 50%;
     margin-left: -50px; /* Use half of the width (120/2 = 60), to center the tooltip */
   }
