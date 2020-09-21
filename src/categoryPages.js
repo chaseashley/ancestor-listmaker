@@ -6,7 +6,8 @@ async function getCategoryArefs(category) {
     // pageInfo holds the url and next page link info for the various categories
     const categoryUrl = {
         'American Revolution Project': 'https://www.wikitree.com/index.php?title=Special:Whatlinkshere/Template:1776_Project&limit=500&from=0',
-        'American Revolution Sticker': 'https://www.wikitree.com/index.php?title=Special:Whatlinkshere/Template:1776&limit=5000&from=0',
+        'American Revolution Old Sticker': 'https://www.wikitree.com/index.php?title=Special:Whatlinkshere/Template:1776&limit=5000&from=0',
+        'American Revolution New Sticker': 'https://www.wikitree.com/index.php?title=Special:Whatlinkshere/Template:1776&limit=5000&from=0',
         'Arbroath Signatories': 'https://www.wikitree.com/wiki/Category:Declaration_of_Arbroath',
         'British Aristo': 'https://www.wikitree.com/index.php?title=Special:Whatlinkshere/Template:British_Isles_Aristo&limit=5000&from=0',
         'EuroAristo': 'https://www.wikitree.com/index.php?title=Special:Whatlinkshere/Template:EuroAristo_Sticker&limit=5000&from=0',
@@ -133,10 +134,11 @@ export async function getAllRelatedCategoryArefs(category) {
         categoryArefs = quakersProjectArefs + quakersStickerArefs;
     } else if (category === 'American Revolution') {
         const amRevProjectArefs = await getCategoryArefs('American Revolution Project');
-        const amRevStickerArefs = await getCategoryArefs('American Revolution Sticker');
+        const amRevOldStickerArefs = await getCategoryArefs('American Revolution Old Sticker');
+        const amRevNewStickerArefs = await getCategoryArefs('American Revolution New Sticker');
         const nsdarArefs = await getCategoryArefs('NSDAR');
         const nssarArefs = await getCategoryArefs('NSSAR');
-        categoryArefs = amRevProjectArefs + amRevStickerArefs + nsdarArefs + nssarArefs;
+        categoryArefs = amRevProjectArefs + amRevOldStickerArefs + amRevNewStickerArefs + nsdarArefs + nssarArefs;
     } else if (category === 'US Civil War') {
         const usCivilWarProjectArefs = await getCategoryArefs('US Civil War Project');
         const usCivilWarStickerArefs = await getCategoryArefs('US Civil War Sticker');

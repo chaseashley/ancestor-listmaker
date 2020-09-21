@@ -3,7 +3,7 @@ import {
     Marker,
     Polyline,
     InfoWindow
-  } from 'react-google-maps';
+} from 'react-google-maps';
 
 class StaticMarkers extends Component {
 
@@ -149,29 +149,6 @@ class StaticMarkers extends Component {
         }
     }
 
-    /*
-    incrementYear() {
-        if ((this.props.birthYear+0.2) <= this.state.year && (this.props.birthYear + 3) >= this.state.year) {
-            this.setState({bOpen: true})
-            this.setState({bzIndex: Math.floor(Date.now()/1000)});
-        } else if (!(this.state.bVisible && (this.state.mouseOver || this.state.clicked))) { //Don't close if mouseover or clicked
-            this.setState({bOpen: false})
-        }
-        if ((this.props.deathYear+0.2) >= this.state.year && (this.props.deathYear - 3) <= this.state.year) {
-            this.setState({dOpen: true})
-            this.setState({dzIndex: Math.floor(Date.now()/1000)});
-        } else if (!(this.state.dVisible && (this.state.mouseOver || this.state.clicked))) { //Don't close if mouseover or clicked
-            this.setState({dOpen: false})
-        }
-      }
-
-    componentDidMount() {
-        if (this.props.animated) {
-            setInterval(this.incrementYear, 200);
-        }
-    }
-    */
-
     render() {
         const bWindowAutoOpen = this.props.windowAutoOpen && ((this.props.birthYear-5) <= this.props.year && (this.props.birthYear + 5) >= this.props.year) ? true : false;
         const dWindowAutoOpen = this.props.windowAutoOpen && ((this.props.deathYear-5) <= this.props.year && (this.props.deathYear + 5) >= this.props.year) ? true : false;
@@ -212,7 +189,7 @@ class StaticMarkers extends Component {
                 <Polyline
                     visible={this.props.visible}
                     path={[{ lat: this.props.ancestor.blat, lng: this.props.ancestor.blng },{ lat: this.props.ancestor.dlat, lng: this.props.ancestor.dlng }]}
-                    defaultOptions={{ disableAutoPan: true }, {strokeOpacity: 0.3, strokeWeight: 3}}
+                    defaultOptions={{ disableAutoPan: true }, {strokeOpacity: 0.3, strokeWeight: 2}}
                 />
             </>
         } else if (this.props.birthPins && (this.props.ancestor.BirthLocation !== '') && this.props.deathPins && (this.props.ancestor.DeathLocation !== '')) {

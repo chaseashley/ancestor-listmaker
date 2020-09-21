@@ -61,11 +61,11 @@ class MapOverlayItems extends React.Component {
             timeSeries: false,
             animated: false,
             markerType: 'static',
-            windowAutoOpen: true,
-            birthPins: true,
-            deathPins: true,
-            lines: true,
-            optionsOpen: false,
+            windowAutoOpen: false,
+            birthPins: false,
+            deathPins: false,
+            lines: false,
+            optionsOpen: true,
             sliderMin: null,
             sliderMax: null,
         }
@@ -161,7 +161,7 @@ class MapOverlayItems extends React.Component {
                     <svg className="button" viewBox="0 0 60 60" onClick={this.onOptionsOpenCloseClick}>
                     <polygon points="0,40 30,20 60,40" />
                     </svg>
-                    <span className={styles.tooltiptext}>Collapse panel</span>
+                    <span className={styles.tooltiptext}>Close panel</span>
                 </div></div>
         } else {
             optionsOpenCloseButton =
@@ -170,46 +170,46 @@ class MapOverlayItems extends React.Component {
                     <svg className="button" viewBox="0 0 60 60" onClick={this.onOptionsOpenCloseClick}>
                         <polygon points="0,20 30,40 60,20" />
                     </svg>
-                    <span className={styles.tooltiptext}>Expand panel</span>
+                    <span className={styles.tooltiptext}>Display options</span>
                 </div></div>
         }
 
-        const allOrTimeSeries = 
-            <div>
-                <label>
-                    <input
-                        type="radio"
-                        name="allOrTimeSeries"
-                        checked={!this.state.timeSeries}
-                        onChange={this.onAllOrTimeSeriesClick}
-                    />
-                    Show all ancestors at once
-                </label>
-                <label>
-                    <input
-                        type="radio"
-                        name="allOrTimeSeries"
-                        checked={this.state.timeSeries}
-                        onChange={this.onAllOrTimeSeriesClick}
-                    />
-                    Show ancestors by time line
-                </label>
-            </div>
+        const allAncestors = 
+            <label className={styles.displayOptions}>
+                <input
+                    type="radio"
+                    name="allOrTimeSeries"
+                    checked={!this.state.timeSeries}
+                    onChange={this.onAllOrTimeSeriesClick}
+                />
+                Show all ancestors at once
+            </label>
+
+        const timeSeriesAncestors =
+            <label className={styles.displayOptions}>
+                <input
+                    type="radio"
+                    name="allOrTimeSeries"
+                    checked={this.state.timeSeries}
+                    onChange={this.onAllOrTimeSeriesClick}
+                />
+                Show ancestors by time line
+            </label>
         
         const windowAutoOpen = 
-            <div>
+            <div className={styles.displayOptions}>
                 <input type="checkbox" name="windowAutoOpenCheckbox" checked={this.state.windowAutoOpen} onChange={(e) => this.setState({windowAutoOpen: e.target.checked})} disabled={!this.state.timeSeries}/>
-                <label for="windowAutoOpenCheckbox">Automatically show birth/death information when event occurs</label>
+                <label for="windowAutoOpenCheckbox">Show birth/death information when event occurs</label>
             </div>
 
         const birthPins = 
-            <div>
+            <div className={styles.displayOptions}>
                 <input type="checkbox" name="birthPins" checked={this.state.birthPins} onChange={(e) => this.setState({birthPins: e.target.checked})} disabled={this.state.markerType==='Moving'}/>
                 <label for="birthPins">Show birth locations</label>
             </div>
 
         const deathPins = 
-            <div>
+            <div className={styles.displayOptions}>
                 <input type="checkbox" name="deathPins" checked={this.state.deathPins} onChange={(e) => this.setState({deathPins: e.target.checked})} disabled={this.state.markerType==='Moving'}/>
                 <label for="birthPins">Show death locations</label>
             </div>
@@ -223,11 +223,22 @@ class MapOverlayItems extends React.Component {
         let optionsBox;
         if (this.state.optionsOpen) {
             optionsBox = <div className={styles.optionsOpen}>
-                {allOrTimeSeries}
-                {birthPins}
-                {deathPins}
-                {lines}
-                {windowAutoOpen}
+                <table className={styles.optionsTable}>
+                    <tr>
+                        <td className={styles.bottomBorder}>{allAncestors}</td>
+                        <td className={styles.bottomBorder}>{timeSeriesAncestors}</td>
+                    </tr>
+                    <tr>
+                        <td>{birthPins}</td>
+                        <td>{deathPins}</td>
+                    </tr>
+                    <tr>
+                        <td colSpan='2' className={styles.bottomBorder}>{lines}</td>
+                    </tr>
+                    <tr>
+                        <td colSpan='2'>{windowAutoOpen}</td>
+                    </tr>
+                </table>
                 {optionsOpenCloseButton}
             </div>
         } else {

@@ -2,26 +2,33 @@
     position: absolute;
     top: 0;
     left: 0;
-    height: 400px;
-    width: 600px;
+    height: 250px;
+    width: 525px;
     background: white;
     transition: left .1s, width .1s, height .1s;
-    padding: 20px;
 }
 
-/*
-.allOrTimeSeries {
-    position: absolute;
-    margin: 20px;
-    width: 400;
-    height: 300;
+.optionsTable {
+    border-collapse: collapse;
+    margin-left: 30px;
+    margin-top: 30px;
 }
-*/
+
+.bottomBorder {
+    border-bottom: 1px solid rgb(189, 189, 189);
+    padding-bottom: 20px;
+    padding-right: 10px
+}
+
+.displayOptions {
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
 
 .optionsClosed {
     position: absolute;
     top: 0;
-    left: 275px;
+    left: 235px;
     height: 12px;
     width: 50px;
     background: white;
@@ -30,8 +37,8 @@
 
 .optionsCloseButton {
     position: absolute;
-    top: 298px;
-    left: 295px;
+    top: -12px;
+    left: 260px;
     width: 15px;
     height: 15px;
     margin: 0;
@@ -44,6 +51,10 @@
     width: 15px;
     height: 15px;
     margin: 0;
+}
+
+input:disabled+label {
+    color:#aaa;
 }
 
 .wrapperStyle {
@@ -74,11 +85,15 @@
   /* Tooltip text */
   .tooltip .tooltiptext {
     visibility: hidden;
-    width: 100px;
+    white-space: nowrap;
+    width: auto;
     background-color: black;
     color: #fff;
     text-align: center;
-    padding: 2px 0;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    padding-left: 7px;
+    padding-right: 7px;
     border-radius: 6px;
    
     /* Position the tooltip text - see examples below! */
@@ -96,5 +111,5 @@
     width: 100px;
     bottom: 100%;
     left: 50%;
-    margin-left: -50px; /* Use half of the width (120/2 = 60), to center the tooltip */
+    margin-left: -60px;
   }
