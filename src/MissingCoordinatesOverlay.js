@@ -24,6 +24,7 @@ class MissingCoordinatesOverlay extends React.Component {
         if (this.props.markerCoordinates !== null) {
             missingCoordinatesOverlay =
                 <div className={styles.coordinatesSearchBox}>
+                    {this.props.numberMissing} remaining locations fields with missing coordinates.
                     <table>
                         <tr><td>{this.props.location}</td><td>{this.props.name}</td><td>{`${this.props.birthdeath} Place`}</td><td>{Number(this.state.markerCoordinates.lat.toFixed(6))}, {Number(this.state.markerCoordinates.lng.toFixed(6))}</td><td><button onClick={() => this.props.onClickCoordinatesSubmit(this.state.markerCoordinates)}>Submit</button></td></tr>
                     </table>

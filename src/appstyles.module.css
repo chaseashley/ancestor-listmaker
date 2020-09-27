@@ -88,15 +88,21 @@
 }
 
 .idTextBox {
+    word-wrap: break-word;
     padding: 10px;
     width: 400px;
     font-size: 16px;
 }
 
+.inputSecondCol {
+    word-wrap: break-word;
+    width: 400px;
+}
+
 .categoryTextBox {
     font-family: Arial, Helvetica, sans-serif;
     padding: 10px;
-    width: 400px;
+    width: 375px;
     font-size: 16px;
     height: 65px;
     word-wrap: normal;

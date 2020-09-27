@@ -173,7 +173,7 @@ class Map extends React.Component {
                     defaultZoom={12}
                     defaultCenter={this.state.markerCoordinates}
                 >
-                    <MissingCoordinatesOverlay location={this.state.missingCoordinates[0][2]} name={this.state.missingCoordinates[0][0].BirthNamePrivate} birthdeath={this.state.missingCoordinates[0][1]} markerCoordinates={this.state.markerCoordinates} onClickCoordinatesSubmit={this.onClickCoordinatesSubmit}/>
+                    <MissingCoordinatesOverlay location={this.state.missingCoordinates[0][2]} name={this.state.missingCoordinates[0][0].BirthNamePrivate} birthdeath={this.state.missingCoordinates[0][1]} markerCoordinates={this.state.markerCoordinates} numberMissing={this.state.missingCoordinates.length} onClickCoordinatesSubmit={this.onClickCoordinatesSubmit}/>
                 </GoogleMap>
             ));
         } else {

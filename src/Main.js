@@ -550,17 +550,17 @@ class Main extends React.Component {
             <tbody>
               <tr className={styles.topdiv}>
                 <td className={styles.label}>Wikitree ID of Descendant:</td>
-                <td><input className={styles.idTextBox} type="text" name="descendant" value={this.state.descendant} onChange={(e) => this.setState({descendant: e.target.value})} placeholder="e.g., Ashley-1950"/></td>
+                <td className={styles.inputSecondCol}><input className={styles.idTextBox} type="text" name="descendant" value={this.state.descendant} onChange={(e) => this.setState({descendant: e.target.value})} placeholder="e.g., Ashley-1950"/></td>
                 <td></td>
               </tr>
               <tr>
                 <td className={styles.label}>Number of ancestor generations back:</td>
-                <td><Dropdown value={String(this.state.generations ? String(this.state.generations) : 'Select a number from 1-20')} options={this.state.generationOptions} onChange={(option) => this.setState({generations: Number(option.value)})} placeholder="Select a number from 1-20" width="50"/></td>
+                <td className={styles.inputSecondCol}><Dropdown value={String(this.state.generations ? String(this.state.generations) : 'Select a number from 1-20')} options={this.state.generationOptions} onChange={(option) => this.setState({generations: Number(option.value)})} placeholder="Select a number from 1-20" width="20"/></td>
                 <td></td>
               </tr>
               <tr className={styles.categoryTr}>
                 <td className={styles.label}>List type/criteria:</td>
-                <td><Dropdown value={this.state.category} options={this.state.categoryOptions} onChange={(option) => this.setState({category: option.value})} placeholder="Select list type/criteria"/></td>
+                <td className={styles.inputSecondCol}><Dropdown value={this.state.category} options={this.state.categoryOptions} onChange={(option) => this.setState({category: option.value})} placeholder="Select list type/criteria"/></td>
                 <td>{locationTextBox}{categoryTextBox}</td> 
               </tr>
               <tr>
@@ -572,7 +572,7 @@ class Main extends React.Component {
               </tr>
               <tr>
                 <td></td>
-                <td colSpan='2' ><input type="checkbox" name="multiplesCheckbox" checked={this.state.multiples} onChange={(e) => this.setState({multiples: e.target.checked})}/>
+                <td colSpan='2'><input type="checkbox" name="multiplesCheckbox" checked={this.state.multiples} onChange={(e) => this.setState({multiples: e.target.checked})}/>
                   <label for="multipleCheckbox">Show number of lines to same ancestor (if multiple lines of descent)</label>
                 </td> 
               </tr>
