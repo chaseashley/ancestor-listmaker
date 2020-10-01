@@ -18,6 +18,7 @@ class Map extends React.Component {
 
     constructor(props) {
         super(props);
+        this.addToMissingCoordinates = this.addToMissingCoordinates.bind(this);
         this.onClickCoordinatesSubmit = this.onClickCoordinatesSubmit.bind(this);
         this.geocodeLocation = this.geocodeLocation.bind(this);
         this.centerMap = this.centerMap.bind(this);
@@ -47,13 +48,32 @@ class Map extends React.Component {
     }
 
     async onClickCoordinatesSubmit(coordinates) {
-        let missingCoordinates = this.addCoordinatesToAncestors(this.state.missingCoordinates[0][2], coordinates);
+        let missingCoordinates = this.addCoordinatesToAncestors(this.state.missingCoordinates[0][0], coordinates);
         if (missingCoordinates.length > 0) {
-            const newCoordinates = await this.geocodeLocation(missingCoordinates[0][2]);
+            const newCoordinates = await this.geocodeLocation(missingCoordinates[0][0]);
             this.setState({markerCoordinates: newCoordinates, missingCoordinates: missingCoordinates});
         } else {
             this.setState({coordinatesLoaded: true});
         }
+    }
+
+    addToMissingCoordinates(missingCoordinates, location, ancestorName, birthDeath) {
+        if (missingCoordinates.length === 0) {
+            missingCoordinates.push([location,[[ancestorName,birthDeath]]]);
+        } else {
+            let matchFound = false;
+            for (let i=0; i<missingCoordinates.length; i++) {
+                if (missingCoordinates[i][0] === location) {
+                    missingCoordinates[i][1].push([ancestorName,birthDeath]);
+                    matchFound = true;
+                    break;
+                }
+            }
+            if (matchFound === false) {
+                missingCoordinates.push([location,[[ancestorName,birthDeath]]]);
+            }
+        }
+        return missingCoordinates;
     }
 
     addCoordinatesToAncestors(location, coordinates) {
@@ -64,7 +84,7 @@ class Map extends React.Component {
                     ancestor['blat'] = coordinates.lat;
                     ancestor['blng'] = coordinates.lng;
                 } else if (ancestor.blat === undefined) {
-                    missingCoordinates.push([ancestor,'Birth', ancestor.BirthLocation]);
+                    missingCoordinates = this.addToMissingCoordinates(missingCoordinates, ancestor.BirthLocation, ancestor.BirthNamePrivate, 'Birth');
                 }
             }
             if (ancestor.DeathLocation !== '') {
@@ -72,7 +92,7 @@ class Map extends React.Component {
                     ancestor['dlat'] = coordinates.lat;
                     ancestor['dlng'] = coordinates.lng;
                 } else if (ancestor.dlat === undefined) {
-                    missingCoordinates.push([ancestor,'Death', ancestor.DeathLocation]);
+                    missingCoordinates = this.addToMissingCoordinates(missingCoordinates, ancestor.DeathLocation, ancestor.BirthNamePrivate, 'Death');
                 }
             }
         });
@@ -131,13 +151,12 @@ class Map extends React.Component {
                 deathLocationIndexes.push(i);
             }
         }
-
         await Promise.all(birthCoordinatesGets)
             .then(responses => {
                 for (let i=0; i<responses.length; i++) {
                     let j = birthLocationIndexes[i];
                     if (responses[i] === undefined) {
-                        missingCoordinates.push([this.state.ancestors[j],'Birth',this.state.ancestors[j].BirthLocation]);
+                        missingCoordinates = this.addToMissingCoordinates(missingCoordinates, this.state.ancestors[j].BirthLocation, this.state.ancestors[j].BirthNamePrivate, 'Birth');
                     } else {
                         let birthCoordinates = responses[i].data.coordinates;
                         let blatString = birthCoordinates.substring(0,birthCoordinates.indexOf(','));
@@ -150,13 +169,12 @@ class Map extends React.Component {
             .catch(error => {
                 console.log(error);
             });
-
         await Promise.all(deathCoordinatesGets)
                 .then(responses => {
                 for (let i=0; i<responses.length; i++) {
                     let j = deathLocationIndexes[i];
                     if (responses[i] === undefined) {
-                        missingCoordinates.push([this.state.ancestors[j],'Death',this.state.ancestors[j].DeathLocation]);
+                        missingCoordinates = this.addToMissingCoordinates(missingCoordinates, this.state.ancestors[j].DeathLocation, this.state.ancestors[j].BirthNamePrivate, 'Death');
                     } else {
                         let deathCoordinates = responses[i].data.coordinates;
                         let dlatString = deathCoordinates.substring(0,deathCoordinates.indexOf(','));
@@ -172,49 +190,10 @@ class Map extends React.Component {
         if (missingCoordinates.length === 0) {
             this.setState({coordinatesLoaded: true});
         } else {
-            const coordinates = await this.geocodeLocation(missingCoordinates[0][2]);
+            const coordinates = await this.geocodeLocation(missingCoordinates[0][0]);
             this.setState({missingCoordinates: missingCoordinates, markerCoordinates: coordinates});
         }
     }
-
-    /*
-    async checkAddressesForCoordinates() {
-        let missingCoordinates = [];
-        const addressDBText = await(fetch('/coordinates.txt').then(x => x.text()));
-        this.state.ancestors.forEach(ancestor => {
-            if (ancestor.BirthLocation !== '') {
-                let birthLocation = this.standardizeAddress(ancestor.BirthLocation);
-                let coordinatesBirthString = this.getCoordinatesFromAddressDBText(addressDBText, birthLocation);
-                if (coordinatesBirthString === '') {
-                    missingCoordinates.push([ancestor,'Birth', ancestor.BirthLocation]);
-                } else {
-                    let blatString = coordinatesBirthString.substring(0,coordinatesBirthString.indexOf(','));
-                    ancestor['blat'] = Number(blatString);
-                    let blngString = coordinatesBirthString.substring(coordinatesBirthString.indexOf(',')+1);
-                    ancestor['blng'] = Number(blngString);
-                }
-            }
-            if (ancestor.DeathLocation !== '') {
-                let deathLocation = this.standardizeAddress(ancestor.DeathLocation)
-                let coordinatesDeathString = this.getCoordinatesFromAddressDBText(addressDBText, deathLocation);
-                if (coordinatesDeathString === '') {
-                    missingCoordinates.push([ancestor,'Death',ancestor.DeathLocation]);
-                } else {
-                    let dlatString = coordinatesDeathString.substring(0,coordinatesDeathString.indexOf(','));
-                    ancestor['dlat'] = Number(dlatString);
-                    let dlngString = coordinatesDeathString.substring(coordinatesDeathString.indexOf(',')+1);
-                    ancestor['dlng'] = Number(dlngString);
-                }
-            }
-        });
-        if (missingCoordinates.length === 0) {
-            this.setState({coordinatesLoaded: true});
-        } else {
-            const coordinates = await this.geocodeLocation(missingCoordinates[0][2]);
-            this.setState({missingCoordinates: missingCoordinates, markerCoordinates: coordinates});
-        }
-    }
-    */
 
     async componentDidMount() {
         this.checkAddressesForCoordinates();
@@ -238,10 +217,10 @@ class Map extends React.Component {
             MapWithOverlay = withScriptjs(withGoogleMap(props =>
                 <GoogleMap
                     options={{fullscreenControl: false, mapTypeControl: false, streetViewControl: false, styles: [ { featureType: 'poi', stylers: [{ visibility: 'off' }] } ] }}
-                    defaultZoom={12}
+                    defaultZoom={10}
                     defaultCenter={this.state.markerCoordinates}
                 >
-                    <MissingCoordinatesOverlay location={this.state.missingCoordinates[0][2]} name={this.state.missingCoordinates[0][0].BirthNamePrivate} birthdeath={this.state.missingCoordinates[0][1]} markerCoordinates={this.state.markerCoordinates} numberMissing={this.state.missingCoordinates.length} onClickCoordinatesSubmit={this.onClickCoordinatesSubmit}/>
+                    <MissingCoordinatesOverlay location={this.state.missingCoordinates[0][0]} occurences={this.state.missingCoordinates[0][1]} markerCoordinates={this.state.markerCoordinates} numberMissing={this.state.missingCoordinates.length} onClickCoordinatesSubmit={this.onClickCoordinatesSubmit}/>
                 </GoogleMap>
             ));
         } else {
