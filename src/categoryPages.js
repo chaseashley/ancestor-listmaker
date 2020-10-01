@@ -31,7 +31,8 @@ async function getCategoryArefs(category) {
         'New England Witches': 'https://www.wikitree.com/wiki/Category:Accused_Witches_of_New_England',
         'New Netherland Settler': 'https://www.wikitree.com/index.php?title=Special:Whatlinkshere/Template:New_Netherland_Settler&limit=5000&from=0',
         'New Netherland Settler Sticker': 'https://www.wikitree.com/index.php?title=Special:Whatlinkshere/Template:New_Netherland_Settler_Sticker&limit=5000&from=0',
-        'Notables': 'https://www.wikitree.com/index.php?title=Special:Whatlinkshere/Template:Notables_Sticker&limit=5000&from=0',
+        'Notables Project': 'https://www.wikitree.com/index.php?title=Special:Whatlinkshere/Template:Notables&limit=5000&from=0',
+        'Notables Sticker': 'https://www.wikitree.com/index.php?title=Special:Whatlinkshere/Template:Notables_Sticker&limit=5000&from=0',
         'NSDAR': 'https://www.wikitree.com/wiki/Category:NSDAR_Patriot_Ancestors',
         'NSSAR': 'https://www.wikitree.com/wiki/Category:NSSAR_Patriot_Ancestors',
         'Palatine Migration': 'https://www.wikitree.com/index.php?title=Special:Whatlinkshere/Template:Palatine_Migration&limit=5000&from=0',
@@ -165,6 +166,10 @@ export async function getAllRelatedCategoryArefs(category) {
         const newNetherlandSettlerArefs = await getCategoryArefs('New Netherland Settler');
         const newNetherlandSettlerStickerArefs = await getCategoryArefs('New Netherland Settler Sticker');
         categoryArefs = newNetherlandSettlerArefs + newNetherlandSettlerStickerArefs;
+    } else if (category === 'Notables') {
+        const notablesProjectArefs = await getCategoryArefs('Notables Project');
+        const notablesStickerArefs = await getCategoryArefs('Notables Sticker');
+        categoryArefs = notablesProjectArefs + notablesStickerArefs;    
     } else {
         categoryArefs = await getCategoryArefs(category);
     }

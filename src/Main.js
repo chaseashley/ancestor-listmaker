@@ -96,7 +96,7 @@ class Main extends React.Component {
         {value:'Mexican-American War', label: 'Mexican-American War - Ancestors who participated in the Mexican-American War, as indicated by the presence of the Mexican-American War sticker or project template on their profile'},
         {value:'Native Americans', label: 'Native Americans - Ancestors who were Native Americans, as indicated by the presence of the Native American sticker or project template on their profile'},
         {value:'New Netherland Settlers', label: 'New Netherland Settlers - Ancestors who lived in New Netherland before 1675, as indicated by the presence of the New Netherland Settler sticker or project template on their profile'},
-        {value:'Notables', label: 'Notables - Ancestors who have the Notables sticker on their profile'},
+        {value:'Notables', label: 'Notables - Ancestors who have the Notables sticker or project template on their profile'},
         {value:'Orphans', label: 'Orphans - Ancestors whose profiles do not currently have a Profile Manager'},
         {value:'Palatine Migration', label: 'Palatine Migration - Ancestors who immigrated to America from a German-speaking area of Europe in 1700-1776, as indicated by the presence of the Palatine Migration template on their profile'},
         {value:'Puritan Great Migration', label: 'Puritan Great Migration - Ancestors who immigrated to New England in 1621-1640, as indicated by the presence of the Puritan Great Migration template on their profile'},
