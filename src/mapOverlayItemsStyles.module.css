@@ -3,7 +3,7 @@
     top: 0;
     left: 0;
     height: 250px;
-    width: 525px;
+    width: 550px;
     background: white;
     transition: left .1s, width .1s, height .1s;
 }
@@ -58,22 +58,11 @@ input:disabled+label {
 }
 
 .wrapperStyle {
-    left: 60px;
+    left: 100px;
     width: 85%;
     margin: 0;
-    padding: 2em;
     position: fixed;
-    bottom: 0;
-}
-
-.pauseplayDivStyle {
-    left: 10px;
-    width: 20px;
-    height: 20px;
-    margin: 0;
-    padding: 2em;
-    position: fixed;
-    bottom: -5;
+    bottom: 30px;
 }
 
 .tooltip {

@@ -13,4 +13,45 @@
 
 .mapDiv {
     position: relative;
+    width: 100%;
+    height: 600px;
 }
+
+.loadingDiv {
+    position: relative;
+    top: 200px;
+    left: 35%;
+    width: 370px;
+    height: 80px;
+    background-color: rgb(243, 241, 234);
+    border:1px solid black;
+}
+
+.statusElipsis {
+    position:relative;
+    top: 30px;
+    left: 60px;
+}
+
+.statusElipsis:after {
+    overflow: hidden;
+    display: inline-block;
+    vertical-align: bottom;
+    -webkit-animation: ellipsis steps(4,end) 1500ms infinite;      
+    animation: ellipsis steps(4,end) 1500ms infinite;
+    white-space: nowrap;
+    content: ' . . . .';
+    width: 0px;
+  }
+  
+  @keyframes ellipsis {
+    to {
+      width: 30px;    
+    }
+  }
+  
+  @-webkit-keyframes ellipsis {
+    to {
+      width: 30px;    
+    }
+  }

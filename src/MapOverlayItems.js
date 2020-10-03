@@ -34,19 +34,42 @@ const activeDotStyle = {
 ///////
 
 const pauseplayDivStyle = {
-    left: "10px",
+    left: "20px",
     width: "20px",
     height: "20px",
     margin: 0,
-    padding: "2em",
     position: "fixed",
-    bottom: -5
+    bottom: "25px"
 }
+
+const speedWrapperStyle = {
+    left: "52px",
+    width: "10px",
+    height: "40px",
+    margin: 0,
+    position: "fixed",
+    bottom: "15px"
+}
+
+const speedTrackStyle = [{
+    backgroundColor: "#6d6ed1",
+    borderRadius: 0,
+    height: "0.5em"
+}];
+
+const speedHandleStyle = {
+    border: "solid 5px #4f4f4f",
+    height: "0.2em",
+    left: "2px",
+    width: "1.25em",
+    marginTop: "-9px"
+};
   
 class MapOverlayItems extends React.Component {
 
     constructor(props) {
         super(props);
+        this.onAfterSpeedChangeHandler = this.onAfterSpeedChangeHandler.bind(this);
         this.onAllOrTimeSeriesClick = this.onAllOrTimeSeriesClick.bind(this);
         this.findEarliestBirthYear = this.findEarliestBirthYear.bind(this);
         this.findLatestDeathYear = this.findLatestDeathYear.bind(this);
@@ -62,12 +85,14 @@ class MapOverlayItems extends React.Component {
             animated: false,
             markerType: 'static',
             windowAutoOpen: false,
-            birthPins: false,
+            birthPins: true,
             deathPins: false,
             lines: false,
             optionsOpen: true,
             sliderMin: null,
             sliderMax: null,
+            sliderInterval: null,
+            sliderSpeed: 1,
         }
     }
 
@@ -77,9 +102,16 @@ class MapOverlayItems extends React.Component {
 
     componentDidMount () {
         const earliestBirthYear = this.findEarliestBirthYear();
-        this.setState({sliderMin: (Math.floor(earliestBirthYear/10))*10});
         const latestDeathYear = this.findLatestDeathYear();
-        this.setState({sliderMax: ((Math.floor(latestDeathYear/10))+1)*10});
+        let sliderInterval = 10;
+        if ((latestDeathYear - earliestBirthYear) > 1000) {
+            sliderInterval = 100;
+        } else if ((latestDeathYear - earliestBirthYear) > 250) {
+            sliderInterval = 25;
+        }
+        let sliderMin = (Math.floor(earliestBirthYear/sliderInterval))*sliderInterval;
+        let sliderMax = ((Math.floor(latestDeathYear/sliderInterval))+1)*sliderInterval;
+        this.setState({sliderMin: sliderMin, sliderMax: sliderMax, sliderInterval: sliderInterval});
     }
 
     findEarliestBirthYear() {
@@ -112,7 +144,7 @@ class MapOverlayItems extends React.Component {
 
     getMarks() {
         let marks = {};
-        for (let i = this.state.sliderMin; i <= this.state.sliderMax; i=i+10) {
+        for (let i = this.state.sliderMin; i <= this.state.sliderMax; i=i+this.state.sliderInterval) {
             marks[i] = i;
         }
         return marks;
@@ -122,12 +154,20 @@ class MapOverlayItems extends React.Component {
         this.setState({year: Math.floor(value)});
     }
 
+    onAfterSpeedChangeHandler(value) {
+        if (value >= 5) {
+            this.setState({sliderSpeed: (value-5) + 1});
+        } else {
+            this.setState({sliderSpeed: value/4});
+        }
+    }
+
     incrementYear() {
         if (this.state.year >= this.state.sliderMax) {
             clearInterval(this.state.intervalId);
             this.setState({animated: false});
         }
-        this.setState({year: this.state.year+0.05})
+        this.setState({year: this.state.year+(this.state.sliderSpeed * 0.1)})
     }
 
     onPausePlayClick() {
@@ -193,7 +233,7 @@ class MapOverlayItems extends React.Component {
                     checked={this.state.timeSeries}
                     onChange={this.onAllOrTimeSeriesClick}
                 />
-                Show ancestors by time line
+                Show ancestors living over time
             </label>
         
         const windowAutoOpen = 
@@ -297,6 +337,27 @@ class MapOverlayItems extends React.Component {
                 </div>
         }
 
+        let speedSlider;
+        if (!this.state.timeSeries) {
+            speedSlider = <></>;
+        } else {
+            speedSlider =
+                <div style={speedWrapperStyle}>
+                    <Slider
+                        range={false}
+                        vertical={true}
+                        min={1}
+                        max={9}
+                        defaultValue={5}
+                        step={0.01}
+                        handleStyle={speedHandleStyle}
+                        trackStyle={speedTrackStyle}
+                        activeDotStyle={activeDotStyle}
+                        onAfterChange={value => this.onAfterSpeedChangeHandler(value)}
+                    />
+                </div>
+        }
+
         let slider;
         if (!this.state.timeSeries) {
             slider = <></>;
@@ -304,6 +365,7 @@ class MapOverlayItems extends React.Component {
             slider = 
                 <div className={styles.wrapperStyle}>
                     <Slider
+                        range={false}
                         min={this.state.sliderMin}
                         max={this.state.sliderMax}
                         step={0.01}
@@ -320,6 +382,7 @@ class MapOverlayItems extends React.Component {
             slider = 
                 <div className={styles.wrapperStyle}>
                     <Slider
+                        range={false}
                         min={this.state.sliderMin}
                         max={this.state.sliderMax}
                         step={0.01}
@@ -339,6 +402,7 @@ class MapOverlayItems extends React.Component {
                 {optionsBox}
                 {markers}
                 {pauseplay}
+                {speedSlider}
                 {slider}
             </div> 
         )

@@ -3,7 +3,15 @@
     position: absolute;
     top: 0;
     left: 0;
-    height: 70px;
+    height: 160px;
     width: 100%;
-    background: white;
+    background-color: white;
+}
+
+.coordinatesSearchTable {
+    margin: 20px 25px 25px 30px;
+}
+
+.locationRowCell {
+    padding-top: 10px;
 }

@@ -25,8 +25,6 @@ class Main extends React.Component {
     this.onClickPODSort = this.onClickPODSort.bind(this);
     this.onClickAhnenSort = this.onClickAhnenSort.bind(this);
     this.getDownloadData = this.getDownloadData.bind(this);
-    this.onClickPrematureDownload = this.onClickPrematureDownload.bind(this);
-    this.onClickPrematureMap = this.onClickPrematureMap.bind(this);
     this.onChangeAhnen = this.onChangeAhnen.bind(this);
     this.state = {
       descendant: '',
@@ -394,26 +392,6 @@ class Main extends React.Component {
     return downloadData;
   }
 
-  onClickPrematureDownload() {
-    if (this.state.ancestors === null) {
-      alert('A list cannot be downloaded until it has first been generated');
-    } else if (this.state.processingStatus !== 'Done') {
-      alert('A list cannot be downnloaded until generation of the list has been completed');
-    } else if (this.state.matchingAncestorsList.length === 0) {
-      alert('A list cannot be downloaded unless it contains at least one ancestor');
-    }
-  }
-
-  onClickPrematureMap() {
-    if (this.state.ancestors === null) {
-      alert('A list cannot be mapped until it has first been generated');
-    } else if (this.state.processingStatus !== 'Done') {
-      alert('A list cannot be mapped until generation of the list has been completed');
-    } else if (this.state.matchingAncestorsList.length === 0) {
-      alert('A list cannot be mapped\ unless it contains at least one ancestor');
-    }
-  }
-
   render() {
     let status;
     if (this.state.processingStatus === 'Collecting') {
@@ -460,7 +438,7 @@ class Main extends React.Component {
     if (this.state.processingStatus ==='Done' && this.state.matchingAncestors.length !== 0) {
       mapButton = <Link to={{ pathname: '/Map', ancestors: this.state.matchingAncestors}}><button className={styles.mapButton}>Map List</button></Link>;
     } else {
-      mapButton = <button className={styles.mapButton} onClick={this.onClickPrematureMap}>Map List</button>;
+      mapButton = <button className={styles.mapButton} disabled={true}>Map List</button>;
     }
 
     let downloadButton;
@@ -469,7 +447,7 @@ class Main extends React.Component {
       downloadFileName = `${downloadFileName.replace(/\./g, '')}.csv`;
       downloadButton = <CSVLink data={this.getDownloadData(this.state.matchingAncestors)} filename={downloadFileName}><button className={styles.downloadButton}>Download List</button></CSVLink>;
     } else {
-      downloadButton = <button className={styles.downloadButton} onClick={this.onClickPrematureDownload}>Download List</button>;
+      downloadButton = <button className={styles.downloadButton} disabled={true}>Download List</button>;
     }
 
     let locationTextBox;
