@@ -29,6 +29,14 @@ class StaticMarkers extends Component {
         }
     }
 
+    shouldComponentUpdate(nextProps, nextState) {
+        if (this.props.animated && (nextProps.visible === this.props.visible)) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
     onBClickHandler() {
         if (this.state.mouseOver) { //this will be true if click occurs while window is open due to a mouseOver
             this.setState({dzIndex: Math.floor(Date.now()/1000)});
@@ -163,7 +171,7 @@ class StaticMarkers extends Component {
                     icon={`http://maps.google.com/mapfiles/ms/icons/green-dot.png`}
                     defaultOptions={{ disableAutoPan: true }}
                     zIndex={(this.state.bzIndex !== null) ? this.state.bzIndex : 'auto'}
-                    onClick={this.onBClickHandler}
+                    onDblClick={this.onBClickHandler}
                     onMouseOver={this.onBMouseOverHandler}
                     onMouseOut={this.onMouseOutHandler}
                 >
@@ -177,7 +185,7 @@ class StaticMarkers extends Component {
                     icon={`http://maps.google.com/mapfiles/ms/icons/red-dot.png`}
                     defaultOptions={{ disableAutoPan: true }}
                     zIndex={(this.state.dzIndex !== null) ? this.state.dzIndex : 'auto'}
-                    onClick={this.onDClickHandler}
+                    onDblClick={this.onDClickHandler}
                     onMouseOver={this.onDMouseOverHandler}
                     onMouseOut={this.onMouseOutHandler}
                     onCloseClck={this.onCloseClickHandler}
@@ -201,7 +209,7 @@ class StaticMarkers extends Component {
                     icon={`http://maps.google.com/mapfiles/ms/icons/green-dot.png`}
                     defaultOptions={{ disableAutoPan: true }}
                     zIndex={(this.state.bzIndex !== null) ? this.state.bzIndex : 'auto'}
-                    onClick={this.onBClickHandler}
+                    onDblClick={this.onBClickHandler}
                     onMouseOver={this.onBMouseOverHandler}
                     onMouseOut={this.onMouseOutHandler}
                 >
@@ -215,7 +223,7 @@ class StaticMarkers extends Component {
                     icon={`http://maps.google.com/mapfiles/ms/icons/red-dot.png`}
                     defaultOptions={{ disableAutoPan: true }}
                     zIndex={(this.state.dzIndex !== null) ? this.state.dzIndex : 'auto'}
-                    onClick={this.onDClickHandler}
+                    onDblClick={this.onDClickHandler}
                     onMouseOver={this.onDMouseOverHandler}
                     onMouseOut={this.onMouseOutHandler}
                     onCloseClck={this.onCloseClickHandler}
@@ -234,7 +242,7 @@ class StaticMarkers extends Component {
                     icon={`http://maps.google.com/mapfiles/ms/icons/green-dot.png`}
                     defaultOptions={{ disableAutoPan: true }}
                     zIndex={(this.state.bzIndex !== null) ? this.state.bzIndex : 'auto'}
-                    onClick={this.onBClickHandler}
+                    onDblClick={this.onBClickHandler}
                     onMouseOver={this.onBMouseOverHandler}
                     onMouseOut={this.onMouseOutHandler}
                 >
@@ -252,7 +260,7 @@ class StaticMarkers extends Component {
                     icon={`http://maps.google.com/mapfiles/ms/icons/red-dot.png`}
                     defaultOptions={{ disableAutoPan: true }}
                     zIndex={(this.state.dzIndex !== null) ? this.state.dzIndex : 'auto'}
-                    onClick={this.onDClickHandler}
+                    onDblClick={this.onDClickHandler}
                     onMouseOver={this.onDMouseOverHandler}
                     onMouseOut={this.onMouseOutHandler}
                     onCloseClck={this.onCloseClickHandler}

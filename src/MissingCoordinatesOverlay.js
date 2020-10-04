@@ -32,6 +32,7 @@ class MissingCoordinatesOverlay extends React.Component {
                 </div>
             marker =
                 <Marker
+                    icon={`http://maps.google.com/mapfiles/ms/icons/blue-dot.png`}
                     position={{lat: this.state.markerCoordinates.lat, lng: this.state.markerCoordinates.lng}}
                     draggable={true}
                     onDragEnd={this.onDragEndHandler}
@@ -47,6 +48,7 @@ class MissingCoordinatesOverlay extends React.Component {
             </div>
             marker =
                 <Marker
+                    icon={`http://maps.google.com/mapfiles/ms/icons/blue-dot.png`}
                     position={{lat: this.state.markerCoordinates.lat, lng: this.state.markerCoordinates.lng}}
                     draggable={true}
                     onDragEnd={this.onDragEndHandler}

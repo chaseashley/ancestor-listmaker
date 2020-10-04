@@ -27,10 +27,6 @@ const trackStyle = [{
     height: "0.5em"
 }];
   
-const activeDotStyle = {
-    backgroundColor: "#FFCA3E",
-    width: "2px"
-};
 ///////
 
 const pauseplayDivStyle = {
@@ -290,7 +286,7 @@ class MapOverlayItems extends React.Component {
         if (this.state.markerType === 'static') {
             markers = this.props.ancestors.map((ancestor, index) => {
                 return <StaticMarkers key={index} id={index}
-                            year={this.state.year}
+                            //year={this.state.year}
                             ancestor={ancestor}
                             birthYear={Number(ancestor.BirthDate.substring(0,4))}
                             deathYear={Number(ancestor.DeathDate.substring(0,4))}
@@ -351,8 +347,8 @@ class MapOverlayItems extends React.Component {
                         defaultValue={5}
                         step={0.01}
                         handleStyle={speedHandleStyle}
+                        railStyle={{backgroundColor: "#6d6ed1"}}
                         trackStyle={speedTrackStyle}
-                        activeDotStyle={activeDotStyle}
                         onAfterChange={value => this.onAfterSpeedChangeHandler(value)}
                     />
                 </div>
@@ -375,7 +371,6 @@ class MapOverlayItems extends React.Component {
                         dotStyle={dotStyle}
                         handleStyle={handleStyle}
                         trackStyle={trackStyle}
-                        activeDotStyle={activeDotStyle}
                     />
                 </div>
         } else {
@@ -391,7 +386,6 @@ class MapOverlayItems extends React.Component {
                         dotStyle={dotStyle}
                         handleStyle={handleStyle}
                         trackStyle={trackStyle}
-                        activeDotStyle={activeDotStyle}
                         onAfterChange={value => this.onAfterChangeHandler(value)}
                     />
                 </div>

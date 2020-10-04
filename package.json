@@ -10,6 +10,7 @@
     "dexie": "^3.0.1",
     "google-maps-react": "^2.0.6",
     "multiselect-react-dropdown": "^1.5.0",
+    "overlapping-marker-spiderfier": "^1.1.4",
     "rc-slider": "^9.3.1",
     "react": "^16.13.1",
     "react-compound-slider": "^2.5.0",
