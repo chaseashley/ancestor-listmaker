@@ -4,6 +4,7 @@ import MovingMarker from './MovingMarker';
 import "rc-slider/assets/index.css";
 import Slider from "rc-slider";
 import styles from './mapOverlayItemsStyles.module.css';
+import { MapConstant } from './Map';
 
 ///// slider constants ///////
 const dotStyle = {
@@ -260,6 +261,7 @@ class MapOverlayItems extends React.Component {
         if (this.state.optionsOpen) {
             optionsBox = <div className={styles.optionsOpen}>
                 <table className={styles.optionsTable}>
+                    <tbody>
                     <tr>
                         <td className={styles.bottomBorder}>{allAncestors}</td>
                         <td className={styles.bottomBorder}>{timeSeriesAncestors}</td>
@@ -274,6 +276,7 @@ class MapOverlayItems extends React.Component {
                     <tr>
                         <td colSpan='2'>{windowAutoOpen}</td>
                     </tr>
+                    </tbody>
                 </table>
                 {optionsOpenCloseButton}
             </div>
@@ -286,7 +289,7 @@ class MapOverlayItems extends React.Component {
         if (this.state.markerType === 'static') {
             markers = this.props.ancestors.map((ancestor, index) => {
                 return <StaticMarkers key={index} id={index}
-                            //year={this.state.year}
+                            oms={this.props.oms}
                             ancestor={ancestor}
                             birthYear={Number(ancestor.BirthDate.substring(0,4))}
                             deathYear={Number(ancestor.DeathDate.substring(0,4))}
@@ -296,7 +299,7 @@ class MapOverlayItems extends React.Component {
                             animated={this.state.animated}
                             windowAutoOpen={this.state.windowAutoOpen}
                             visible={(this.state.year === null) ? true : (Number(ancestor.BirthDate.substring(0,4)) <= this.state.year && Number(ancestor.DeathDate.substring(0,4)) >= this.state.year) ? true : false}
-                        />
+                            />
             })
         } else {
             markers = this.props.ancestors.map((ancestor, index) => {

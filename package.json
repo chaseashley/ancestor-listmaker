@@ -5,11 +5,13 @@
   "description": "This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).",
   "main": "index.js",
   "dependencies": {
+    "@react-google-maps/api": "^1.10.1",
     "axios": "^0.19.2",
     "cheerio": "^1.0.0-rc.3",
     "dexie": "^3.0.1",
     "google-maps-react": "^2.0.6",
     "multiselect-react-dropdown": "^1.5.0",
+    "npm-overlapping-marker-spiderfier": "^1.0.3",
     "overlapping-marker-spiderfier": "^1.1.4",
     "rc-slider": "^9.3.1",
     "react": "^16.13.1",

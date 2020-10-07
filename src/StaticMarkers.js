@@ -1,9 +1,5 @@
 import React, { Component } from 'react';
-import {
-    Marker,
-    Polyline,
-    InfoWindow
-} from 'react-google-maps';
+import { Marker, Polyline, InfoWindow } from '@react-google-maps/api';
 
 class StaticMarkers extends Component {
 
@@ -197,7 +193,7 @@ class StaticMarkers extends Component {
                 <Polyline
                     visible={this.props.visible}
                     path={[{ lat: this.props.ancestor.blat, lng: this.props.ancestor.blng },{ lat: this.props.ancestor.dlat, lng: this.props.ancestor.dlng }]}
-                    defaultOptions={{ disableAutoPan: true }, {strokeOpacity: 0.3, strokeWeight: 2}}
+                    options={{ disableAutoPan: true }, {strokeOpacity: 0.3, strokeWeight: 2}}
                 />
             </>
         } else if (this.props.birthPins && (this.props.ancestor.BirthLocation !== '') && this.props.deathPins && (this.props.ancestor.DeathLocation !== '')) {
@@ -245,6 +241,9 @@ class StaticMarkers extends Component {
                     onDblClick={this.onBClickHandler}
                     onMouseOver={this.onBMouseOverHandler}
                     onMouseOut={this.onMouseOutHandler}
+                    onLoad={marker => {
+                        this.props.oms.addMarker(marker);
+                    }}
                 >
                     {this.props.visible && (this.state.bOpen || bWindowAutoOpen) && <InfoWindow onCloseClick={this.onCloseClickHandler} defaultOptions={{ disableAutoPan: true }} zIndex={(this.state.bWindowZIndex !== null) ? this.state.bWindowZIndex : 0}>
                         <div><a href={`https://www.wikitree.com/wiki/${this.props.ancestor.Name}`} target='_blank'>{this.props.ancestor.BirthNamePrivate}</a>, b. {this.props.ancestor.BirthDate}</div>

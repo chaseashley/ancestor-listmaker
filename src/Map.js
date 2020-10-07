@@ -1,15 +1,12 @@
  /* global google */ 
 import React from 'react';
-import {
-    withScriptjs,
-    withGoogleMap,
-    GoogleMap
-} from 'react-google-maps';
+import { GoogleMap, LoadScript } from '@react-google-maps/api';
 import Geocode from "react-geocode";
 import styles from './mapstyles.module.css';
 import MapOverlayItems from './MapOverlayItems';
 import MissingCoordinatesOverlay from './MissingCoordinatesOverlay';
 import { getCoordinates, postCoordinates } from './locationsDBqueries';
+//import OverlappingMarkerSpiderfier from 'overlapping-marker-spiderfier';
 
 const API_KEY='AIzaSyD5VQNhUE4UQlIZbaJo4aHE1pt9zuZFzPw';
 
@@ -30,6 +27,7 @@ class Map extends React.Component {
             missingCoordinates: null,
             markerCoordinates: null,
             initialMarkerCoordinates: null,
+            oms: null,
         }
     }
 
@@ -235,36 +233,42 @@ class Map extends React.Component {
         } else {
             let MapWithOverlay;
             if (this.state.coordinatesLoaded) {
-                MapWithOverlay = withScriptjs(withGoogleMap(props =>
-                    <GoogleMap
-                        options={{fullscreenControl: false, mapTypeControl: false, streetViewControl: false, styles: [ { featureType: 'poi', stylers: [{ visibility: 'off' }] } ] }}
-                        defaultZoom={2}
-                        defaultCenter={{ lat: 20, lng: 0 }}
-                        ref={map => map && this.centerMap(map)}
-                    >
-                        <MapOverlayItems ancestors={this.state.ancestors}/>
-                    </GoogleMap>
-                ));
+                MapWithOverlay = 
+                    <LoadScript googleMapsApiKey={API_KEY}>
+                        <GoogleMap
+                            mapContainerStyle={{ width: '100%', height: '600px'}}
+                            options={{fullscreenControl: false, mapTypeControl: false, streetViewControl: false, styles: [ { featureType: 'poi', stylers: [{ visibility: 'off' }] } ] }}
+                            defaultZoom={2}
+                            defaultCenter={{ lat: 20, lng: 0 }}
+                            onLoad={map => {
+                                this.centerMap(map);
+                                const oms = require(`npm-overlapping-marker-spiderfier/lib/oms.min`)
+                                let thisoms = new oms.OverlappingMarkerSpiderfier(map, {
+                                    keepSpiderfied: true,
+                                    nearbyDistance: 30 //in pixels
+                                });
+                                this.setState({oms: thisoms});
+                            }}
+                        >
+                            <MapOverlayItems oms={this.state.oms} ancestors={this.state.ancestors}/>
+                        </GoogleMap>
+                    </LoadScript>
             } else if (this.state.missingCoordinates !== null) {
-                MapWithOverlay = withScriptjs(withGoogleMap(props =>
-                    <GoogleMap
-                        options={{fullscreenControl: false, mapTypeControl: false, streetViewControl: false, styles: [ { featureType: 'poi', stylers: [{ visibility: 'off' }] } ] }}
-                        defaultZoom={(this.state.markerCoordinates===undefined) ? 2 : 10}
-                        defaultCenter={(this.state.markerCoordinates===undefined) ? { lat: 20, lng: 0 } : this.state.markerCoordinates}
-                    >
-                        <MissingCoordinatesOverlay location={this.state.missingCoordinates[0][0]} ancestorName={this.state.missingCoordinates[0][1]} id={this.state.missingCoordinates[0][2]} birthDeath={this.state.missingCoordinates[0][3]} markerCoordinates={this.state.markerCoordinates} numberMissing={this.state.missingCoordinates.length} onClickCoordinatesSubmit={this.onClickCoordinatesSubmit} onClickCoordinatesSkip={this.onClickCoordinatesSkip}/>
-                    </GoogleMap>
-                ));
+                MapWithOverlay =
+                    <LoadScript googleMapsApiKey={API_KEY}>
+                        <GoogleMap
+                            mapContainerStyle={{ width: '100%', height: '600px'}}
+                            options={{fullscreenControl: false, mapTypeControl: false, streetViewControl: false, styles: [ { featureType: 'poi', stylers: [{ visibility: 'off' }] } ] }}
+                            defaultZoom={(this.state.markerCoordinates===undefined) ? 2 : 10}
+                            defaultCenter={(this.state.markerCoordinates===undefined) ? { lat: 20, lng: 0 } : this.state.markerCoordinates}
+                        >
+                            <MissingCoordinatesOverlay location={this.state.missingCoordinates[0][0]} ancestorName={this.state.missingCoordinates[0][1]} id={this.state.missingCoordinates[0][2]} birthDeath={this.state.missingCoordinates[0][3]} markerCoordinates={this.state.markerCoordinates} numberMissing={this.state.missingCoordinates.length} onClickCoordinatesSubmit={this.onClickCoordinatesSubmit} onClickCoordinatesSkip={this.onClickCoordinatesSkip}/>
+                        </GoogleMap>
+                    </LoadScript>
             }
             mapOrLoading =
                 <div className={styles.mapDiv}>
-                    <MapWithOverlay
-                        //googleMapURL={`https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=geometry,drawing,places"`}
-                        googleMapURL={`https://maps.googleapis.com/maps/api/js?key=${API_KEY}&v=3.exp&libraries=geometry,drawing,places"`}
-                        loadingElement={<div style={{ height: `100%` }} />}
-                        containerElement={<div style={{ height: `600px` }} />}
-                        mapElement={<div style={{ height: `100%` }} />}
-                    />
+                    {MapWithOverlay}
                 </div>
         }
 
