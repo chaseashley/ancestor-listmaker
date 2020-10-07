@@ -1,14 +1,31 @@
  /* global google */ 
 import React from 'react';
-import { GoogleMap, LoadScript } from '@react-google-maps/api';
+import { GoogleMap, LoadScript, useGoogleMap } from '@react-google-maps/api';
 import Geocode from "react-geocode";
 import styles from './mapstyles.module.css';
 import MapOverlayItems from './MapOverlayItems';
 import MissingCoordinatesOverlay from './MissingCoordinatesOverlay';
 import { getCoordinates, postCoordinates } from './locationsDBqueries';
-//import OverlappingMarkerSpiderfier from 'overlapping-marker-spiderfier';
 
 const API_KEY='AIzaSyD5VQNhUE4UQlIZbaJo4aHE1pt9zuZFzPw';
+
+/*
+function recenterMap() {
+    const map = useGoogleMap()
+
+    if (map) {
+        let bounds = new google.maps.LatLngBounds();
+        this.state.ancestors.forEach(ancestor => {
+            if (ancestor.blat !== undefined) {
+                bounds.extend(new google.maps.LatLng(ancestor.blat, ancestor.blng));
+            }
+            if (ancestor.dlat !== undefined) {
+                bounds.extend(new google.maps.LatLng(ancestor.dlat, ancestor.dlng));
+            }
+        })
+        map.fitBounds(bounds);
+    }
+}*/
 
 class Map extends React.Component {
 
@@ -27,7 +44,7 @@ class Map extends React.Component {
             missingCoordinates: null,
             markerCoordinates: null,
             initialMarkerCoordinates: null,
-            oms: null,
+            map: null,
         }
     }
 
@@ -68,6 +85,7 @@ class Map extends React.Component {
             this.setState({markerCoordinates: newCoordinates, missingCoordinates: missingCoordinates});
         } else {
             this.setState({coordinatesLoaded: true});
+            this.centerMap(this.state.map);
         }
     }
 
@@ -75,9 +93,10 @@ class Map extends React.Component {
         let missingCoordinates = this.addCoordinatesToAncestors(this.state.missingCoordinates[0][0], coordinates);
         if (missingCoordinates.length > 0) {
             const newCoordinates = await this.geocodeLocation(missingCoordinates[0][0]);
-            this.setState({markerCoordinates: newCoordinates, missingCoordinates: missingCoordinates});
+            await this.setState({markerCoordinates: newCoordinates, missingCoordinates: missingCoordinates});
         } else {
             this.setState({coordinatesLoaded: true});
+            this.centerMap(this.state.map);
         }
     }
 
@@ -153,6 +172,29 @@ class Map extends React.Component {
         address = address.replace(/  /g,' ');
         address = address.replace(/, /g,',');
         address = address.replace(/\./g,'');
+        if (address.indexOf('UNITED STATES OF AMERICA') !== -1 && address.indexOf('UNITED STATES OF AMERICA') === address.length-24) {
+            address = address.substring(0,address.length-24) + 'USA';
+        }
+        if (address.indexOf('UNITED STATES') !== -1 && address.indexOf('UNITED STATES') === address.length-13) {
+            address = address.substring(0,address.length-13) + 'USA';
+        }
+        if (address.indexOf(',NEW ENGLAND') !== -1 && address.indexOf(',NEW ENGLAND') === address.length-12) {
+            address = address.substring(0,address.length-12);
+        }
+        if (address.indexOf('COLONY') !== -1 && address.indexOf('COLONY') === address.length-6) {
+            address = address.substring(0,address.length-6);
+        }
+        if (address.indexOf(' COUNTY,') !== -1) {
+            let end = address.indexOf(' COUNTY,');
+            let front = address.substring(0,end);
+            if (front.indexOf(',') !== -1) {
+                address = address.replace(' COUNTY,',',');
+            }
+        }
+        address = address.replace(',PROVINCE OF MASSACHUSETTS BAY',',MASSACHUSETTS');
+        address = address.replace(',MASSACHUSETTS BAY COLONY',',MASSACHUSETTS');
+        address = address.replace(',MASSACHUSETTS BAY',',MASSACHUSETTS');
+        address = address.replace(',PLYMOUTH COLONY',',MASSACHUSETTS');
         return address;
     }
 
@@ -223,7 +265,7 @@ class Map extends React.Component {
     }
 
     render() {
-
+        //NEED TO ADD SOME VERSION IF ANCESTOR LIST HAS NO ADDRESSES - JUST SHOW MESSAGE AND RETURN TO ANCESTOR LIST
         let mapOrLoading;
         if (!this.state.coordinatesLoaded && this.state.missingCoordinates === null) {
             mapOrLoading = 
@@ -238,19 +280,13 @@ class Map extends React.Component {
                         <GoogleMap
                             mapContainerStyle={{ width: '100%', height: '600px'}}
                             options={{fullscreenControl: false, mapTypeControl: false, streetViewControl: false, styles: [ { featureType: 'poi', stylers: [{ visibility: 'off' }] } ] }}
-                            defaultZoom={2}
-                            defaultCenter={{ lat: 20, lng: 0 }}
+                            //zoom={2}
+                            //center={{ lat: 20, lng: 0 }}
                             onLoad={map => {
                                 this.centerMap(map);
-                                const oms = require(`npm-overlapping-marker-spiderfier/lib/oms.min`)
-                                let thisoms = new oms.OverlappingMarkerSpiderfier(map, {
-                                    keepSpiderfied: true,
-                                    nearbyDistance: 30 //in pixels
-                                });
-                                this.setState({oms: thisoms});
                             }}
                         >
-                            <MapOverlayItems oms={this.state.oms} ancestors={this.state.ancestors}/>
+                            <MapOverlayItems ancestors={this.state.ancestors}/>
                         </GoogleMap>
                     </LoadScript>
             } else if (this.state.missingCoordinates !== null) {
@@ -259,8 +295,11 @@ class Map extends React.Component {
                         <GoogleMap
                             mapContainerStyle={{ width: '100%', height: '600px'}}
                             options={{fullscreenControl: false, mapTypeControl: false, streetViewControl: false, styles: [ { featureType: 'poi', stylers: [{ visibility: 'off' }] } ] }}
-                            defaultZoom={(this.state.markerCoordinates===undefined) ? 2 : 10}
-                            defaultCenter={(this.state.markerCoordinates===undefined) ? { lat: 20, lng: 0 } : this.state.markerCoordinates}
+                            zoom={(this.state.markerCoordinates===undefined) ? 2 : 9}
+                            center={(this.state.markerCoordinates===undefined) ? { lat: 20, lng: 0 } : this.state.markerCoordinates}
+                            onLoad={map => {
+                                this.setState({map: map})
+                            }}
                         >
                             <MissingCoordinatesOverlay location={this.state.missingCoordinates[0][0]} ancestorName={this.state.missingCoordinates[0][1]} id={this.state.missingCoordinates[0][2]} birthDeath={this.state.missingCoordinates[0][3]} markerCoordinates={this.state.markerCoordinates} numberMissing={this.state.missingCoordinates.length} onClickCoordinatesSubmit={this.onClickCoordinatesSubmit} onClickCoordinatesSkip={this.onClickCoordinatesSkip}/>
                         </GoogleMap>

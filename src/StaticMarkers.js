@@ -165,13 +165,13 @@ class StaticMarkers extends Component {
                     visible={this.props.visible}
                     position={{lat: this.props.ancestor.blat, lng: this.props.ancestor.blng}}
                     icon={`http://maps.google.com/mapfiles/ms/icons/green-dot.png`}
-                    defaultOptions={{ disableAutoPan: true }}
+                    options={{ disableAutoPan: true }}
                     zIndex={(this.state.bzIndex !== null) ? this.state.bzIndex : 'auto'}
-                    onDblClick={this.onBClickHandler}
+                    onClick={this.onBClickHandler}
                     onMouseOver={this.onBMouseOverHandler}
                     onMouseOut={this.onMouseOutHandler}
                 >
-                    {this.props.visible && (this.state.bOpen || bWindowAutoOpen) && <InfoWindow onCloseClick={this.onCloseClickHandler} defaultOptions={{ disableAutoPan: true }} zIndex={(this.state.bWindowZIndex !== null) ? this.state.bWindowZIndex : 0}>
+                    {this.props.visible && (this.state.bOpen || bWindowAutoOpen) && <InfoWindow onCloseClick={this.onCloseClickHandler} options={{ disableAutoPan: true }} zIndex={(this.state.bWindowZIndex !== null) ? this.state.bWindowZIndex : 0}>
                         <div><a href={`https://www.wikitree.com/wiki/${this.props.ancestor.Name}`} target='_blank'>{this.props.ancestor.BirthNamePrivate}</a>, b. {this.props.ancestor.BirthDate}</div>
                     </InfoWindow>}
                 </Marker>
@@ -179,14 +179,14 @@ class StaticMarkers extends Component {
                     visible={this.props.visible}
                     position={{lat: this.props.ancestor.dlat, lng: this.props.ancestor.dlng}}
                     icon={`http://maps.google.com/mapfiles/ms/icons/red-dot.png`}
-                    defaultOptions={{ disableAutoPan: true }}
+                    options={{ disableAutoPan: true }}
                     zIndex={(this.state.dzIndex !== null) ? this.state.dzIndex : 'auto'}
-                    onDblClick={this.onDClickHandler}
+                    onClick={this.onDClickHandler}
                     onMouseOver={this.onDMouseOverHandler}
                     onMouseOut={this.onMouseOutHandler}
                     onCloseClck={this.onCloseClickHandler}
                 >
-                    {this.props.visible && (this.state.dOpen || dWindowAutoOpen)  && <InfoWindow onCloseClick={this.onCloseClickHandler} defaultOptions={{ disableAutoPan: true }} zIndex={(this.state.dWindowZIndex !== null) ? this.state.dWindowZIndex : 0}>
+                    {this.props.visible && (this.state.dOpen || dWindowAutoOpen)  && <InfoWindow onCloseClick={this.onCloseClickHandler} options={{ disableAutoPan: true }} zIndex={(this.state.dWindowZIndex !== null) ? this.state.dWindowZIndex : 0}>
                         <div><a href={`https://www.wikitree.com/wiki/${this.props.ancestor.Name}`} target='_blank'>{this.props.ancestor.BirthNamePrivate}</a>, d. {this.props.ancestor.DeathDate}</div>
                     </InfoWindow>}
                 </Marker>
@@ -203,13 +203,13 @@ class StaticMarkers extends Component {
                     visible={this.props.visible}
                     position={{lat: this.props.ancestor.blat, lng: this.props.ancestor.blng}}
                     icon={`http://maps.google.com/mapfiles/ms/icons/green-dot.png`}
-                    defaultOptions={{ disableAutoPan: true }}
+                    options={{ disableAutoPan: true }}
                     zIndex={(this.state.bzIndex !== null) ? this.state.bzIndex : 'auto'}
-                    onDblClick={this.onBClickHandler}
+                    onClick={this.onBClickHandler}
                     onMouseOver={this.onBMouseOverHandler}
                     onMouseOut={this.onMouseOutHandler}
                 >
-                    {this.props.visible && (this.state.bOpen || bWindowAutoOpen) && <InfoWindow onCloseClick={this.onCloseClickHandler} defaultOptions={{ disableAutoPan: true }} zIndex={(this.state.bWindowZIndex !== null) ? this.state.bWindowZIndex : 0}>
+                    {this.props.visible && (this.state.bOpen || bWindowAutoOpen) && <InfoWindow onCloseClick={this.onCloseClickHandler} options={{ disableAutoPan: true }} zIndex={(this.state.bWindowZIndex !== null) ? this.state.bWindowZIndex : 0}>
                         <div><a href={`https://www.wikitree.com/wiki/${this.props.ancestor.Name}`} target='_blank'>{this.props.ancestor.BirthNamePrivate}</a>, b. {this.props.ancestor.BirthDate}</div>
                     </InfoWindow>}
                 </Marker>
@@ -217,14 +217,14 @@ class StaticMarkers extends Component {
                     visible={this.props.visible}
                     position={{lat: this.props.ancestor.dlat, lng: this.props.ancestor.dlng}}
                     icon={`http://maps.google.com/mapfiles/ms/icons/red-dot.png`}
-                    defaultOptions={{ disableAutoPan: true }}
+                    options={{ disableAutoPan: true }}
                     zIndex={(this.state.dzIndex !== null) ? this.state.dzIndex : 'auto'}
-                    onDblClick={this.onDClickHandler}
+                    onClick={this.onDClickHandler}
                     onMouseOver={this.onDMouseOverHandler}
                     onMouseOut={this.onMouseOutHandler}
                     onCloseClck={this.onCloseClickHandler}
                 >
-                    {this.props.visible && (this.state.dOpen || dWindowAutoOpen)  && <InfoWindow onCloseClick={this.onCloseClickHandler} defaultOptions={{ disableAutoPan: true }} zIndex={(this.state.dWindowZIndex !== null) ? this.state.dWindowZIndex : 0}>
+                    {this.props.visible && (this.state.dOpen || dWindowAutoOpen)  && <InfoWindow onCloseClick={this.onCloseClickHandler} options={{ disableAutoPan: true }} zIndex={(this.state.dWindowZIndex !== null) ? this.state.dWindowZIndex : 0}>
                         <div><a href={`https://www.wikitree.com/wiki/${this.props.ancestor.Name}`} target='_blank'>{this.props.ancestor.BirthNamePrivate}</a>, d. {this.props.ancestor.DeathDate}</div>
                     </InfoWindow>}
                 </Marker>
@@ -236,16 +236,13 @@ class StaticMarkers extends Component {
                     visible={this.props.visible}
                     position={{lat: this.props.ancestor.blat, lng: this.props.ancestor.blng}}
                     icon={`http://maps.google.com/mapfiles/ms/icons/green-dot.png`}
-                    defaultOptions={{ disableAutoPan: true }}
+                    options={{ disableAutoPan: true }}
                     zIndex={(this.state.bzIndex !== null) ? this.state.bzIndex : 'auto'}
-                    onDblClick={this.onBClickHandler}
+                    onClick={this.onBClickHandler}
                     onMouseOver={this.onBMouseOverHandler}
                     onMouseOut={this.onMouseOutHandler}
-                    onLoad={marker => {
-                        this.props.oms.addMarker(marker);
-                    }}
                 >
-                    {this.props.visible && (this.state.bOpen || bWindowAutoOpen) && <InfoWindow onCloseClick={this.onCloseClickHandler} defaultOptions={{ disableAutoPan: true }} zIndex={(this.state.bWindowZIndex !== null) ? this.state.bWindowZIndex : 0}>
+                    {this.props.visible && (this.state.bOpen || bWindowAutoOpen) && <InfoWindow onCloseClick={this.onCloseClickHandler} options={{ disableAutoPan: true }} zIndex={(this.state.bWindowZIndex !== null) ? this.state.bWindowZIndex : 0}>
                         <div><a href={`https://www.wikitree.com/wiki/${this.props.ancestor.Name}`} target='_blank'>{this.props.ancestor.BirthNamePrivate}</a>, b. {this.props.ancestor.BirthDate}</div>
                     </InfoWindow>}
                 </Marker>
@@ -257,14 +254,14 @@ class StaticMarkers extends Component {
                     visible={this.props.visible}
                     position={{lat: this.props.ancestor.dlat, lng: this.props.ancestor.dlng}}
                     icon={`http://maps.google.com/mapfiles/ms/icons/red-dot.png`}
-                    defaultOptions={{ disableAutoPan: true }}
+                    options={{ disableAutoPan: true }}
                     zIndex={(this.state.dzIndex !== null) ? this.state.dzIndex : 'auto'}
-                    onDblClick={this.onDClickHandler}
+                    onClick={this.onDClickHandler}
                     onMouseOver={this.onDMouseOverHandler}
                     onMouseOut={this.onMouseOutHandler}
                     onCloseClck={this.onCloseClickHandler}
                 >
-                    {this.props.visible && (this.state.dOpen || dWindowAutoOpen)  && <InfoWindow onCloseClick={this.onCloseClickHandler} defaultOptions={{ disableAutoPan: true }} zIndex={(this.state.dWindowZIndex !== null) ? this.state.dWindowZIndex : 0}>
+                    {this.props.visible && (this.state.dOpen || dWindowAutoOpen)  && <InfoWindow onCloseClick={this.onCloseClickHandler} options={{ disableAutoPan: true }} zIndex={(this.state.dWindowZIndex !== null) ? this.state.dWindowZIndex : 0}>
                         <div><a href={`https://www.wikitree.com/wiki/${this.props.ancestor.Name}`} target='_blank'>{this.props.ancestor.BirthNamePrivate}</a>, d. {this.props.ancestor.DeathDate}</div>
                     </InfoWindow>}
                 </Marker>

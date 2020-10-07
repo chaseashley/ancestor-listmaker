@@ -289,7 +289,6 @@ class MapOverlayItems extends React.Component {
         if (this.state.markerType === 'static') {
             markers = this.props.ancestors.map((ancestor, index) => {
                 return <StaticMarkers key={index} id={index}
-                            oms={this.props.oms}
                             ancestor={ancestor}
                             birthYear={Number(ancestor.BirthDate.substring(0,4))}
                             deathYear={Number(ancestor.DeathDate.substring(0,4))}
