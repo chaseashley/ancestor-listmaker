@@ -45,6 +45,8 @@ class Map extends React.Component {
             markerCoordinates: null,
             initialMarkerCoordinates: null,
             map: null,
+            mapZoom: null,
+            mapCenter: null,
         }
     }
 
@@ -153,6 +155,10 @@ class Map extends React.Component {
             }
         })
         map.fitBounds(bounds);
+        this.setState({
+            mapZoom: map.getZoom(),
+            mapCenter: map.getCenter()
+        });
     }
 
     getCoordinatesFromAddressDBText(addressDBText, address) {
@@ -280,8 +286,8 @@ class Map extends React.Component {
                         <GoogleMap
                             mapContainerStyle={{ width: '100%', height: '600px'}}
                             options={{fullscreenControl: false, mapTypeControl: false, streetViewControl: false, styles: [ { featureType: 'poi', stylers: [{ visibility: 'off' }] } ] }}
-                            //zoom={2}
-                            //center={{ lat: 20, lng: 0 }}
+                            zoom={this.state.mapZoom === null ? 2 : this.state.mapZoom}
+                            center={this.state.mapCenter == null ? { lat: 20, lng: 0 } : this.state.mapCenter}
                             onLoad={map => {
                                 this.centerMap(map);
                             }}
