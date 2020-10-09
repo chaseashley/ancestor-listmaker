@@ -14,6 +14,8 @@ class Map extends React.Component {
 
     constructor(props) {
         super(props);
+        this.birthPinsCallback = this.birthPinsCallback.bind(this);
+        this.deathPinsCallback = this.deathPinsCallback.bind(this);
         this.onClickCoordinatesSkip = this.onClickCoordinatesSkip.bind(this);
         this.addToMissingCoordinates = this.addToMissingCoordinates.bind(this);
         this.onClickCoordinatesSubmit = this.onClickCoordinatesSubmit.bind(this);
@@ -30,6 +32,8 @@ class Map extends React.Component {
             map: null,
             mapZoom: null,
             mapCenter: null,
+            birthPins: true,
+            deathPins: false,
         }
     }
 
@@ -254,6 +258,14 @@ class Map extends React.Component {
         this.checkAddressesForCoordinates();
     }
 
+    birthPinsCallback() {
+        this.setState({birthPins: !this.state.birthPins})
+    }
+
+    deathPinsCallback() {
+        this.setState({deathPins: !this.state.deathPins})
+    }
+
     render() {
         //NEED TO ADD SOME VERSION IF ANCESTOR LIST HAS NO ADDRESSES - JUST SHOW MESSAGE AND RETURN TO ANCESTOR LIST
         let mapOrLoading;
@@ -269,7 +281,7 @@ class Map extends React.Component {
                     <LoadScript googleMapsApiKey={API_KEY}>
                         <GoogleMap
                             mapContainerStyle={{ width: '100%', height: '600px'}}
-                            options={{fullscreenControl: false, mapTypeControl: false, streetViewControl: false, styles: [ { featureType: 'poi', stylers: [{ visibility: 'off' }] } ] }}
+                            options={{fullscreenControl: false, scaleControl: true, mapTypeControl: false, streetViewControl: false, styles: [ { featureType: 'poi', stylers: [{ visibility: 'off' }] } ] }}
                             zoom={this.state.mapZoom === null ? 2 : this.state.mapZoom}
                             center={this.state.mapCenter == null ? { lat: 20, lng: 0 } : this.state.mapCenter}
                             onLoad={map => {
@@ -277,12 +289,13 @@ class Map extends React.Component {
                             }}
                             onZoomChanged={() => {
                                 if (this.state.map!==null) {
-                                    let adjustedAncestors = adjustOverlappingMarkerCoordinates(this.state.ancestors, this.state.map.getZoom());
+                                    this.setState({zoom: this.state.map.getZoom()});
+                                    let adjustedAncestors = adjustOverlappingMarkerCoordinates(this.state.ancestors, this.state.map.getZoom(), this.state.birthPins, this.state.deathPins);
                                     this.setState({ancestors: adjustedAncestors});
                                 }
                             }}
                         >
-                            <MapOverlayItems ancestors={this.state.ancestors}/>
+                            <MapOverlayItems ancestors={this.state.ancestors} birthPinsCallback={this.birthPinsCallback} deathPinsCallback={this.deathPinsCallback} zoom={this.state.zoom}/>
                         </GoogleMap>
                     </LoadScript>
             } else if (this.state.missingCoordinates !== null) {
@@ -290,7 +303,7 @@ class Map extends React.Component {
                     <LoadScript googleMapsApiKey={API_KEY}>
                         <GoogleMap
                             mapContainerStyle={{ width: '100%', height: '600px'}}
-                            options={{fullscreenControl: false, mapTypeControl: false, streetViewControl: false, styles: [ { featureType: 'poi', stylers: [{ visibility: 'off' }] } ] }}
+                            options={{fullscreenControl: false, scaleControl: true, mapTypeControl: false, streetViewControl: false, styles: [ { featureType: 'poi', stylers: [{ visibility: 'off' }] } ] }}
                             zoom={(this.state.markerCoordinates===undefined) ? 2 : 9}
                             center={(this.state.markerCoordinates===undefined) ? { lat: 20, lng: 0 } : this.state.markerCoordinates}
                             onLoad={map => {

@@ -194,7 +194,7 @@ class StaticMarkers extends Component {
         const dWindowAutoOpen = this.props.windowAutoOpen && ((this.props.deathYear-5) <= this.props.year && (this.props.deathYear + 5) >= this.props.year) ? true : false;
         
         let personMarkers;
-        if (this.props.birthPins && (this.props.ancestor.BirthLocation !== '') && this.props.deathPins && (this.props.ancestor.DeathLocation !== '') && this.props.lines) {
+        if (this.props.birthPins && this.props.ancestor.adjustedblat !== undefined && this.props.deathPins && this.props.ancestor.adjusteddlat !== undefined && this.props.lines) {
             personMarkers =
             <>
                 <Marker
@@ -234,7 +234,7 @@ class StaticMarkers extends Component {
                     options={{ disableAutoPan: true }, {strokeOpacity: 0.3, strokeWeight: 2}}
                 />
             </>
-        } else if (this.props.birthPins && (this.props.ancestor.BirthLocation !== '') && this.props.deathPins && (this.props.ancestor.DeathLocation !== '')) {
+        } else if (this.props.birthPins && this.props.ancestor.adjustedblat !== undefined && this.props.deathPins && this.props.ancestor.adjusteddlat !== undefined) {
             personMarkers =
             <>
                 <Marker
@@ -269,7 +269,7 @@ class StaticMarkers extends Component {
                     </InfoWindow>}
                 </Marker>
             </>
-        } else if (this.props.birthPins && (this.props.ancestor.BirthLocation !== '')) {
+        } else if (this.props.birthPins && this.props.ancestor.adjustedblat !== undefined) {
             personMarkers =
             <>
                 <Marker
@@ -288,7 +288,7 @@ class StaticMarkers extends Component {
                     </InfoWindow>}
                 </Marker>
             </>
-        } else if (this.props.deathPins && (this.props.ancestor.DeathLocation !== '')) {
+        } else if (this.props.deathPins && this.props.ancestor.adjusteddlat !== undefined) {
             personMarkers =
             <>
                 <Marker

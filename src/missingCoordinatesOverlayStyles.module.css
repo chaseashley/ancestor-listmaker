@@ -3,7 +3,7 @@
     position: absolute;
     top: 0;
     left: 0;
-    height: 160px;
+    height: 125px;
     width: 100%;
     background-color: white;
 }
@@ -14,12 +14,10 @@
 
 .locationCell {
     padding-top: 10px;
-    width: 40%;
 }
 
 .nameCell {
     padding-top: 10px;
-    width: 40%;
 }
 
 .submitCell {
@@ -29,4 +27,5 @@
 
 .skipCell {
     padding-top: 10px;
+    width: 100px;
 }

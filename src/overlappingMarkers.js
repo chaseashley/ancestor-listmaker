@@ -1,17 +1,17 @@
 
-function getUniqueCoordinatesArray(ancestors,zoom) {
+function getUniqueCoordinatesArray(ancestors,zoom,birthPins,deathPins) {
     let uniqueCoordinates = [];
     for (let i=0; i<ancestors.length; i++){
         if (uniqueCoordinates.length===0){
-            if (ancestors[i].blat!==undefined) {
+            if (birthPins && ancestors[i].blat!==undefined) {
                 uniqueCoordinates.push([{lat: ancestors[i].blat, lng: ancestors[i].blng},[['birth',i]]]);
-            } else if (ancestors[i].dlat!==undefined) {
+            } else if (deathPins && ancestors[i].dlat!==undefined) {
                 uniqueCoordinates.push([{lat: ancestors[i].dlat, lng: ancestors[i].dlng},[['death',i]]]);
             }
         }
         //check birth marker coordinates
         let boffset = true;
-        if (ancestors[i].blat !== undefined) {
+        if (birthPins && ancestors[i].blat !== undefined) {
             for (let j=0; j<uniqueCoordinates.length; j++) {
                 let bjoffset = false;
                 if (j!==0 || 'birth' !== uniqueCoordinates[0][1][0][0] || i !== uniqueCoordinates[0][1][0][1]) {
@@ -37,7 +37,7 @@ function getUniqueCoordinatesArray(ancestors,zoom) {
         }
         //check death marker coordinates
         let doffset = true;
-        if (ancestors[i].dlat !== undefined) {
+        if (deathPins && ancestors[i].dlat !== undefined) {
             for (let j=0; j<uniqueCoordinates.length; j++) {
                 let djoffset = false;
                 if (j!==0 || 'death' !== uniqueCoordinates[0][1][0][0] || i !== uniqueCoordinates[0][1][0][1]) {
@@ -65,8 +65,8 @@ function getUniqueCoordinatesArray(ancestors,zoom) {
     return uniqueCoordinates
 }
 
-export function adjustOverlappingMarkerCoordinates(ancestors, zoom) {
-    const uniqueCoordinates = getUniqueCoordinatesArray(ancestors,zoom);
+export function adjustOverlappingMarkerCoordinates(ancestors, zoom, birthPins, deathPins) {
+    let uniqueCoordinates = getUniqueCoordinatesArray(ancestors, zoom, birthPins, deathPins);
     for (let i=0; i<uniqueCoordinates.length; i++) {
         for (let j=0; j<uniqueCoordinates[i][1].length; j++) {//for each ancestor in the array for those coordinates
             let ancestorIndex = uniqueCoordinates[i][1][j][1];

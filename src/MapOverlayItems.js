@@ -4,7 +4,7 @@ import MovingMarker from './MovingMarker';
 import "rc-slider/assets/index.css";
 import Slider from "rc-slider";
 import styles from './mapOverlayItemsStyles.module.css';
-import { MapConstant } from './Map';
+import { adjustOverlappingMarkerCoordinates } from './overlappingMarkers';
 
 ///// slider constants ///////
 const dotStyle = {
@@ -66,6 +66,8 @@ class MapOverlayItems extends React.Component {
 
     constructor(props) {
         super(props);
+        this.onBirthPinsChange = this.onBirthPinsChange.bind(this);
+        this.onDeathPinsChange = this.onDeathPinsChange.bind(this);
         this.onAfterSpeedChangeHandler = this.onAfterSpeedChangeHandler.bind(this);
         this.onAllOrTimeSeriesClick = this.onAllOrTimeSeriesClick.bind(this);
         this.findEarliestBirthYear = this.findEarliestBirthYear.bind(this);
@@ -76,6 +78,7 @@ class MapOverlayItems extends React.Component {
         this.onPausePlayClick = this.onPausePlayClick.bind(this);
         this.incrementYear = this.incrementYear.bind(this);
         this.state={
+            ancestors: this.props.ancestors,
             year: null,
             intervalId: null,
             timeSeries: false,
@@ -188,8 +191,25 @@ class MapOverlayItems extends React.Component {
         this.setState({timeSeries: !this.state.timeSeries})
     }
 
-    render() {
+    onBirthPinsChange(e) {
+        this.props.birthPinsCallback();
+        let adjustedAncestors = adjustOverlappingMarkerCoordinates(this.state.ancestors, this.props.zoom, e.target.checked, this.state.deathPins);
+        this.setState({
+            birthPins: e.target.checked,
+            ancestors: adjustedAncestors,
+        });
+    }
 
+    onDeathPinsChange(e) {
+        this.props.deathPinsCallback();
+        let adjustedAncestors = adjustOverlappingMarkerCoordinates(this.state.ancestors, this.props.zoom, this.state.birthPins, e.target.checked);
+        this.setState({
+            deathPins: e.target.checked,
+            ancestors: adjustedAncestors,
+        });
+    }
+
+    render() {
         let optionsOpenCloseButton;
         if (this.state.optionsOpen) {
             optionsOpenCloseButton =
@@ -241,13 +261,13 @@ class MapOverlayItems extends React.Component {
 
         const birthPins = 
             <div className={styles.displayOptions}>
-                <input type="checkbox" name="birthPins" checked={this.state.birthPins} onChange={(e) => this.setState({birthPins: e.target.checked})} disabled={this.state.markerType==='Moving'}/>
+                <input type="checkbox" name="birthPins" checked={this.state.birthPins} onChange={(e) => this.onBirthPinsChange(e)} disabled={this.state.markerType==='Moving'}/>
                 <label for="birthPins">Show birth locations</label>
             </div>
 
         const deathPins = 
             <div className={styles.displayOptions}>
-                <input type="checkbox" name="deathPins" checked={this.state.deathPins} onChange={(e) => this.setState({deathPins: e.target.checked})} disabled={this.state.markerType==='Moving'}/>
+                <input type="checkbox" name="deathPins" checked={this.state.deathPins} onChange={(e) => this.onDeathPinsChange(e)} disabled={this.state.markerType==='Moving'}/>
                 <label for="birthPins">Show death locations</label>
             </div>
 
@@ -287,7 +307,7 @@ class MapOverlayItems extends React.Component {
 
         let markers;
         if (this.state.markerType === 'static') {
-            markers = this.props.ancestors.map((ancestor, index) => {
+            markers = this.state.ancestors.map((ancestor, index) => {
                 return <StaticMarkers key={index} id={index}
                             ancestor={ancestor}
                             birthYear={Number(ancestor.BirthDate.substring(0,4))}
@@ -301,7 +321,7 @@ class MapOverlayItems extends React.Component {
                             />
             })
         } else {
-            markers = this.props.ancestors.map((ancestor, index) => {
+            markers = this.state.ancestors.map((ancestor, index) => {
                 return <MovingMarker key={index} id={index}
                             ancestor={ancestor}
                             birthYear={Number(ancestor.BirthDate.substring(0,4))}

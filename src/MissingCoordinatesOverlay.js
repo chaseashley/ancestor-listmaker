@@ -21,16 +21,6 @@ class MissingCoordinatesOverlay extends React.Component {
             })
         }
     }
-    /*
-    static getDerivedStateFromProps(nextProps, prevState) {
-        if (nextProps !== prevState) {
-            return {
-                markerCoordinates: nextProps.markerCoordinates,
-                finalCoordinates
-            };
-        }
-    }
-    */
 
     onDragEndHandler(event) {
         this.setState({finalCoordinates: {lat: Number(event.latLng.lat().toFixed(6)), lng: Number(event.latLng.lng().toFixed(6))}});
@@ -44,8 +34,9 @@ class MissingCoordinatesOverlay extends React.Component {
                 <div className={styles.coordinatesSearchBox}>
                     <table className={styles.coordinatesSearchTable}>
                         <tbody>
-                            <tr><td colSpan='4'>There are {this.props.numberMissing} locations in the ancestor list that do not have confirmed coordinates in the app's database, including the location listed below. The marker on the map is where Google Maps suggests may be the correct coordinates for the location listed below. Please confirm that the marker is in the correct place for the location. Using +- to zoom in or out, may help you confirm the correctness of the marker placement. If the marker is not at the correct place, drag and drop it to the correct place. Use care in confirming the marker placement before clicking the Submit button, as this placement will become part of the database for all users. If you are not confident of the correct place of the location listed below, please click the Skip button.</td></tr>
-                            <tr><td className={styles.locationCell}>{this.props.location}</td><td className={styles.nameCell}>Found in {this.props.birthDeath} Location field for <a href={`https://www.wikitree.com/wiki/${this.props.id}`} target='_blank'>{this.props.ancestorName}</a></td><td className={styles.submitCell}><button onClick={() => this.props.onClickCoordinatesSubmit(this.state.finalCoordinates === null ? {lat: this.state.markerCoordinates.lat, lng: this.state.markerCoordinates.lng} : {lat: this.state.finalCoordinates.lat, lng: this.state.finalCoordinates.lng})}>Submit</button></td>
+                            <tr><td colSpan='4'>The location below is one of {this.props.numberMissing} locations in the ancestor list not in the app’s database. The marker is where Google Maps suggests the location is. If incorrect, drag and drop the marker at the correct place. Zoom in/out as necessary. Click 'Submit' when you are confident the marker is in the correct place to add it to the app's database.</td></tr>
+                            <tr><td className={styles.locationCell}>{this.props.location}</td><td className={styles.nameCell}>Found in {this.props.birthDeath} Location field for <a href={`https://www.wikitree.com/wiki/${this.props.id}`} target='_blank'>{this.props.ancestorName}</a></td>
+                            <td className={styles.submitCell}><button onClick={() => this.props.onClickCoordinatesSubmit(this.state.finalCoordinates === null ? {lat: this.state.markerCoordinates.lat, lng: this.state.markerCoordinates.lng} : {lat: this.state.finalCoordinates.lat, lng: this.state.finalCoordinates.lng})}>Submit</button></td>
                             <td className={styles.skipCell}><button onClick={() => this.props.onClickCoordinatesSkip(this.props.location)}>Skip</button></td></tr>
                         </tbody>
                     </table>
@@ -62,9 +53,10 @@ class MissingCoordinatesOverlay extends React.Component {
             <div className={styles.coordinatesSearchBox}>
                 <table className={styles.coordinatesSearchTable}>
                     <tbody>
-                        <tr><td colSpan='4'>There are {this.props.numberMissing} locations in the ancestor list that do not have confirmed coordinates in the app's database, including the location listed below. Google maps could not find the location listed below. Please drag and drop the marker on the correct place for the location. Use +- to zoom in or out, as necessary, to place the marker in the correction place. Use care in confirming the marker placement before clicking the Submit button , as this placement will become part of the database for all users. If you are not confident of the correct place of the location listed below, please click the Skip button.</td></tr>
-                        <tr><td className={styles.locationRowCell}>{this.props.location}</td><td className={styles.locationRowCell}>Found in {this.props.birthDeath} Location field for <a href={`https://www.wikitree.com/wiki/${this.props.id}`} target='_blank'>{this.props.ancestorName}</a></td><td className={styles.locationRowCell}><button onClick={() => this.props.onClickCoordinatesSubmit(this.state.markerCoordinates)}>Submit</button></td>
-                        <td className={styles.locationRowCell}><button onClick={() => this.props.onClickCoordinatesSkip(this.props.location)}>Skip</button></td></tr>
+                        <tr><td colSpan='4'>The location below is one of {this.props.numberMissing} locations in the ancestor list not in the app’s database. Google Maps could not find the location. Drag and drop the marker at the correct place for the location. Zoom in/out as necessary. Click 'Submit' when you are confident the marker is in the correct place to add it to the app's database.</td></tr>
+                        <tr><td className={styles.locationCell}>{this.props.location}</td><td className={styles.nameCell}>Found in {this.props.birthDeath} Location field for <a href={`https://www.wikitree.com/wiki/${this.props.id}`} target='_blank'>{this.props.ancestorName}</a></td>
+                        <td className={styles.submitCell}><button onClick={() => this.props.onClickCoordinatesSubmit(this.state.finalCoordinates === null ? {lat: this.state.markerCoordinates.lat, lng: this.state.markerCoordinates.lng} : {lat: this.state.finalCoordinates.lat, lng: this.state.finalCoordinates.lng})}>Submit</button></td>
+                        <td className={styles.skipCell}><button onClick={() => this.props.onClickCoordinatesSkip(this.props.location)}>Skip</button></td></tr>
                     </tbody>
                 </table>
             </div>
