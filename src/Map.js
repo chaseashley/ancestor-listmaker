@@ -6,26 +6,9 @@ import styles from './mapstyles.module.css';
 import MapOverlayItems from './MapOverlayItems';
 import MissingCoordinatesOverlay from './MissingCoordinatesOverlay';
 import { getCoordinates, postCoordinates } from './locationsDBqueries';
+import { adjustOverlappingMarkerCoordinates } from './overlappingMarkers';
 
 const API_KEY='AIzaSyD5VQNhUE4UQlIZbaJo4aHE1pt9zuZFzPw';
-
-/*
-function recenterMap() {
-    const map = useGoogleMap()
-
-    if (map) {
-        let bounds = new google.maps.LatLngBounds();
-        this.state.ancestors.forEach(ancestor => {
-            if (ancestor.blat !== undefined) {
-                bounds.extend(new google.maps.LatLng(ancestor.blat, ancestor.blng));
-            }
-            if (ancestor.dlat !== undefined) {
-                bounds.extend(new google.maps.LatLng(ancestor.dlat, ancestor.dlng));
-            }
-        })
-        map.fitBounds(bounds);
-    }
-}*/
 
 class Map extends React.Component {
 
@@ -156,6 +139,7 @@ class Map extends React.Component {
         })
         map.fitBounds(bounds);
         this.setState({
+            map: map,
             mapZoom: map.getZoom(),
             mapCenter: map.getCenter()
         });
@@ -290,6 +274,12 @@ class Map extends React.Component {
                             center={this.state.mapCenter == null ? { lat: 20, lng: 0 } : this.state.mapCenter}
                             onLoad={map => {
                                 this.centerMap(map);
+                            }}
+                            onZoomChanged={() => {
+                                if (this.state.map!==null) {
+                                    let adjustedAncestors = adjustOverlappingMarkerCoordinates(this.state.ancestors, this.state.map.getZoom());
+                                    this.setState({ancestors: adjustedAncestors});
+                                }
                             }}
                         >
                             <MapOverlayItems ancestors={this.state.ancestors}/>
