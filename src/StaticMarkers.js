@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Marker, Polyline, InfoWindow } from '@react-google-maps/api';
+import { Marker, Polyline, MarkerClusterer, InfoWindow } from '@react-google-maps/api';
 
 class StaticMarkers extends Component {
 
@@ -13,7 +13,6 @@ class StaticMarkers extends Component {
         this.onDMouseOverHandler = this.onDMouseOverHandler.bind(this);
         this.onMouseOutHandler = this.onMouseOutHandler.bind(this);
         this.onCloseClickHandler = this.onCloseClickHandler.bind(this);
-        //this.incrementYear = this.incrementYear.bind(this);
         this.state = {
             bOpen: false,
             dOpen: false,
@@ -198,6 +197,7 @@ class StaticMarkers extends Component {
             personMarkers =
             <>
                 <Marker
+                    //key={this.props.ancestor.Id + this.props.ancestor.blat}
                     visible={this.props.visible}
                     position={{lat: this.props.ancestor.adjustedblat, lng: this.props.ancestor.adjustedblng}}
                     icon={`http://maps.google.com/mapfiles/ms/icons/green-dot.png`}
@@ -213,6 +213,7 @@ class StaticMarkers extends Component {
                     </InfoWindow>}
                 </Marker>
                 <Marker
+                    //key={this.props.ancestor.Id + this.props.ancestor.dlat}
                     visible={this.props.visible}
                     position={{lat: this.props.ancestor.adjusteddlat, lng: this.props.ancestor.adjusteddlng}}
                     icon={`http://maps.google.com/mapfiles/ms/icons/red-dot.png`}
@@ -229,6 +230,7 @@ class StaticMarkers extends Component {
                     </InfoWindow>}
                 </Marker>
                 <Polyline
+                    //key={this.props.ancestor.Id + this.props.ancestor.blat + this.props.ancestor.dlat}
                     visible={this.props.visible}
                     path={[{ lat: this.props.ancestor.adjustedblat, lng: this.props.ancestor.adjustedblng },{ lat: this.props.ancestor.adjusteddlat, lng: this.props.ancestor.adjusteddlng }]}
                     options={{ disableAutoPan: true }, {strokeOpacity: 0.3, strokeWeight: 2}}
@@ -238,6 +240,7 @@ class StaticMarkers extends Component {
             personMarkers =
             <>
                 <Marker
+                    //key={this.props.ancestor.Id + this.props.ancestor.blat}
                     visible={this.props.visible}
                     position={{lat: this.props.ancestor.adjustedblat, lng: this.props.ancestor.adjustedblng}}
                     icon={`http://maps.google.com/mapfiles/ms/icons/green-dot.png`}
@@ -253,6 +256,7 @@ class StaticMarkers extends Component {
                     </InfoWindow>}
                 </Marker>
                 <Marker
+                    //key={this.props.ancestor.Id + this.props.ancestor.dlat}
                     visible={this.props.visible}
                     position={{lat: this.props.ancestor.adjusteddlat, lng: this.props.ancestor.adjusteddlng}}
                     icon={`http://maps.google.com/mapfiles/ms/icons/red-dot.png`}
@@ -273,6 +277,7 @@ class StaticMarkers extends Component {
             personMarkers =
             <>
                 <Marker
+                    //key={this.props.ancestor.Id + this.props.ancestor.blat}
                     visible={this.props.visible}
                     position={{lat: this.props.ancestor.adjustedblat, lng: this.props.ancestor.adjustedblng}}
                     icon={`http://maps.google.com/mapfiles/ms/icons/green-dot.png`}
@@ -292,6 +297,7 @@ class StaticMarkers extends Component {
             personMarkers =
             <>
                 <Marker
+                    //key={this.props.ancestor.Id + this.props.ancestor.dlat}
                     visible={this.props.visible}
                     position={{lat: this.props.ancestor.adjusteddlat, lng: this.props.ancestor.adjusteddlng}}
                     icon={`http://maps.google.com/mapfiles/ms/icons/red-dot.png`}

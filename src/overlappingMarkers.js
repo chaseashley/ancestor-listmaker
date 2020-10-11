@@ -19,7 +19,7 @@ function getUniqueCoordinatesArray(ancestors,zoom,birthPins,deathPins) {
                     if (Math.abs(bPixelLatOffset) >= 1) {
                         bjoffset = true;
                     } else {
-                        let bPixelLngOffset = lngDegreesToPixels(ancestors[i].blng-uniqueCoordinates[j][0].lng, ancestors[i].blng, zoom);
+                        let bPixelLngOffset = lngDegreesToPixels(ancestors[i].blng-uniqueCoordinates[j][0].lng, zoom);
                         if (Math.abs(bPixelLngOffset) >= 1) {
                             bjoffset = true;
                         }
@@ -45,7 +45,7 @@ function getUniqueCoordinatesArray(ancestors,zoom,birthPins,deathPins) {
                     if (Math.abs(dPixelLatOffset) >= 1) {
                         djoffset = true;
                     } else {
-                        let dPixelLngOffset = lngDegreesToPixels(ancestors[i].dlng-uniqueCoordinates[j][0].lng, ancestors[i].dlng, zoom);
+                        let dPixelLngOffset = lngDegreesToPixels(ancestors[i].dlng-uniqueCoordinates[j][0].lng, zoom);
                         if (Math.abs(dPixelLngOffset) >= 1) {
                             djoffset = true;
                         }
@@ -67,45 +67,77 @@ function getUniqueCoordinatesArray(ancestors,zoom,birthPins,deathPins) {
 
 export function adjustOverlappingMarkerCoordinates(ancestors, zoom, birthPins, deathPins) {
     let uniqueCoordinates = getUniqueCoordinatesArray(ancestors, zoom, birthPins, deathPins);
+    let maxOverlaps = 0;
+    uniqueCoordinates.forEach(uniqueCoordinate => {
+        if (uniqueCoordinate[1].length > maxOverlaps) {
+            maxOverlaps = uniqueCoordinate[1].length;
+        }
+    })
+    const variableLngOffset = (Math.pow(2,zoom-(Math.log2(maxOverlaps))) + 1)/4 * pixelToLngDegrees(zoom);
+    //const variableOffset = (Math.pow(zoom,4)/100) * (4/(Math.log2(maxOverlaps)+1)) * pixelToLngDegrees(zoom);
+    const maxLngOffset = 18 * pixelToLngDegrees(zoom);
+    let lngOffset;
+    if (variableLngOffset > maxLngOffset) {
+        lngOffset = maxLngOffset;
+    } else {
+        lngOffset = variableLngOffset;
+    }
     for (let i=0; i<uniqueCoordinates.length; i++) {
+        const variableLatOffset = (Math.pow(2,zoom-(Math.log2(maxOverlaps))) + 1)/4 * pixelToLatDegrees(uniqueCoordinates[i][0].lat, zoom);
+        //const variableOffset = (Math.pow(zoom,4)/100) * (4/(Math.log2(maxOverlaps)+1)) * pixelToLngDegrees(zoom);
+        const maxLatOffset = 30 * pixelToLatDegrees(uniqueCoordinates[i][0].lat, zoom);
+        let latOffset;
+        if (variableLatOffset > maxLatOffset) {
+            latOffset = maxLatOffset;
+        } else {
+            latOffset = variableLatOffset;
+        }
+        const rowLength = Math.round((maxLatOffset/maxLngOffset) * Math.ceil(Math.sqrt(uniqueCoordinates[i][1].length)));
+        const topLeftLat = uniqueCoordinates[i][0].lat + (latOffset * Math.floor((rowLength-1)/2));
+        const topLeftLng = uniqueCoordinates[i][0].lng - (lngOffset * Math.floor((rowLength-1)/2));
+        let rowIndex = 0;
+        let columnIndex = 0;
         for (let j=0; j<uniqueCoordinates[i][1].length; j++) {//for each ancestor in the array for those coordinates
             let ancestorIndex = uniqueCoordinates[i][1][j][1];
             let birthDeath = uniqueCoordinates[i][1][j][0];
-            if (j===0) {
-                if (birthDeath==='birth') {
-                    ancestors[ancestorIndex].adjustedblat = uniqueCoordinates[i][0].lat;
-                    ancestors[ancestorIndex].adjustedblng = uniqueCoordinates[i][0].lng
-                } else if (birthDeath==='death') {
-                    ancestors[ancestorIndex].adjusteddlat = uniqueCoordinates[i][0].lat;
-                    ancestors[ancestorIndex].adjusteddlng = uniqueCoordinates[i][0].lng
-                }
+            if (birthDeath==='birth') {
+                ancestors[ancestorIndex].adjustedblat = topLeftLat - (rowIndex * latOffset);
+                ancestors[ancestorIndex].adjustedblng = topLeftLng + (columnIndex * lngOffset);
+            } else if (birthDeath==='death') {
+                ancestors[ancestorIndex].adjusteddlat = topLeftLat - (rowIndex * latOffset);
+                ancestors[ancestorIndex].adjusteddlng = topLeftLng + (columnIndex * lngOffset);
+            }
+            if (columnIndex + 1 < rowLength) {
+                columnIndex = columnIndex + 1;
             } else {
-                const plusMinusMultiplier = Math.floor((j+1)/2) * Math.pow(-1,(j+1)%2); // for j=1,2,3,4 => 1,-1,2,-2, so offsets are centered around original
-                if (birthDeath==='birth') {
-                    ancestors[ancestorIndex].adjustedblat = uniqueCoordinates[i][0].lat;
-                    ancestors[ancestorIndex].adjustedblng = uniqueCoordinates[i][0].lng + (plusMinusMultiplier * (zoom*zoom/10) * pixelToLngDegrees(zoom));
-                } else if (birthDeath==='death') {
-                    ancestors[ancestorIndex].adjusteddlat = uniqueCoordinates[i][0].lat;
-                    ancestors[ancestorIndex].adjusteddlng = uniqueCoordinates[i][0].lng + (plusMinusMultiplier * (zoom*zoom/10) * pixelToLngDegrees(zoom));
-                }
+                rowIndex = rowIndex + 1;
+                columnIndex = 0;
             }
         }
-
     }
     return ancestors;
 }
 
-function latDegreesToPixels(lat, zoom) {
-    let degreesPerPixelX = 360 / Math.pow(2, zoom + 8);
-    return lat/degreesPerPixelX;
+function lngDegreesToPixels(lng, zoom) {
+    let lngDegreesPerPixelX = 360 / Math.pow(2, zoom + 8);
+    let pixelsXPerLongDegrees = 1/lngDegreesPerPixelX;
+    return lng * pixelsXPerLongDegrees;
 }
 
-function lngDegreesToPixels(lng, lat, zoom) {
+function latDegreesToPixels(lat, zoom) {
     let parallelMultiplier = Math.cos(lat * Math.PI / 180);
-    let degreesPerPixelY = 360 / Math.pow(2, zoom + 8) * parallelMultiplier;
-    return lng/degreesPerPixelY;
+    let latDegreesPerPixelY = 360 / Math.pow(2, zoom + 8) * parallelMultiplier;
+    let pixelsYPerLatDegree = 1/latDegreesPerPixelY;
+    return lat * pixelsYPerLatDegree;
 }
 
 function pixelToLngDegrees(zoom) {
-    return 360 / Math.pow(2, zoom + 8);
+    let lngDegreesPerPixelX = 360 / Math.pow(2, zoom + 8);
+    return lngDegreesPerPixelX;
+}
+
+function pixelToLatDegrees(lat, zoom) {
+    let parallelMultiplier = Math.cos(lat * Math.PI / 180);
+    let latDegreesPerPixelY = 360 / Math.pow(2, zoom + 8) * parallelMultiplier;
+    return latDegreesPerPixelY;
 }

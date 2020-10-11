@@ -66,6 +66,7 @@ class MapOverlayItems extends React.Component {
 
     constructor(props) {
         super(props);
+        this.ancestorVisible = this.ancestorVisible.bind(this);
         this.onBirthPinsChange = this.onBirthPinsChange.bind(this);
         this.onDeathPinsChange = this.onDeathPinsChange.bind(this);
         this.onAfterSpeedChangeHandler = this.onAfterSpeedChangeHandler.bind(this);
@@ -74,7 +75,7 @@ class MapOverlayItems extends React.Component {
         this.findLatestDeathYear = this.findLatestDeathYear.bind(this);
         this.onOptionsOpenCloseClick = this.onOptionsOpenCloseClick.bind(this);
         this.getMarks = this.getMarks.bind(this);
-        this.onAfterChangeHandler = this.onAfterChangeHandler.bind(this);
+        this.onAfterSliderChangeHandler = this.onAfterSliderChangeHandler.bind(this);
         this.onPausePlayClick = this.onPausePlayClick.bind(this);
         this.incrementYear = this.incrementYear.bind(this);
         this.state={
@@ -111,7 +112,7 @@ class MapOverlayItems extends React.Component {
         }
         let sliderMin = (Math.floor(earliestBirthYear/sliderInterval))*sliderInterval;
         let sliderMax = ((Math.floor(latestDeathYear/sliderInterval))+1)*sliderInterval;
-        this.setState({sliderMin: sliderMin, sliderMax: sliderMax, sliderInterval: sliderInterval});
+        this.setState({year: sliderMin, sliderMin: sliderMin, sliderMax: sliderMax, sliderInterval: sliderInterval});
     }
 
     findEarliestBirthYear() {
@@ -150,8 +151,9 @@ class MapOverlayItems extends React.Component {
         return marks;
     }
 
-    onAfterChangeHandler(value) {
-        this.setState({year: Math.floor(value)});
+    onAfterSliderChangeHandler(value) {
+        let newYear = Math.floor(value);
+        this.setState({year: newYear});
     }
 
     onAfterSpeedChangeHandler(value) {
@@ -167,7 +169,11 @@ class MapOverlayItems extends React.Component {
             clearInterval(this.state.intervalId);
             this.setState({animated: false});
         }
-        this.setState({year: this.state.year+(this.state.sliderSpeed * 0.1)})
+        //let newAdjustedAncestors = adjustOverlappingMarkerCoordinates(this.state.ancestors, this.props.zoom, this.state.birthPins, this.state.deathPins);
+        this.setState({
+            year: this.state.year+(this.state.sliderSpeed * 0.1),
+            //visibleAncestors: newAdjustedAncestors
+        });
     }
 
     onPausePlayClick() {
@@ -184,11 +190,13 @@ class MapOverlayItems extends React.Component {
 
     onAllOrTimeSeriesClick() {
         if (this.state.timeSeries) {
-            this.setState({year: null});
+            this.setState({
+                timeSeries: false,
+                year: this.state.sliderMin
+            });
         } else {
-            this.setState({year: this.state.sliderMin});
+            this.setState({timeSeries: true});
         }
-        this.setState({timeSeries: !this.state.timeSeries})
     }
 
     onBirthPinsChange(e) {
@@ -196,7 +204,7 @@ class MapOverlayItems extends React.Component {
         let adjustedAncestors = adjustOverlappingMarkerCoordinates(this.state.ancestors, this.props.zoom, e.target.checked, this.state.deathPins);
         this.setState({
             birthPins: e.target.checked,
-            ancestors: adjustedAncestors,
+            ancestors: adjustedAncestors
         });
     }
 
@@ -207,6 +215,38 @@ class MapOverlayItems extends React.Component {
             deathPins: e.target.checked,
             ancestors: adjustedAncestors,
         });
+    }
+
+    ancestorVisible(year, birthdateString, deathdateString) {
+        if (this.state.timeSeries === false) {
+            return true;
+        }
+        if ((birthdateString === '0000-00-00' || birthdateString === '') && (deathdateString === '0000-00-00'  || deathdateString === '')) {
+            return false;
+        }
+        let birthdate = Number(birthdateString.substring(0,4));
+        let deathdate = Number(deathdateString.substring(0,4));
+        if (birthdate !== '0000-00-00' && deathdate !== '0000-00-00') {
+            if (birthdate <= year && deathdate >= year) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+        if (birthdate !== '0000-00-00' && deathdate === '0000-00-00') {
+            if (birthdate <= year && (birthdate+60) >= year) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+        if (birthdate === '0000-00-00' && deathdate !== '0000-00-00') {
+            if ((deathdate-60) <= year && deathdate >= year) {
+                return true;
+            } else {
+                return false;
+            }
+        }
     }
 
     render() {
@@ -310,27 +350,24 @@ class MapOverlayItems extends React.Component {
             markers = this.state.ancestors.map((ancestor, index) => {
                 return <StaticMarkers key={index} id={index}
                             ancestor={ancestor}
-                            birthYear={Number(ancestor.BirthDate.substring(0,4))}
-                            deathYear={Number(ancestor.DeathDate.substring(0,4))}
                             birthPins={this.state.birthPins}
                             deathPins={this.state.deathPins}
                             lines={this.state.lines}
                             animated={this.state.animated}
-                            windowAutoOpen={this.state.windowAutoOpen}
-                            visible={(this.state.year === null) ? true : (Number(ancestor.BirthDate.substring(0,4)) <= this.state.year && Number(ancestor.DeathDate.substring(0,4)) >= this.state.year) ? true : false}
-                            />
+                            windowAutoOpen={false}
+                            visible={this.ancestorVisible(this.state.year, ancestor.BirthDate, ancestor.DeathDate)}
+                        />
             })
         } else {
             markers = this.state.ancestors.map((ancestor, index) => {
                 return <MovingMarker key={index} id={index}
                             ancestor={ancestor}
-                            birthYear={Number(ancestor.BirthDate.substring(0,4))}
-                            deathYear={Number(ancestor.DeathDate.substring(0,4))}
                             birthPins={this.state.birthPins}
                             deathPins={this.state.deathPins}
                             lines={this.state.lines}
                             animated={this.state.animated}
                             year={this.state.year}
+                            visible={this.ancestorVisible(this.state.year, ancestor.BirthDate, ancestor.BirthDate)}
                         />
             })
         }
@@ -408,7 +445,7 @@ class MapOverlayItems extends React.Component {
                         dotStyle={dotStyle}
                         handleStyle={handleStyle}
                         trackStyle={trackStyle}
-                        onAfterChange={value => this.onAfterChangeHandler(value)}
+                        onAfterChange={value => this.onAfterSliderChangeHandler(value)}
                     />
                 </div>
         }
