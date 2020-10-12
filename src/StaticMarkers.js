@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Marker, Polyline, MarkerClusterer, InfoWindow } from '@react-google-maps/api';
+import { Marker, Polyline, InfoWindow } from '@react-google-maps/api';
 
 class StaticMarkers extends Component {
 

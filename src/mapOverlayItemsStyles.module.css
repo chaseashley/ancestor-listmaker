@@ -2,7 +2,7 @@
     position: absolute;
     top: 0;
     left: 0;
-    height: 250px;
+    height: 190px;
     width: 550px;
     background: white;
     transition: left .1s, width .1s, height .1s;
@@ -69,7 +69,7 @@ input:disabled+label {
     position: relative;
     display: inline-block;
     border-bottom: 1px dotted black; /* If you want dots under the hoverable text */
-  }
+}
   
   /* Tooltip text */
   .tooltip .tooltiptext {
@@ -88,17 +88,17 @@ input:disabled+label {
     /* Position the tooltip text - see examples below! */
     position: absolute;
     z-index: 1;
-  }
+}
   
-  /* Show the tooltip text when you mouse over the tooltip container */
-  .tooltip:hover .tooltiptext {
+/* Show the tooltip text when you mouse over the tooltip container */
+.tooltip:hover .tooltiptext {
     visibility: visible;
     font-size: .9em;
-  }
+}
 
 .tooltip .tooltiptext {
     width: 100px;
-    bottom: 100%;
+    top: 100%;
     left: 50%;
     margin-left: -60px;
-  }
+}

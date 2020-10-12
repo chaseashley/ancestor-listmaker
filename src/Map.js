@@ -7,6 +7,7 @@ import MapOverlayItems from './MapOverlayItems';
 import MissingCoordinatesOverlay from './MissingCoordinatesOverlay';
 import { getCoordinates, postCoordinates } from './locationsDBqueries';
 import { adjustOverlappingMarkerCoordinates } from './overlappingMarkers';
+import db from './db';
 
 const API_KEY='AIzaSyD5VQNhUE4UQlIZbaJo4aHE1pt9zuZFzPw';
 
@@ -35,6 +36,21 @@ class Map extends React.Component {
             birthPins: true,
             deathPins: false,
         }
+    }
+
+    componentDidMount() {
+        db.table('map')
+        .toArray()
+        .then((storedState) => {
+            if (storedState !== null && this.props.location.ancestors === undefined) {
+                this.setState(JSON.parse(storedState));
+                this.checkAddressesForCoordinates();
+            } else {
+                db.table('map').put(JSON.stringify(this.state),0)
+                    .catch(function(e){alert('Mapping information cannot be stored. Therefore, if you wish to return to this map page, use the Map List button on the ancestors list page rather than the forward return arrow')});
+                this.checkAddressesForCoordinates();
+            }
+        });
     }
 
     async geocodeLocation(location) {
@@ -119,7 +135,7 @@ class Map extends React.Component {
                 }
             }
             if (ancestor.DeathLocation !== '' && ancestor.DeathLocation !== null) {
-                if (ancestor.DeathLocation !== '' && ancestor.dlat === undefined && this.standardizeAddress(ancestor.DeathLocation) === this.standardizeAddress(location)) {
+                if (ancestor.dlat === undefined && this.standardizeAddress(ancestor.DeathLocation) === this.standardizeAddress(location)) {
                     ancestor['dlat'] = coordinates.lat;
                     ancestor['dlng'] = coordinates.lng;
                 } else if (ancestor.dlat === undefined) {
@@ -162,9 +178,9 @@ class Map extends React.Component {
 
     standardizeAddress(address) {
         address = address.toUpperCase();
-        address = address.replace(/,,/g,',');
         address = address.replace(/  /g,' ');
         address = address.replace(/, /g,',');
+        address = address.replace(/,,/g,',');
         address = address.replace(/\./g,'');
         if (address.indexOf('UNITED STATES OF AMERICA') !== -1 && address.indexOf('UNITED STATES OF AMERICA') === address.length-24) {
             address = address.substring(0,address.length-24) + 'USA';
@@ -175,9 +191,34 @@ class Map extends React.Component {
         if (address.indexOf(',NEW ENGLAND') !== -1 && address.indexOf(',NEW ENGLAND') === address.length-12) {
             address = address.substring(0,address.length-12);
         }
-        if (address.indexOf('COLONY') !== -1 && address.indexOf('COLONY') === address.length-6) {
-            address = address.substring(0,address.length-6);
+        if (address.indexOf(',BRITISH COLONIAL AMERICA') !== -1 && address.indexOf(',BRITISH COLONIAL AMERICA') === address.length-25) {
+            address = address.substring(0,address.length-25);
         }
+        if (address.indexOf(',BRITISH AMERICA') !== -1 && address.indexOf(',BRITISH AMERICA') === address.length-16) {
+            address = address.substring(0,address.length-16);
+        }
+        if (address.indexOf(',AMERICA') !== -1 && address.indexOf(',AMERICA') === address.length-8) {
+            address = address.substring(0,address.length-8);
+        }
+        address = address.replace(',PLYMOUTH COLONY',',MASSACHUSETTS');
+        address = address.replace(',MASSACHUSETTS BAY COLONY',',MASSACHUSETTS');
+        address = address.replace(',MASSACHUSETTS BAY',',MASSACHUSETTS');
+        address = address.replace(',PROVINCE OF MASSACHUSETTS BAY',',MASSACHUSETTS');
+        address = address.replace(',PROVINCE OF MASSACHUSETTS',',MASSACHUSETTS');
+        address = address.replace(',PROVINCE OF NEW HAMPSHIRE',',NEW HAMPSHIRE');
+        address = address.replace(',PROVINCE OF MAINE',',MAINE');
+        address = address.replace(',DISTRICT OF MAINE',',MAINE');
+        address = address.replace(',PROVINCE OF RHODE ISLAND',',RHODE ISLAND');
+        address = address.replace(',CONNECTICUT COLONY',',CONNECTICUT');
+        address = address.replace(',COLONY OF CONNECTICUT',',CONNECTICUT');
+        address = address.replace(',PROVINCE OF NEW YORK',',NEW YORK');
+        address = address.replace(',PROVINCE OF NEW JERSEY',',NEW JERSEY');
+        address = address.replace(',PROVINCE OF PENNSYLVANIA',',PENNSYLVANIA');
+        address = address.replace(',PENNSYLVANIA COLONY',',PENNSYLVANIA');
+        address = address.replace(',PROVINCE OF MARYLAND',',MARYLAND');
+        address = address.replace(',VIRGINIA COLONY',',VIRGINIA');
+        address = address.replace(',PROVINCE OF NORTH CAROLINA',',NORTH CAROLINA');
+        address = address.replace(',PROVINCE OF SOUTH CAROLINA',',SOUTH CAROLINA');
         if (address.indexOf(' COUNTY,') !== -1) {
             let end = address.indexOf(' COUNTY,');
             let front = address.substring(0,end);
@@ -185,10 +226,6 @@ class Map extends React.Component {
                 address = address.replace(' COUNTY,',',');
             }
         }
-        address = address.replace(',PROVINCE OF MASSACHUSETTS BAY',',MASSACHUSETTS');
-        address = address.replace(',MASSACHUSETTS BAY COLONY',',MASSACHUSETTS');
-        address = address.replace(',MASSACHUSETTS BAY',',MASSACHUSETTS');
-        address = address.replace(',PLYMOUTH COLONY',',MASSACHUSETTS');
         return address;
     }
 
@@ -216,6 +253,7 @@ class Map extends React.Component {
                     let j = birthLocationIndexes[i];
                     if (responses[i] === undefined) {
                         missingCoordinates = this.addToMissingCoordinates(missingCoordinates, this.state.ancestors[j].BirthLocation, this.state.ancestors[j].BirthNamePrivate, this.state.ancestors[j].Name, 'Birth');
+                        console.log(this.state.ancestors[j].BirthLocation);
                     } else {
                         let birthCoordinates = responses[i].data.coordinates;
                         let blatString = birthCoordinates.substring(0,birthCoordinates.indexOf(','));
@@ -254,20 +292,17 @@ class Map extends React.Component {
         }
     }
 
-    componentDidMount() {
-        this.checkAddressesForCoordinates();
-    }
-
     birthPinsCallback() {
-        this.setState({birthPins: !this.state.birthPins})
+        this.setState({birthPins: !this.state.birthPins});
+        //db.table('map').put(JSON.stringify(this.state),0).catch(function(e){console.log('Dixie IndexedDB error:',e)});
     }
 
     deathPinsCallback() {
-        this.setState({deathPins: !this.state.deathPins})
+        this.setState({deathPins: !this.state.deathPins});
+        //db.table('map').put(JSON.stringify(this.state),0).catch(function(e){console.log('Dixie IndexedDB error:',e)});
     }
 
     render() {
-        //NEED TO ADD SOME VERSION IF ANCESTOR LIST HAS NO ADDRESSES - JUST SHOW MESSAGE AND RETURN TO ANCESTOR LIST
         let mapOrLoading;
         if (!this.state.coordinatesLoaded && this.state.missingCoordinates === null) {
             mapOrLoading = 

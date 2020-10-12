@@ -437,7 +437,20 @@ class Main extends React.Component {
 
     let mapButton;
     if (this.state.processingStatus ==='Done' && this.state.matchingAncestors.length !== 0) {
-      mapButton = <Link to={{ pathname: '/Map', ancestors: this.state.matchingAncestors}}><button className={styles.mapButton}>Map List</button></Link>;
+      let noLocations = true;
+      for (let i=0; i<this.state.matchingAncestors.length; i++){
+        let ancestor = this.state.matchingAncestors[i];
+        if ((ancestor.BirthLocation !== null && ancestor.BirthLocation !== '') || (ancestor.DeathLocation !== null && ancestor.DeathLocation !== '')) {
+          noLocations = false;
+          break;
+        }
+      }
+      if (noLocations) {
+        mapButton = <button className={styles.mapButton} disabled={true}>Map List</button>;
+      } else { //is at least one location field
+        mapButton = <Link to={{ pathname: '/Map', ancestors: this.state.matchingAncestors}}><button className={styles.mapButton}>Map List</button></Link>;
+    
+      }
     } else {
       mapButton = <button className={styles.mapButton} disabled={true}>Map List</button>;
     }

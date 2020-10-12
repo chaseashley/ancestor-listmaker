@@ -1,6 +1,5 @@
 import React from 'react';
 import StaticMarkers from './StaticMarkers';
-import MovingMarker from './MovingMarker';
 import "rc-slider/assets/index.css";
 import Slider from "rc-slider";
 import styles from './mapOverlayItemsStyles.module.css';
@@ -119,7 +118,7 @@ class MapOverlayItems extends React.Component {
         let earliestBirthYear = 3000;
         let birthYear;
         this.props.ancestors.forEach(ancestor => {
-            if (ancestor.BirthDate !=='') {
+            if (ancestor.BirthDate !=='' && ancestor.BirthDate !== '0000-00-00') {
                 birthYear = Number(ancestor.BirthDate.substring(0,4));
                 if (birthYear < earliestBirthYear) {
                     earliestBirthYear = birthYear;
@@ -226,21 +225,21 @@ class MapOverlayItems extends React.Component {
         }
         let birthdate = Number(birthdateString.substring(0,4));
         let deathdate = Number(deathdateString.substring(0,4));
-        if (birthdate !== '0000-00-00' && deathdate !== '0000-00-00') {
+        if (birthdateString !== '0000-00-00' && deathdateString !== '0000-00-00') {
             if (birthdate <= year && deathdate >= year) {
                 return true;
             } else {
                 return false;
             }
         }
-        if (birthdate !== '0000-00-00' && deathdate === '0000-00-00') {
+        if (birthdateString !== '0000-00-00' && deathdateString === '0000-00-00') {
             if (birthdate <= year && (birthdate+60) >= year) {
                 return true;
             } else {
                 return false;
             }
         }
-        if (birthdate === '0000-00-00' && deathdate !== '0000-00-00') {
+        if (birthdateString === '0000-00-00' && deathdateString !== '0000-00-00') {
             if ((deathdate-60) <= year && deathdate >= year) {
                 return true;
             } else {
@@ -292,12 +291,6 @@ class MapOverlayItems extends React.Component {
                 />
                 Show ancestors living over time
             </label>
-        
-        const windowAutoOpen = 
-            <div className={styles.displayOptions}>
-                <input type="checkbox" name="windowAutoOpenCheckbox" checked={this.state.windowAutoOpen} onChange={(e) => this.setState({windowAutoOpen: e.target.checked})} disabled={!this.state.timeSeries}/>
-                <label for="windowAutoOpenCheckbox">Show birth/death information when event occurs</label>
-            </div>
 
         const birthPins = 
             <div className={styles.displayOptions}>
@@ -333,9 +326,6 @@ class MapOverlayItems extends React.Component {
                     <tr>
                         <td colSpan='2' className={styles.bottomBorder}>{lines}</td>
                     </tr>
-                    <tr>
-                        <td colSpan='2'>{windowAutoOpen}</td>
-                    </tr>
                     </tbody>
                 </table>
                 {optionsOpenCloseButton}
@@ -345,32 +335,17 @@ class MapOverlayItems extends React.Component {
             </div>
         }
 
-        let markers;
-        if (this.state.markerType === 'static') {
-            markers = this.state.ancestors.map((ancestor, index) => {
-                return <StaticMarkers key={index} id={index}
-                            ancestor={ancestor}
-                            birthPins={this.state.birthPins}
-                            deathPins={this.state.deathPins}
-                            lines={this.state.lines}
-                            animated={this.state.animated}
-                            windowAutoOpen={false}
-                            visible={this.ancestorVisible(this.state.year, ancestor.BirthDate, ancestor.DeathDate)}
-                        />
-            })
-        } else {
-            markers = this.state.ancestors.map((ancestor, index) => {
-                return <MovingMarker key={index} id={index}
-                            ancestor={ancestor}
-                            birthPins={this.state.birthPins}
-                            deathPins={this.state.deathPins}
-                            lines={this.state.lines}
-                            animated={this.state.animated}
-                            year={this.state.year}
-                            visible={this.ancestorVisible(this.state.year, ancestor.BirthDate, ancestor.BirthDate)}
-                        />
-            })
-        }
+        let markers = this.state.ancestors.map((ancestor, index) => {
+            return <StaticMarkers key={index} id={index}
+                        ancestor={ancestor}
+                        birthPins={this.state.birthPins}
+                        deathPins={this.state.deathPins}
+                        lines={this.state.lines}
+                        animated={this.state.animated}
+                        windowAutoOpen={false}
+                        visible={this.ancestorVisible(this.state.year, ancestor.BirthDate, ancestor.DeathDate)}
+                    />
+        })
 
         let pauseplay;
         if (!this.state.timeSeries) {
