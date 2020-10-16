@@ -158,10 +158,12 @@ class Map extends React.Component {
             }
         })
         map.fitBounds(bounds);
+        let adjustedAncestors = adjustOverlappingMarkerCoordinates(this.state.ancestors, map.getZoom(), this.state.birthPins, this.state.deathPins);
         this.setState({
             map: map,
             mapZoom: map.getZoom(),
-            mapCenter: map.getCenter()
+            mapCenter: map.getCenter(),
+            ancestors: adjustedAncestors
         });
     }
 
@@ -209,6 +211,9 @@ class Map extends React.Component {
         address = address.replace(',PROVINCE OF MAINE',',MAINE');
         address = address.replace(',DISTRICT OF MAINE',',MAINE');
         address = address.replace(',PROVINCE OF RHODE ISLAND',',RHODE ISLAND');
+        address = address.replace(',COLONY OF RHODE ISLAND',',RHODE ISLAND');
+        address = address.replace(',COLONY OF RHODE ISLAND AND PROVIDENCE PLANTATIONS',',RHODE ISLAND');
+        address = address.replace(',COLONY OF RHODE ISLAND AND PROVIDENCE PLANTATION',',RHODE ISLAND');
         address = address.replace(',CONNECTICUT COLONY',',CONNECTICUT');
         address = address.replace(',COLONY OF CONNECTICUT',',CONNECTICUT');
         address = address.replace(',PROVINCE OF NEW YORK',',NEW YORK');
@@ -226,6 +231,11 @@ class Map extends React.Component {
                 address = address.replace(' COUNTY,',',');
             }
         }
+        address = address.replace('ENGLAND,UNITED KINGDOM','ENGLAND');
+        address = address.replace('SCOTLAND,UNITED KINGDOM','SCOTLAND');
+        address = address.replace('WALES,UNITED KINGDOM','WALES');
+        address = address.replace('NORTHERN IRELAND,UNITED KINGDOM','IRELAND');
+        address = address.replace('REPUBLIC OF IRELAND','IRELAND');
         return address;
     }
 
@@ -330,7 +340,7 @@ class Map extends React.Component {
                                 }
                             }}
                         >
-                            <MapOverlayItems ancestors={this.state.ancestors} birthPinsCallback={this.birthPinsCallback} deathPinsCallback={this.deathPinsCallback} zoom={this.state.zoom}/>
+                            <MapOverlayItems ancestors={this.state.ancestors} birthPinsCallback={this.birthPinsCallback} deathPinsCallback={this.deathPinsCallback} zoom={this.state.mapZoom}/>
                         </GoogleMap>
                     </LoadScript>
             } else if (this.state.missingCoordinates !== null) {

@@ -14,7 +14,7 @@ function getUniqueCoordinatesArray(ancestors,zoom,birthPins,deathPins) {
         if (birthPins && ancestors[i].blat !== undefined) {
             for (let j=0; j<uniqueCoordinates.length; j++) {
                 let bjoffset = false;
-                if (j!==0 || 'birth' !== uniqueCoordinates[0][1][0][0] || i !== uniqueCoordinates[0][1][0][1]) {
+                if ('birth' !== uniqueCoordinates[0][1][0][0] || i !== uniqueCoordinates[0][1][0][1]) {
                     let bPixelLatOffset = latDegreesToPixels(ancestors[i].blat-uniqueCoordinates[j][0].lat, zoom);
                     if (Math.abs(bPixelLatOffset) >= 1) {
                         bjoffset = true;
@@ -40,7 +40,7 @@ function getUniqueCoordinatesArray(ancestors,zoom,birthPins,deathPins) {
         if (deathPins && ancestors[i].dlat !== undefined) {
             for (let j=0; j<uniqueCoordinates.length; j++) {
                 let djoffset = false;
-                if (j!==0 || 'death' !== uniqueCoordinates[0][1][0][0] || i !== uniqueCoordinates[0][1][0][1]) {
+                if ('death' !== uniqueCoordinates[0][1][0][0] || i !== uniqueCoordinates[0][1][0][1]) {
                     let dPixelLatOffset = latDegreesToPixels(ancestors[i].dlat-uniqueCoordinates[j][0].lat, zoom);
                     if (Math.abs(dPixelLatOffset) >= 1) {
                         djoffset = true;

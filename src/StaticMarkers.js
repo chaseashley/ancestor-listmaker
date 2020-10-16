@@ -46,6 +46,11 @@ class StaticMarkers extends Component {
             });
         } else { //this will be true if click occurs while window is open due to a click or has been closed due to a click and not reopened with a mouseOver; close window and reactivate mouseOver by setting clicked to false
             if (this.props.visible) {
+                this.setState({dOpen: true});
+                this.setState({dWindowZindex: Math.floor(Date.now()/1000)});
+                this.setState({bOpen: true});
+                this.setState({bWindowZindex: Math.floor(Date.now()/1000)});
+                /* COMMENTED OUT CODE PROVIDES FOR CLOSING WINDOW WITH A CLICK
                 let dOpen;
                 if (this.state.dOpen) {
                     dOpen = true;
@@ -70,6 +75,8 @@ class StaticMarkers extends Component {
                 }
             }
             this.setState({clicked: false})
+            */
+            }
         }
     }
 
@@ -85,6 +92,11 @@ class StaticMarkers extends Component {
             });
         } else { //this will be true if click occurs while window is open due to a click or has been closed due to a click and not reopened with a mouseOver; close window and reactivate mouseOver by setting clicked to false
             if (this.props.visible) {
+                this.setState({bOpen: true});
+                this.setState({bWindowZindex: Math.floor(Date.now()/1000)});
+                this.setState({dOpen: true});
+                this.setState({dWindowZindex: Math.floor(Date.now()/1000)});
+                /* COMMENTED OUT CODE PROVIDES FOR CLOSING WINDOW WITH A CLICK
                 let bOpen;
                 if (this.state.bOpen) {
                     bOpen = true;
@@ -108,7 +120,8 @@ class StaticMarkers extends Component {
                     this.setState({dWindowZindex: Math.floor(Date.now()/1000)+1})
                 }
             }
-            this.setState({clicked: false})
+            this.setState({clicked: false})*/
+            }
         }
     }
 
