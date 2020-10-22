@@ -213,6 +213,9 @@ export function standardizeAddress(address) {
     if (address.indexOf('NOVA SCOTIA') !== -1 && address.indexOf('NOVA SCOTIA') === address.length-11) {
         address = address + ',CANADA';
     }
+    if (address.indexOf('PROVINCE OF NEW BRUNSWICK') !== -1 && address.indexOf('PROVINCE OF NEW BRUNSWICK') === address.length-25) {
+        address = address.substring(0,address.length-25) + 'NEW BRUNSWICK,CANADA';
+    }
 
     return address;
 }

@@ -85,7 +85,7 @@ export function adjustOverlappingMarkerCoordinates(ancestors, zoom, birthPins, d
     */
     for (let i=0; i<uniqueCoordinates.length; i++) {
         const variableLngOffset = (Math.pow(2,zoom-(Math.log2(uniqueCoordinates[i][1].length))) + 1)/4 * pixelToLngDegrees(zoom);
-        const maxLngOffset = 20 * pixelToLngDegrees(zoom);
+        const maxLngOffset = 19 * pixelToLngDegrees(zoom);
         let lngOffset;
         if (variableLngOffset > maxLngOffset) {
             lngOffset = maxLngOffset;

@@ -49,6 +49,7 @@ function get_retry(url, n) {
 
 export function getCoordinates(locationName) {
   const dbURL = 'https://ancestor-listmaker-backend.herokuapp.com/locations/' + locationName;
+  console.log('locationName=', locationName);
   return get_retry(dbURL, 5)
 }
     
