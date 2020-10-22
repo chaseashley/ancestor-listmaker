@@ -10,7 +10,7 @@ export class AhnenTable extends React.Component {
     for (let i = 0; i < data.length; i++) {
       rows.push(<tr key={i}>
         <td className={styles.ahnen}>{data[i]['Generation'] + '-' + data[i]['Ahnen']}</td>
-        <td className={styles.ancestor}><a href={`https://www.wikitree.com/wiki/${data[i]['Name']}`} target='_blank'>{fullname ? data[i]['BirthName'] : data[i]['BirthNamePrivate']}</a>
+        <td className={styles.ancestor}><a href={`https://www.wikitree.com/wiki/${data[i]['Name']}`} target='_blank' rel='noopener noreferrer'>{fullname ? data[i]['BirthName'] : data[i]['BirthNamePrivate']}</a>
         {(multiples && multiplesArray[data[i]['Id']]>1) ? <span className={styles.multiples}>&nbsp;({multiplesArray[data[i]['Id']]})</span>:''}
         &nbsp;<Link to={{ pathname: '/apps/ashley1950/listmaker/lines', endAncestor: data[i], descendantJson: descendantJson, ancestors: ancestors, generations: generations, fullname: fullname}}><img src={rfimage}/></Link>
         </td>

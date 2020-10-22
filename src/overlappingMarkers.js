@@ -67,6 +67,7 @@ function getUniqueCoordinatesArray(ancestors,zoom,birthPins,deathPins) {
 
 export function adjustOverlappingMarkerCoordinates(ancestors, zoom, birthPins, deathPins) {
     let uniqueCoordinates = getUniqueCoordinatesArray(ancestors, zoom, birthPins, deathPins);
+    /*
     let maxOverlaps = 0;
     uniqueCoordinates.forEach(uniqueCoordinate => {
         if (uniqueCoordinate[1].length > maxOverlaps) {
@@ -74,7 +75,6 @@ export function adjustOverlappingMarkerCoordinates(ancestors, zoom, birthPins, d
         }
     })
     const variableLngOffset = (Math.pow(2,zoom-(Math.log2(maxOverlaps))) + 1)/4 * pixelToLngDegrees(zoom);
-    //const variableOffset = (Math.pow(zoom,4)/100) * (4/(Math.log2(maxOverlaps)+1)) * pixelToLngDegrees(zoom);
     const maxLngOffset = 18 * pixelToLngDegrees(zoom);
     let lngOffset;
     if (variableLngOffset > maxLngOffset) {
@@ -82,9 +82,17 @@ export function adjustOverlappingMarkerCoordinates(ancestors, zoom, birthPins, d
     } else {
         lngOffset = variableLngOffset;
     }
+    */
     for (let i=0; i<uniqueCoordinates.length; i++) {
-        const variableLatOffset = (Math.pow(2,zoom-(Math.log2(maxOverlaps))) + 1)/4 * pixelToLatDegrees(uniqueCoordinates[i][0].lat, zoom);
-        //const variableOffset = (Math.pow(zoom,4)/100) * (4/(Math.log2(maxOverlaps)+1)) * pixelToLngDegrees(zoom);
+        const variableLngOffset = (Math.pow(2,zoom-(Math.log2(uniqueCoordinates[i][1].length))) + 1)/4 * pixelToLngDegrees(zoom);
+        const maxLngOffset = 20 * pixelToLngDegrees(zoom);
+        let lngOffset;
+        if (variableLngOffset > maxLngOffset) {
+            lngOffset = maxLngOffset;
+        } else {
+            lngOffset = variableLngOffset;
+        }
+        const variableLatOffset = (Math.pow(2,zoom-(Math.log2(uniqueCoordinates[i][1].length))) + 1)/4 * pixelToLatDegrees(uniqueCoordinates[i][0].lat, zoom);
         const maxLatOffset = 30 * pixelToLatDegrees(uniqueCoordinates[i][0].lat, zoom);
         let latOffset;
         if (variableLatOffset > maxLatOffset) {

@@ -106,7 +106,7 @@ class Lines extends React.Component {
           row.push(
             <>
             <td className={styles.gen1}>{ancestralLines[0][i]['Generation']}</td>
-            <td className={styles.name1}>{(ancestralLines[0][i]['Id']<0) ? 'Private' : <a href={`https://www.wikitree.com/wiki/${ancestralLines[0][i]['Name']}`} target='_blank'>{this.state.fullname ? ancestralLines[0][i]['BirthName'] : ancestralLines[0][i]['BirthNamePrivate']}</a>}</td>
+            <td className={styles.name1}>{(ancestralLines[0][i]['Id']<0) ? 'Private' : <a href={`https://www.wikitree.com/wiki/${ancestralLines[0][i]['Name']}`} target='_blank' rel='noopener noreferrer'>{this.state.fullname ? ancestralLines[0][i]['BirthName'] : ancestralLines[0][i]['BirthNamePrivate']}</a>}</td>
             <td className={styles.date1}>{ancestralLines[0][i]['BirthDate']}</td>
             <td className={styles.location1}>{ancestralLines[0][i]['BirthLocation']}</td>
             <td className={styles.date1}>{ancestralLines[0][i]['DeathDate']}</td>

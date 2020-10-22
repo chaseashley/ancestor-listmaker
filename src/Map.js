@@ -8,6 +8,7 @@ import MissingCoordinatesOverlay from './MissingCoordinatesOverlay';
 import { getCoordinates, postCoordinates } from './locationsDBqueries';
 import { adjustOverlappingMarkerCoordinates } from './overlappingMarkers';
 import db from './db';
+import { standardizeAddress } from './standardizeAddress';
 
 const API_KEY='AIzaSyD5VQNhUE4UQlIZbaJo4aHE1pt9zuZFzPw';
 
@@ -22,7 +23,6 @@ class Map extends React.Component {
         this.onClickCoordinatesSubmit = this.onClickCoordinatesSubmit.bind(this);
         this.geocodeLocation = this.geocodeLocation.bind(this);
         this.centerMap = this.centerMap.bind(this);
-        this.standardizeAddress = this.standardizeAddress.bind(this);
         this.getCoordinatesFromAddressDBText = this.getCoordinatesFromAddressDBText.bind(this);
         this.state = {
             coordinatesLoaded: false,
@@ -127,7 +127,7 @@ class Map extends React.Component {
         let missingCoordinates = [];
         this.state.ancestors.forEach(ancestor => {
             if (ancestor.BirthLocation !== '' && ancestor.BirthLocation !== null) {
-                if (ancestor.blat === undefined && this.standardizeAddress(ancestor.BirthLocation) === this.standardizeAddress(location)) {
+                if (ancestor.blat === undefined && standardizeAddress(ancestor.BirthLocation) === standardizeAddress(location)) {
                     ancestor['blat'] = coordinates.lat;
                     ancestor['blng'] = coordinates.lng;
                 } else if (ancestor.blat === undefined) {
@@ -135,7 +135,7 @@ class Map extends React.Component {
                 }
             }
             if (ancestor.DeathLocation !== '' && ancestor.DeathLocation !== null) {
-                if (ancestor.dlat === undefined && this.standardizeAddress(ancestor.DeathLocation) === this.standardizeAddress(location)) {
+                if (ancestor.dlat === undefined && standardizeAddress(ancestor.DeathLocation) === standardizeAddress(location)) {
                     ancestor['dlat'] = coordinates.lat;
                     ancestor['dlng'] = coordinates.lng;
                 } else if (ancestor.dlat === undefined) {
@@ -143,7 +143,7 @@ class Map extends React.Component {
                 }
             }
         });
-        postCoordinates(this.standardizeAddress(location), `${coordinates.lat},${coordinates.lng}`)
+        postCoordinates(standardizeAddress(location), `${coordinates.lat},${coordinates.lng}`)
         return missingCoordinates;
     }
 
@@ -178,67 +178,6 @@ class Map extends React.Component {
         }
     }
 
-    standardizeAddress(address) {
-        address = address.toUpperCase();
-        address = address.replace(/  /g,' ');
-        address = address.replace(/, /g,',');
-        address = address.replace(/,,/g,',');
-        address = address.replace(/\./g,'');
-        if (address.indexOf('UNITED STATES OF AMERICA') !== -1 && address.indexOf('UNITED STATES OF AMERICA') === address.length-24) {
-            address = address.substring(0,address.length-24) + 'USA';
-        }
-        if (address.indexOf('UNITED STATES') !== -1 && address.indexOf('UNITED STATES') === address.length-13) {
-            address = address.substring(0,address.length-13) + 'USA';
-        }
-        if (address.indexOf(',NEW ENGLAND') !== -1 && address.indexOf(',NEW ENGLAND') === address.length-12) {
-            address = address.substring(0,address.length-12);
-        }
-        if (address.indexOf(',BRITISH COLONIAL AMERICA') !== -1 && address.indexOf(',BRITISH COLONIAL AMERICA') === address.length-25) {
-            address = address.substring(0,address.length-25);
-        }
-        if (address.indexOf(',BRITISH AMERICA') !== -1 && address.indexOf(',BRITISH AMERICA') === address.length-16) {
-            address = address.substring(0,address.length-16);
-        }
-        if (address.indexOf(',AMERICA') !== -1 && address.indexOf(',AMERICA') === address.length-8) {
-            address = address.substring(0,address.length-8);
-        }
-        address = address.replace(',PLYMOUTH COLONY',',MASSACHUSETTS');
-        address = address.replace(',MASSACHUSETTS BAY COLONY',',MASSACHUSETTS');
-        address = address.replace(',MASSACHUSETTS BAY',',MASSACHUSETTS');
-        address = address.replace(',PROVINCE OF MASSACHUSETTS BAY',',MASSACHUSETTS');
-        address = address.replace(',PROVINCE OF MASSACHUSETTS',',MASSACHUSETTS');
-        address = address.replace(',PROVINCE OF NEW HAMPSHIRE',',NEW HAMPSHIRE');
-        address = address.replace(',PROVINCE OF MAINE',',MAINE');
-        address = address.replace(',DISTRICT OF MAINE',',MAINE');
-        address = address.replace(',PROVINCE OF RHODE ISLAND',',RHODE ISLAND');
-        address = address.replace(',COLONY OF RHODE ISLAND',',RHODE ISLAND');
-        address = address.replace(',COLONY OF RHODE ISLAND AND PROVIDENCE PLANTATIONS',',RHODE ISLAND');
-        address = address.replace(',COLONY OF RHODE ISLAND AND PROVIDENCE PLANTATION',',RHODE ISLAND');
-        address = address.replace(',CONNECTICUT COLONY',',CONNECTICUT');
-        address = address.replace(',COLONY OF CONNECTICUT',',CONNECTICUT');
-        address = address.replace(',PROVINCE OF NEW YORK',',NEW YORK');
-        address = address.replace(',PROVINCE OF NEW JERSEY',',NEW JERSEY');
-        address = address.replace(',PROVINCE OF PENNSYLVANIA',',PENNSYLVANIA');
-        address = address.replace(',PENNSYLVANIA COLONY',',PENNSYLVANIA');
-        address = address.replace(',PROVINCE OF MARYLAND',',MARYLAND');
-        address = address.replace(',VIRGINIA COLONY',',VIRGINIA');
-        address = address.replace(',PROVINCE OF NORTH CAROLINA',',NORTH CAROLINA');
-        address = address.replace(',PROVINCE OF SOUTH CAROLINA',',SOUTH CAROLINA');
-        if (address.indexOf(' COUNTY,') !== -1) {
-            let end = address.indexOf(' COUNTY,');
-            let front = address.substring(0,end);
-            if (front.indexOf(',') !== -1) {
-                address = address.replace(' COUNTY,',',');
-            }
-        }
-        address = address.replace('ENGLAND,UNITED KINGDOM','ENGLAND');
-        address = address.replace('SCOTLAND,UNITED KINGDOM','SCOTLAND');
-        address = address.replace('WALES,UNITED KINGDOM','WALES');
-        address = address.replace('NORTHERN IRELAND,UNITED KINGDOM','IRELAND');
-        address = address.replace('REPUBLIC OF IRELAND','IRELAND');
-        return address;
-    }
-
     async checkAddressesForCoordinates() {
         let missingCoordinates = [];
         let birthCoordinatesGets = [];
@@ -247,12 +186,12 @@ class Map extends React.Component {
         let deathLocationIndexes = [];
         for (let i=0; i<this.state.ancestors.length; i++) {
             if (this.state.ancestors[i].BirthLocation !== '' && this.state.ancestors[i].BirthLocation !== null) {
-                let birthLocation = this.standardizeAddress(this.state.ancestors[i].BirthLocation);
+                let birthLocation = standardizeAddress(this.state.ancestors[i].BirthLocation);
                 birthCoordinatesGets.push(getCoordinates(birthLocation));
                 birthLocationIndexes.push(i);
             }
             if (this.state.ancestors[i].DeathLocation !== '' && this.state.ancestors[i].DeathLocation !== null) {
-                let deathLocation = this.standardizeAddress(this.state.ancestors[i].DeathLocation);
+                let deathLocation = standardizeAddress(this.state.ancestors[i].DeathLocation);
                 deathCoordinatesGets.push(getCoordinates(deathLocation));
                 deathLocationIndexes.push(i);
             }
@@ -334,7 +273,7 @@ class Map extends React.Component {
                             }}
                             onZoomChanged={() => {
                                 if (this.state.map!==null) {
-                                    this.setState({zoom: this.state.map.getZoom()});
+                                    this.setState({mapZoom: this.state.map.getZoom()});
                                     let adjustedAncestors = adjustOverlappingMarkerCoordinates(this.state.ancestors, this.state.map.getZoom(), this.state.birthPins, this.state.deathPins);
                                     this.setState({ancestors: adjustedAncestors});
                                 }
