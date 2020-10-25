@@ -84,7 +84,7 @@ export function adjustOverlappingMarkerCoordinates(ancestors, zoom, birthPins, d
     }
     */
     for (let i=0; i<uniqueCoordinates.length; i++) {
-        const variableLngOffset = (Math.pow(2,zoom-(Math.log2(uniqueCoordinates[i][1].length))) + 1)/4 * pixelToLngDegrees(zoom);
+        const variableLngOffset = (Math.pow(2,zoom-(Math.log1p(uniqueCoordinates[i][1].length))) + 1)/12 * pixelToLngDegrees(zoom);
         const maxLngOffset = 19 * pixelToLngDegrees(zoom);
         let lngOffset;
         if (variableLngOffset > maxLngOffset) {
@@ -92,7 +92,7 @@ export function adjustOverlappingMarkerCoordinates(ancestors, zoom, birthPins, d
         } else {
             lngOffset = variableLngOffset;
         }
-        const variableLatOffset = (Math.pow(2,zoom-(Math.log2(uniqueCoordinates[i][1].length))) + 1)/4 * pixelToLatDegrees(uniqueCoordinates[i][0].lat, zoom);
+        const variableLatOffset = (Math.pow(2,zoom-(Math.log1p(uniqueCoordinates[i][1].length))) + 1)/12 * pixelToLatDegrees(uniqueCoordinates[i][0].lat, zoom);
         const maxLatOffset = 30 * pixelToLatDegrees(uniqueCoordinates[i][0].lat, zoom);
         let latOffset;
         if (variableLatOffset > maxLatOffset) {

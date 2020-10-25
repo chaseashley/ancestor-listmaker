@@ -27,6 +27,16 @@
     border:1px solid black;
 }
 
+.reviewWarningDiv {
+    position: relative;
+    top: 150px;
+    left: 25%;
+    width: 700px;
+    height: 200px;
+    background-color: rgb(243, 241, 234);
+    border:1px solid black;
+}
+
 .statusElipsis {
     position:relative;
     top: 30px;

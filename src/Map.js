@@ -16,6 +16,8 @@ class Map extends React.Component {
 
     constructor(props) {
         super(props);
+        this.checkAddressesForCoordinates = this.checkAddressesForCoordinates.bind(this);
+        this.makeLocationsList = this.makeLocationsList.bind(this);
         this.birthPinsCallback = this.birthPinsCallback.bind(this);
         this.deathPinsCallback = this.deathPinsCallback.bind(this);
         this.onClickCoordinatesSkip = this.onClickCoordinatesSkip.bind(this);
@@ -35,6 +37,7 @@ class Map extends React.Component {
             mapCenter: null,
             birthPins: true,
             deathPins: false,
+            proceed: false,
         }
     }
 
@@ -178,61 +181,94 @@ class Map extends React.Component {
         }
     }
 
-    async checkAddressesForCoordinates() {
-        let missingCoordinates = [];
-        let birthCoordinatesGets = [];
-        let birthLocationIndexes = [];
-        let deathCoordinatesGets = [];
-        let deathLocationIndexes = [];
+    makeLocationsList() {
+        let locations = [];
         for (let i=0; i<this.state.ancestors.length; i++) {
             if (this.state.ancestors[i].BirthLocation !== '' && this.state.ancestors[i].BirthLocation !== null) {
-                let birthLocation = standardizeAddress(this.state.ancestors[i].BirthLocation);
-                birthCoordinatesGets.push(getCoordinates(birthLocation));
-                birthLocationIndexes.push(i);
+                let standardizedBirthLocation = standardizeAddress(this.state.ancestors[i].BirthLocation);
+                let locationFound = false;
+                for (let j=0; j<locations.length; j++) {
+                    if (standardizedBirthLocation === locations[j]) {
+                        locationFound = true;
+                        break;
+                    } 
+                }
+                if (!locationFound) {
+                    locations.push(standardizedBirthLocation);
+                }
             }
             if (this.state.ancestors[i].DeathLocation !== '' && this.state.ancestors[i].DeathLocation !== null) {
-                let deathLocation = standardizeAddress(this.state.ancestors[i].DeathLocation);
-                deathCoordinatesGets.push(getCoordinates(deathLocation));
-                deathLocationIndexes.push(i);
+                let standardizedDeathLocation = standardizeAddress(this.state.ancestors[i].DeathLocation);
+                let locationFound = false;
+                for (let j=0; j<locations.length; j++) {
+                    if (standardizedDeathLocation === locations[j]) {
+                        locationFound = true;
+                        break;
+                    }
+                }
+                if (!locationFound) {
+                    locations.push(standardizedDeathLocation);
+                }
             }
         }
-        await Promise.all(birthCoordinatesGets)
+        return locations;
+    }
+
+    async getLocationsCoordinates(locations) {
+        let locationsWithCoordinates = {};
+        let locationsMissingCoordinates = [];
+        let coordinatesGets = [];
+        let missingCoordinates = [];
+        for (let i=0; i<locations.length; i++) {
+            coordinatesGets.push(getCoordinates(locations[i]));
+        }
+        await Promise.all(coordinatesGets)
             .then(responses => {
                 for (let i=0; i<responses.length; i++) {
-                    let j = birthLocationIndexes[i];
                     if (responses[i] === undefined) {
-                        missingCoordinates = this.addToMissingCoordinates(missingCoordinates, this.state.ancestors[j].BirthLocation, this.state.ancestors[j].BirthNamePrivate, this.state.ancestors[j].Name, 'Birth');
-                        console.log(this.state.ancestors[j].BirthLocation);
+                        locationsMissingCoordinates.push(locations[i])
                     } else {
-                        let birthCoordinates = responses[i].data.coordinates;
-                        let blatString = birthCoordinates.substring(0,birthCoordinates.indexOf(','));
-                        this.state.ancestors[j]['blat'] = Number(blatString);
-                        let blngString = birthCoordinates.substring(birthCoordinates.indexOf(',')+1);
-                        this.state.ancestors[j]['blng'] = Number(blngString);
+                        locationsWithCoordinates[locations[i]] = responses[i].data.coordinates;
                     }
                 }
             })
             .catch(error => {
                 console.log(error);
             });
-        await Promise.all(deathCoordinatesGets)
-                .then(responses => {
-                for (let i=0; i<responses.length; i++) {
-                    let j = deathLocationIndexes[i];
-                    if (responses[i] === undefined) {
-                        missingCoordinates = this.addToMissingCoordinates(missingCoordinates, this.state.ancestors[j].DeathLocation, this.state.ancestors[j].BirthNamePrivate, this.state.ancestors[j].Name, 'Death');
-                    } else {
-                        let deathCoordinates = responses[i].data.coordinates;
-                        let dlatString = deathCoordinates.substring(0,deathCoordinates.indexOf(','));
-                        this.state.ancestors[j]['dlat'] = Number(dlatString);
-                        let dlngString = deathCoordinates.substring(deathCoordinates.indexOf(',')+1);
-                        this.state.ancestors[j]['dlng'] = Number(dlngString);
-                    }
+        for (let i=0; i<this.state.ancestors.length; i++) {
+            if (this.state.ancestors[i].BirthLocation !== '' && this.state.ancestors[i].BirthLocation !== null) {
+                let standardizedBirthLocation = standardizeAddress(this.state.ancestors[i].BirthLocation);
+                if (standardizedBirthLocation in locationsWithCoordinates) {
+                    let coordinates = locationsWithCoordinates[standardizedBirthLocation];
+                    let commaLocation = coordinates.indexOf(',');
+                    let blatString = coordinates.substring(0,commaLocation);
+                    this.state.ancestors[i]['blat'] = Number(blatString);
+                    let blngString = coordinates.substring(commaLocation+1);
+                    this.state.ancestors[i]['blng'] = Number(blngString);
+                } else {
+                    missingCoordinates = this.addToMissingCoordinates(missingCoordinates, this.state.ancestors[i].BirthLocation, this.state.ancestors[i].BirthNamePrivate, this.state.ancestors[i].Name, 'Birth');
                 }
-            })
-            .catch(error => {
-                console.log(error);
-            });
+            }
+            if (this.state.ancestors[i].DeathLocation !== '' && this.state.ancestors[i].DeathLocation !== null) {
+                let standardizedDeathLocation = standardizeAddress(this.state.ancestors[i].DeathLocation);
+                if (standardizedDeathLocation in locationsWithCoordinates) {
+                    let coordinates = locationsWithCoordinates[standardizedDeathLocation];
+                    let commaLocation = coordinates.indexOf(',');
+                    let dlatString = coordinates.substring(0,commaLocation);
+                    this.state.ancestors[i]['dlat'] = Number(dlatString);
+                    let dlngString = coordinates.substring(commaLocation+1);
+                    this.state.ancestors[i]['dlng'] = Number(dlngString);
+                } else {
+                    missingCoordinates = this.addToMissingCoordinates(missingCoordinates, this.state.ancestors[i].DeathLocation, this.state.ancestors[i].BirthNamePrivate, this.state.ancestors[i].Name, 'Death');
+                }
+            }
+        }
+        return missingCoordinates;
+    }
+
+    async checkAddressesForCoordinates() {
+        let locations = this.makeLocationsList();
+        let missingCoordinates = await this.getLocationsCoordinates(locations);
         if (missingCoordinates.length === 0) {
             this.setState({coordinatesLoaded: true});
         } else {
@@ -257,6 +293,17 @@ class Map extends React.Component {
             mapOrLoading = 
                 <div className={styles.loadingDiv}>
                     <div className={styles.statusElipsis}>Retrieving location coordinates</div>
+                </div>
+        } else if (!this.state.coordinatesLoaded && this.state.missingCoordinates !== null && !this.state.proceed) {
+            mapOrLoading = 
+                <div className={styles.reviewWarningDiv}>
+                    <div><p>The ancestor list contains {this.state.missingCoordinates.length} locations that are not yet in the 
+                    app’s database and that you will need to review and add to the database before a map of the ancestor list 
+                    can be generated.</p><p>If you wish to review these locations and add them to the database so that a map of the 
+                    ancestor list can be generated, click 'Proceed'.</p><p>If you do not wish to review that many 
+                    locations, click 'Return' or the browser back arrow to return to the ancestor list page and consider 
+                    generating a shorter list (e.g. with fewer generations) to map.</p>
+                    </div>
                 </div>
         } else {
             let MapWithOverlay;

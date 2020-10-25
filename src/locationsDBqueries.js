@@ -24,10 +24,15 @@ function get_retry(url, n) {
       if (error.response) {
         // The request was made and the server responded with a status code
         // that falls out of the range of 2xx
+        console.log('first error n=',n);
+        console.log('response.date', error.response.data);
+        console.log('response.status', error.response.status);
+        console.log('response.headers', error.response.headers);
         if (n===1) {
+          /*
           console.log(error.response.data);
           console.log(error.response.status);
-          console.log(error.response.headers);
+          console.log(error.response.headers);*/
         } else {
           return get_retry(url, n-1);
         }
@@ -35,8 +40,10 @@ function get_retry(url, n) {
         // The request was made but no response was received
         // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
         // http.ClientRequest in node.js
+        console.log('second error n=',n);
+        console.log(error.request);
         if (n === 1) {
-          console.log(error.request);
+          //console.log(error.request);
         } else {
           return get_retry(url, n-1);
         }
@@ -49,8 +56,8 @@ function get_retry(url, n) {
 
 export function getCoordinates(locationName) {
   const dbURL = 'https://ancestor-listmaker-backend.herokuapp.com/locations/' + locationName;
-  console.log('locationName=', locationName);
-  return get_retry(dbURL, 5)
+  console.log(locationName);
+  return get_retry(dbURL, 1)
 }
     
 /*
