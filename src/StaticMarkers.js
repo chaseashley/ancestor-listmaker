@@ -26,6 +26,7 @@ class StaticMarkers extends Component {
             childMouseOut: false,
             childClick: false,
             childCloseClick: false,
+            childParentWindowsLinked: false
         }
     }
 
@@ -39,38 +40,66 @@ class StaticMarkers extends Component {
 
     static getDerivedStateFromProps(nextProps, prevState) {
         if (nextProps.childParentWindowsLinked && nextProps.childMouseOver && !prevState.childMouseOver) {
+            //mouseOver on child; simulate mouseOver on this parent marker
             return {
                 bOpen: true,
-                childMouseOVer: true,
-                childMouseOut: false
+                dOpen: true,
+                childMouseOver: true,
+                childMouseOut: false,
+                childParentWindowsLinked: true
             };
         }
         if (nextProps.childParentWindowsLinked && nextProps.childMouseOut && !prevState.childMouseOut && !prevState.clicked) {
+            //mouseOut on child; simulate mouseOut on this parent marker
             return {
                 bOpen: false,
+                dOpen: false,
                 childMouseOut: true,
-                childMouseOver: false
+                childMouseOver: false,
+                childParentWindowsLinked: true
             };
         }
         if (nextProps.childParentWindowsLinked && nextProps.childMouseOut && !prevState.childMouseOut && prevState.clicked) {
+            //mouseOut on child, but this parent marker was clicked, so just record the child mouseOut
             return {
                 childMouseOut: true,
-                childMouseOver: false
+                childMouseOver: false,
+                childParentWindowsLinked: true
             };
         }
         if (nextProps.childParentWindowsLinked && nextProps.childClick && !prevState.childClick) {
+            //click on child; simulate click on this parent marker
             return {
                 bOpen: true,
+                dOpen: true,
                 clicked: true,
+                mouseOver: false,
                 childClick: true,
                 childCloseClick: false,
+                childParentWindowsLinked: true
             };
         }
         if (nextProps.childParentWindowsLinked && nextProps.childCloseClick && !prevState.childCloseClick) {
+            //closeClick on child; just record the child closeClick and don't change this parent marker's info window
             return {
                 childCloseClick: true,
                 childClick: false,
+                childParentWindowsLinked: true
             };
+        }
+        if (!nextProps.childParentWindowsLinked && prevState.childParentWindowsLinked) {
+            //child-parent linking option turned off, so null out child parent states
+            return {
+                bOpen: false,
+                dOpen: false,
+                clicked: false,
+                childClick: false,
+                childCloseClick: false,
+                childMouseOut: false,
+                childMouseOver: false,
+                childParentWindowsLinked: false
+            }
+
         }
     }
 
@@ -199,7 +228,7 @@ class StaticMarkers extends Component {
         if (this.props.childParentWindowsLinked) {
             this.props.onMouseOverCallback(this.props.ancestor);
         }
-        if (this.props.visible) {
+        if (this.props.visible && !this.state.clicked) {
             let newZindex = Math.floor(Date.now()/1000);
             if (this.props.birthDeathWindowsLinked) {
                 this.setState({
@@ -209,13 +238,11 @@ class StaticMarkers extends Component {
                 });
             }
             this.setState({
+                mouseOver: true,
                 bOpen: true,
                 bzIndex: newZindex+1,
                 bWindowZindex: newZindex+1
             });
-        }
-        if (!this.state.clicked){ //mouseOver only operative if the windown isn't open due to a click
-            this.setState({mouseOver: true});
         }
     }
 
@@ -223,7 +250,7 @@ class StaticMarkers extends Component {
         if (this.props.childParentWindowsLinked) {
             this.props.onMouseOverCallback(this.props.ancestor);
         }
-        if (this.props.visible) {
+        if (this.props.visible && !this.state.clicked) {
             let newZindex = Math.floor(Date.now()/1000);
             if (this.props.birthDeathWindowsLinked) {
                 this.setState({
@@ -233,13 +260,11 @@ class StaticMarkers extends Component {
                 });
             }
             this.setState({
+                mouseOver: true,
                 dOpen: true,
                 dzIndex: newZindex+1,
-                dWindowZindex: newZindex+1
+                dWindowZindex: newZindex+1,
             });
-        } 
-        if (!this.state.clicked){ //mouseOver only operative if the windown isn't open due to a click
-            this.setState({mouseOver: true});
         }
     }
 
@@ -250,7 +275,8 @@ class StaticMarkers extends Component {
         this.setState({
             bOpen: false,
             dOpen: false,
-            clicked: false
+            clicked: false,
+            mouseOver: false
         });
     }
 

@@ -24,21 +24,21 @@
     border-bottom: 1px solid rgb(189, 189, 189);
 }
 
-.birthDeathLinesTD {
+.parentChildLinesTD {
     padding-top: 15px;
     padding-bottom: 15px;
 }
 
-.parentChildLinesTD {
+.childParentWindowsLinkedTD {
     border-bottom: 1px solid rgb(189, 189, 189);
     padding-bottom: 15px;
 }
 
-.birthDeathWindowsLinkedTD {
+.birthDeathLinesTD {
     padding-top: 15px;
 }
 
-.childParentWindowsLinkedTD {
+.birthDeathWindowsLinkedTD {
     border-bottom: 1px solid rgb(189, 189, 189);
     padding-top: 15px;
     padding-bottom: 15px;

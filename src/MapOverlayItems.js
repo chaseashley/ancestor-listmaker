@@ -95,7 +95,7 @@ class MapOverlayItems extends React.Component {
             deathPins: false,
             birthDeathLines: false,
             parentChildLines: false,
-            birthDeathWindowsLinked: true,
+            birthDeathWindowsLinked: false,
             childParentWindowsLinked: false,
             clickedChild: null,
             closeClickedChild: null,
@@ -314,13 +314,6 @@ class MapOverlayItems extends React.Component {
     }
 
     onChildParentWindowsLinkedChange(e) {
-        this.props.deathPinsCallback();
-        if (this.childParentWindowsLinked) {
-            this.setState({
-                clickedChildID: null,
-                mouseOverChildID: null,
-            })
-        }
         this.setState({
             childParentWindowsLinked: e.target.checked,
         });
@@ -382,28 +375,28 @@ class MapOverlayItems extends React.Component {
                 <label for="birthPins">Show death locations</label>
             </div>
 
-        const birthDeathLines = 
-            <div>
-                <input type="checkbox" name="birthDeathLines" checked={this.state.birthDeathLines} onChange={(e) => this.setState({birthDeathLines: e.target.checked})} disabled={!this.state.birthPins || !this.state.deathPins}/>
-                <label for="birthDeathLines">Show lines connecting birth and death locations</label>
-            </div>
-
         const parentChildLines = 
             <div>
                 <input type="checkbox" name="parentChildLines" checked={this.state.parentChildLines} onChange={(e) => this.setState({parentChildLines: e.target.checked})} disabled={this.state.birthPins && this.state.deathPins}/>
-                <label for="parentChildLines">Show lines connecting children and parents</label>
-            </div>
-
-        const birthDeathWindowsLinked = 
-            <div>
-                <input type="checkbox" name="birthDeathWindowsLinked" checked={this.state.birthDeathWindowsLinked} onChange={(e) => this.setState({birthDeathWindowsLinked: e.target.checked})} disabled={!this.state.birthPins || !this.state.deathPins}/>
-                <label for="birthDeathWindowsLink">Link opening/closing of birth and death location info windows</label>
+                <label for="parentChildLines">Show lines connecting parents to children</label>
             </div>
 
         const childParentWindowsLinked = 
             <div>
                 <input type="checkbox" name="childParentWindowsLinked" checked={this.state.childParentWindowsLinked} onChange={(e) => this.onChildParentWindowsLinkedChange(e)} disabled={this.state.birthPins && this.state.deathPins}/>
                 <label for="childParewntWindowsLink">Link opening/closing of parent info windows to child info window</label>
+            </div>
+
+        const birthDeathLines = 
+            <div>
+                <input type="checkbox" name="birthDeathLines" checked={this.state.birthDeathLines} onChange={(e) => this.setState({birthDeathLines: e.target.checked})} disabled={!this.state.birthPins || !this.state.deathPins}/>
+                <label for="birthDeathLines">Show lines connecting birth and death locations</label>
+            </div>
+
+        const birthDeathWindowsLinked = 
+            <div>
+                <input type="checkbox" name="birthDeathWindowsLinked" checked={this.state.birthDeathWindowsLinked} onChange={(e) => this.setState({birthDeathWindowsLinked: e.target.checked})} disabled={!this.state.birthPins || !this.state.deathPins}/>
+                <label for="birthDeathWindowsLink">Link opening/closing of birth and death location info windows</label>
             </div>
 
         let optionsBox;
@@ -420,16 +413,16 @@ class MapOverlayItems extends React.Component {
                         <td className={styles.birthDeathPinsTD}>{deathPins}</td>
                     </tr>
                     <tr>
-                        <td colSpan='2' className={styles.birthDeathLinesTD}>{birthDeathLines}</td>
-                    </tr>
-                    <tr>
                         <td colSpan='2' className={styles.parentChildLinesTD}>{parentChildLines}</td>
                     </tr>
                     <tr>
-                        <td colSpan='2' className={styles.birthDeathWindowsLinkedTD}>{birthDeathWindowsLinked}</td>
+                        <td colSpan='2' className={styles.childParentWindowsLinkedTD}>{childParentWindowsLinked}</td>
                     </tr>
                     <tr>
-                        <td colSpan='2' className={styles.childParentWindowsLinkedTD}>{childParentWindowsLinked}</td>
+                        <td colSpan='2' className={styles.birthDeathLinesTD}>{birthDeathLines}</td>
+                    </tr>
+                    <tr>
+                        <td colSpan='2' className={styles.birthDeathWindowsLinkedTD}>{birthDeathWindowsLinked}</td>
                     </tr>
                     </tbody>
                 </table>
