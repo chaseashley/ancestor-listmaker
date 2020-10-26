@@ -2,7 +2,7 @@
     position: absolute;
     top: 0;
     left: 0;
-    height: 190px;
+    height: 310px;
     width: 550px;
     background: white;
     transition: left .1s, width .1s, height .1s;
@@ -11,13 +11,37 @@
 .optionsTable {
     border-collapse: collapse;
     margin-left: 30px;
-    margin-top: 30px;
+    margin-top: 25px;
 }
 
 .bottomBorder {
     border-bottom: 1px solid rgb(189, 189, 189);
-    padding-bottom: 20px;
-    padding-right: 10px
+    padding-bottom: 15px;
+}
+
+.birthDeathPinsTD {
+    padding-top: 0px;
+    border-bottom: 1px solid rgb(189, 189, 189);
+}
+
+.birthDeathLinesTD {
+    padding-top: 15px;
+    padding-bottom: 15px;
+}
+
+.parentChildLinesTD {
+    border-bottom: 1px solid rgb(189, 189, 189);
+    padding-bottom: 15px;
+}
+
+.birthDeathWindowsLinkedTD {
+    padding-top: 15px;
+}
+
+.childParentWindowsLinkedTD {
+    border-bottom: 1px solid rgb(189, 189, 189);
+    padding-top: 15px;
+    padding-bottom: 15px;
 }
 
 .displayOptions {

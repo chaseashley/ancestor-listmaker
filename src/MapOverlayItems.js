@@ -4,6 +4,7 @@ import "rc-slider/assets/index.css";
 import Slider from "rc-slider";
 import styles from './mapOverlayItemsStyles.module.css';
 import { adjustOverlappingMarkerCoordinates } from './overlappingMarkers';
+import GenerationLines from './GenerationLines';
 
 ///// slider constants ///////
 const dotStyle = {
@@ -65,6 +66,13 @@ class MapOverlayItems extends React.Component {
 
     constructor(props) {
         super(props);
+        this.onCloseClickCallback = this.onCloseClickCallback.bind(this);
+        this.onMouseOutCallback = this.onMouseOutCallback.bind(this);
+        this.onChildParentWindowsLinkedChange = this.onChildParentWindowsLinkedChange.bind(this);
+        this.onClickCallback = this.onClickCallback.bind(this);
+        this.onMouseOverCallback = this.onMouseOverCallback.bind(this);
+        this.getFather = this.getFather.bind(this);
+        this.getMother = this.getMother.bind(this);
         this.ancestorVisible = this.ancestorVisible.bind(this);
         this.onBirthPinsChange = this.onBirthPinsChange.bind(this);
         this.onDeathPinsChange = this.onDeathPinsChange.bind(this);
@@ -83,11 +91,15 @@ class MapOverlayItems extends React.Component {
             intervalId: null,
             timeSeries: false,
             animated: false,
-            markerType: 'static',
-            windowAutoOpen: false,
             birthPins: true,
             deathPins: false,
-            lines: false,
+            birthDeathLines: false,
+            parentChildLines: false,
+            birthDeathWindowsLinked: true,
+            childParentWindowsLinked: false,
+            clickedChild: null,
+            mouseOverChild: null,
+            mouseOutChild: null,
             optionsOpen: true,
             sliderMin: null,
             sliderMax: null,
@@ -216,7 +228,15 @@ class MapOverlayItems extends React.Component {
         });
     }
 
-    ancestorVisible(year, birthdateString, deathdateString) {
+    ancestorVisible(year, ancestor) {
+        let birthdateString;
+        let deathdateString;
+        if (ancestor === null) {
+            return false;
+        } else {
+            birthdateString = ancestor.BirthDate;
+            deathdateString = ancestor.DeathDate;
+        }
         if (this.state.timeSeries === false) {
             return true;
         }
@@ -246,6 +266,62 @@ class MapOverlayItems extends React.Component {
                 return false;
             }
         }
+    }
+
+    getFather(ancestor) {
+        if (ancestor.Father === 0) {
+            return null;
+        } else {
+            for (let i=0; i<this.state.ancestors.length; i++) {
+                if (this.state.ancestors[i].Id === ancestor.Father) {
+                    return this.state.ancestors[i];
+                }
+            }
+            return null;
+        }
+    }
+
+    getMother(ancestor) {
+        if (ancestor.Mother === 0) {
+            return null;
+        } else {
+            for (let i=0; i<this.state.ancestors.length; i++) {
+                if (this.state.ancestors[i].Id === ancestor.Mother) {
+                    return this.state.ancestors[i];
+                }
+            }
+            return null;
+        }
+    }
+
+    onClickCallback(child) {
+        this.setState({clickedChild: child});
+    }
+
+    onMouseOverCallback(child) {
+        this.setState({mouseOverChild: child});
+    }
+
+    onMouseOutCallback(child) {
+        this.setState({mouseOutChild: child});
+        this.setState({mouseOverChild: null});
+    }
+
+    onCloseClickCallback(child) {
+        this.setState({clickedChild: null});
+    }
+
+    onChildParentWindowsLinkedChange(e) {
+        this.props.deathPinsCallback();
+        if (this.childParentWindowsLinked) {
+            this.setState({
+                clickedChildID: null,
+                mouseOverChildID: null,
+            })
+        }
+        this.setState({
+            childParentWindowsLinked: e.target.checked,
+        });
     }
 
     render() {
@@ -294,20 +370,38 @@ class MapOverlayItems extends React.Component {
 
         const birthPins = 
             <div className={styles.displayOptions}>
-                <input type="checkbox" name="birthPins" checked={this.state.birthPins} onChange={(e) => this.onBirthPinsChange(e)} disabled={this.state.markerType==='Moving'}/>
+                <input type="checkbox" name="birthPins" checked={this.state.birthPins} onChange={(e) => this.onBirthPinsChange(e)}/>
                 <label for="birthPins">Show birth locations</label>
             </div>
 
         const deathPins = 
             <div className={styles.displayOptions}>
-                <input type="checkbox" name="deathPins" checked={this.state.deathPins} onChange={(e) => this.onDeathPinsChange(e)} disabled={this.state.markerType==='Moving'}/>
+                <input type="checkbox" name="deathPins" checked={this.state.deathPins} onChange={(e) => this.onDeathPinsChange(e)}/>
                 <label for="birthPins">Show death locations</label>
             </div>
 
-        const lines = 
+        const birthDeathLines = 
             <div>
-                <input type="checkbox" name="lines" checked={this.state.lines} onChange={(e) => this.setState({lines: e.target.checked})} disabled={this.state.markerType==='Moving' || !this.state.birthPins || !this.state.deathPins}/>
-                <label for="lines">Show migration lines between birth and death locations</label>
+                <input type="checkbox" name="birthDeathLines" checked={this.state.birthDeathLines} onChange={(e) => this.setState({birthDeathLines: e.target.checked})} disabled={!this.state.birthPins || !this.state.deathPins}/>
+                <label for="birthDeathLines">Show lines connecting birth and death locations</label>
+            </div>
+
+        const parentChildLines = 
+            <div>
+                <input type="checkbox" name="parentChildLines" checked={this.state.parentChildLines} onChange={(e) => this.setState({parentChildLines: e.target.checked})} disabled={this.state.birthPins && this.state.deathPins}/>
+                <label for="parentChildLines">Show lines connecting children and parents</label>
+            </div>
+
+        const birthDeathWindowsLinked = 
+            <div>
+                <input type="checkbox" name="birthDeathWindowsLinked" checked={this.state.birthDeathWindowsLinked} onChange={(e) => this.setState({birthDeathWindowsLinked: e.target.checked})} disabled={!this.state.birthPins || !this.state.deathPins}/>
+                <label for="birthDeathWindowsLink">Link opening/closing of birth and death location info windows</label>
+            </div>
+
+        const childParentWindowsLinked = 
+            <div>
+                <input type="checkbox" name="childParentWindowsLinked" checked={this.state.childParentWindowsLinked} onChange={(e) => this.onChildParentWindowsLinkedChange(e)} disabled={this.state.birthPins && this.state.deathPins}/>
+                <label for="childParewntWindowsLink">Link opening/closing of parent info windows to child info window</label>
             </div>
 
         let optionsBox;
@@ -320,11 +414,20 @@ class MapOverlayItems extends React.Component {
                         <td className={styles.bottomBorder}>{timeSeriesAncestors}</td>
                     </tr>
                     <tr>
-                        <td>{birthPins}</td>
-                        <td>{deathPins}</td>
+                        <td className={styles.birthDeathPinsTD}>{birthPins}</td>
+                        <td className={styles.birthDeathPinsTD}>{deathPins}</td>
                     </tr>
                     <tr>
-                        <td colSpan='2' className={styles.bottomBorder}>{lines}</td>
+                        <td colSpan='2' className={styles.birthDeathLinesTD}>{birthDeathLines}</td>
+                    </tr>
+                    <tr>
+                        <td colSpan='2' className={styles.parentChildLinesTD}>{parentChildLines}</td>
+                    </tr>
+                    <tr>
+                        <td colSpan='2' className={styles.birthDeathWindowsLinkedTD}>{birthDeathWindowsLinked}</td>
+                    </tr>
+                    <tr>
+                        <td colSpan='2' className={styles.childParentWindowsLinkedTD}>{childParentWindowsLinked}</td>
                     </tr>
                     </tbody>
                 </table>
@@ -340,12 +443,41 @@ class MapOverlayItems extends React.Component {
                         ancestor={ancestor}
                         birthPins={this.state.birthPins}
                         deathPins={this.state.deathPins}
-                        lines={this.state.lines}
+                        birthDeathLines={this.state.birthDeathLines}
                         animated={this.state.animated}
-                        windowAutoOpen={false}
-                        visible={this.ancestorVisible(this.state.year, ancestor.BirthDate, ancestor.DeathDate)}
+                        visible={this.ancestorVisible(this.state.year, ancestor)}
+                        birthDeathWindowsLinked={this.state.birthDeathWindowsLinked}
+                        childParentWindowsLinked={this.state.childParentWindowsLinked}
+                        childClick={(this.state.clickedChild === null || (this.state.clickedChild.Father !== ancestor.Id && this.state.clickedChild.Mother !== ancestor.Id)) ? false : true}
+                        childMouseOver={(this.state.mouseOverChild === null || (this.state.mouseOverChild.Father !== ancestor.Id && this.state.mouseOverChild.Mother !== ancestor.Id)) ? false : true}
+                        childMouseOut={(this.state.mouseOutChild === null || (this.state.mouseOutChild.Father !== ancestor.Id && this.state.mouseOutChild.Mother !== ancestor.Id)) ? false : true}
+                        onClickCallback={this.onClickCallback}
+                        onMouseOverCallback={this.onMouseOverCallback}
+                        onMouseOutCallback={this.onMouseOutCallback}
+                        onCloseClickCallback={this.onCloseClickCallback}
                     />
         })
+
+        let generationLines;
+        if (!this.state.parentChildLines || (this.state.birthPins && this.state.deathPins)) {
+            generationLines = <></>
+        } else {
+            generationLines = this.state.ancestors.map((ancestor, index) => {
+                let father = this.getFather(ancestor);
+                let mother = this.getMother(ancestor);
+                return <GenerationLines key={index} id={index}
+                    ancestor={ancestor}
+                    father={father}
+                    mother={mother}
+                    birthPins={this.state.birthPins}
+                    deathPins={this.state.deathPins}
+                    animated={this.state.animated}
+                    visible={this.ancestorVisible(this.state.year, ancestor)}
+                    fatherVisible={this.ancestorVisible(this.state.year, father)}
+                    motherVisible={this.ancestorVisible(this.state.year, mother)}
+                />
+            })
+        }
 
         let pauseplay;
         if (!this.state.timeSeries) {
@@ -429,6 +561,7 @@ class MapOverlayItems extends React.Component {
             <div>
                 {optionsBox}
                 {markers}
+                {generationLines}
                 {pauseplay}
                 {speedSlider}
                 {slider}

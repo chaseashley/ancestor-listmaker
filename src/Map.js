@@ -9,6 +9,7 @@ import { getCoordinates, postCoordinates } from './locationsDBqueries';
 import { adjustOverlappingMarkerCoordinates } from './overlappingMarkers';
 import db from './db';
 import { standardizeAddress } from './standardizeAddress';
+import { Link } from "react-router-dom";
 
 const API_KEY='AIzaSyD5VQNhUE4UQlIZbaJo4aHE1pt9zuZFzPw';
 
@@ -16,6 +17,7 @@ class Map extends React.Component {
 
     constructor(props) {
         super(props);
+        this.onProceedClick = this.onProceedClick.bind(this);
         this.checkAddressesForCoordinates = this.checkAddressesForCoordinates.bind(this);
         this.makeLocationsList = this.makeLocationsList.bind(this);
         this.birthPinsCallback = this.birthPinsCallback.bind(this);
@@ -216,7 +218,6 @@ class Map extends React.Component {
 
     async getLocationsCoordinates(locations) {
         let locationsWithCoordinates = {};
-        let locationsMissingCoordinates = [];
         let coordinatesGets = [];
         let missingCoordinates = [];
         for (let i=0; i<locations.length; i++) {
@@ -226,7 +227,7 @@ class Map extends React.Component {
             .then(responses => {
                 for (let i=0; i<responses.length; i++) {
                     if (responses[i] === undefined) {
-                        locationsMissingCoordinates.push(locations[i])
+                        console.log(locations[i]);
                     } else {
                         locationsWithCoordinates[locations[i]] = responses[i].data.coordinates;
                     }
@@ -287,6 +288,10 @@ class Map extends React.Component {
         //db.table('map').put(JSON.stringify(this.state),0).catch(function(e){console.log('Dixie IndexedDB error:',e)});
     }
 
+    onProceedClick() {
+        this.setState({proceed: true});
+    }
+
     render() {
         let mapOrLoading;
         if (!this.state.coordinatesLoaded && this.state.missingCoordinates === null) {
@@ -300,10 +305,18 @@ class Map extends React.Component {
                     <div><p>The ancestor list contains {this.state.missingCoordinates.length} locations that are not yet in the 
                     app’s database and that you will need to review and add to the database before a map of the ancestor list 
                     can be generated.</p><p>If you wish to review these locations and add them to the database so that a map of the 
-                    ancestor list can be generated, click 'Proceed'.</p><p>If you do not wish to review that many 
-                    locations, click 'Return' or the browser back arrow to return to the ancestor list page and consider 
-                    generating a shorter list (e.g. with fewer generations) to map.</p>
+                    ancestor list can be generated, click 'Proceed'. (If you stop partway through, your results will be saved.)</p>
+                    <p>If you do not wish to review that many locations, click 'Return to List' or the browser back arrow to return to the 
+                    ancestor list page and consider starting with a shorter list (e.g., one with fewer generations) to map.</p>
                     </div>
+                    <table className={styles.formTable}><tbody>
+                        <tr className={styles.buttonsTr}>
+                            <td className={styles.buttonSpacer}></td>
+                            <td className={styles.buttonsTd}><button onClick={this.onProceedClick} className={styles.button}>Proceed</button></td>
+                            <td className={styles.buttonsTd}><Link to={{ pathname: '/apps/ashley1950/listmaker/'}}><button className={styles.button}>Return to List</button></Link></td>
+                            <td></td>
+                        </tr></tbody>
+                    </table>
                 </div>
         } else {
             let MapWithOverlay;

@@ -3,6 +3,7 @@ export function standardizeAddress(address) {
     address = address.toUpperCase();
     address = address.replace(/  /g,' ');
     address = address.replace(/, /g,',');
+    address = address.replace(/ ,/g,',');
     address = address.replace(/,,/g,',');
     address = address.replace(/\./g,'');
 
@@ -66,26 +67,42 @@ export function standardizeAddress(address) {
 
     //UK standardizations
     address = address.replace('ENGLAND,UNITED KINGDOM','ENGLAND');
+    address = address.replace('ENGLAND,UK','ENGLAND');
     address = address.replace('SCOTLAND,UNITED KINGDOM','SCOTLAND');
+    address = address.replace('SCOTLAND,UK','SCOTLAND');
     address = address.replace('WALES,UNITED KINGDOM','WALES');
+    address = address.replace('WALES,UK','WALES');
     address = address.replace('NORTHERN IRELAND,UNITED KINGDOM','NORTHERN IRELAND');
+    address = address.replace('NORTHERN IRELAND,UK','NORTHERN IRELAND');
+    if (address.indexOf('ENG') !== -1 && address.indexOf('ENG') === address.length-3) {
+        address = address.substring(0,address.length-3) + 'ENGLAND';
+    }
     address = address.replace('DEVONSHIRE','DEVON');
     address = address.replace('COUNTY DEVON','DEVON');
+    address = address.replace('CO DEVON','DEVON');
     address = address.replace('DORSETSHIRE','DORSET');
     address = address.replace('COUNTY DORSET','DORSET');
+    address = address.replace('CO DORSET','DORSET');
     address = address.replace('DURHAMSHIRE','DURHAM');
     address = address.replace('COUNTY DURHAM','DURHAM');
+    address = address.replace('CO DURHAM','DURHAM');
     address = address.replace('ESSEXSHIRE','ESSEX');
     address = address.replace('COUNTY ESSEX','ESSEX');
+    address = address.replace('CO ESSEX','ESSEX');
     address = address.replace('COUNTY KENT','KENT');
+    address = address.replace('CO KENT','KENT');
     address = address.replace('NORFOLKSHIRE','NORFOLK');
     address = address.replace('COUNTY NORFOLK','NORFOLK');
+    address = address.replace('CO NORFOLK','NORFOLK');
     address = address.replace('RUTLANDSHIRE','RUTLAND');
     address = address.replace('COUNTY RUTLAND','RUTLAND');
+    address = address.replace('CO RUTLAND','RUTLAND');
     address = address.replace('SOMERSETSHIRE','SOMERSET');
     address = address.replace('COUNTY SOMERSET','SOMERSET');
+    address = address.replace('CO SOMERSET','SOMERSET');
     address = address.replace('SUFFOLKSHIRE','SUFFOLK');
     address = address.replace('COUNTY SUFFOLK','SUFFOLK');
+    address = address.replace('CO SUFFOLK','SUFFOLK');
 
     //USA standardizations
     if (address.indexOf('UNITED STATES OF AMERICA') !== -1 && address.indexOf('UNITED STATES OF AMERICA') === address.length-24) {
