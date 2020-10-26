@@ -45,9 +45,15 @@ class StaticMarkers extends Component {
                 childMouseOut: false
             };
         }
-        if (nextProps.childParentWindowsLinked && nextProps.childMouseOut && !prevState.childMouseOut) {
+        if (nextProps.childParentWindowsLinked && nextProps.childMouseOut && !prevState.childMouseOut && !prevState.clicked) {
             return {
                 bOpen: false,
+                childMouseOut: true,
+                childMouseOver: false
+            };
+        }
+        if (nextProps.childParentWindowsLinked && nextProps.childMouseOut && !prevState.childMouseOut && prevState.clicked) {
+            return {
                 childMouseOut: true,
                 childMouseOver: false
             };
