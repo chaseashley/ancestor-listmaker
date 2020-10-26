@@ -21,7 +21,11 @@ class StaticMarkers extends Component {
             bWindowZindex: null,
             dWindowZindex: null,
             clicked: false,
-            mouseOver: false
+            mouseOver: false,
+            childMouseOver: false,
+            childMouseOut: false,
+            childClick: false,
+            childCloseClick: false,
         }
     }
 
@@ -34,19 +38,32 @@ class StaticMarkers extends Component {
     }
 
     static getDerivedStateFromProps(nextProps, prevState) {
-        if (nextProps.childParentWindowsLinked && nextProps.childMouseOver) {
+        if (nextProps.childParentWindowsLinked && nextProps.childMouseOver && !prevState.childMouseOver) {
             return {
-                bOpen: true
+                bOpen: true,
+                childMouseOVer: true,
+                childMouseOut: false
             };
         }
-        if (nextProps.childParentWindowsLinked && nextProps.childMouseOut) {
+        if (nextProps.childParentWindowsLinked && nextProps.childMouseOut && !prevState.childMouseOut) {
             return {
-                bOpen: false
+                bOpen: false,
+                childMouseOut: true,
+                childMouseOver: false
             };
         }
-        if (nextProps.childParentWindowsLinked && nextProps.childClick) {
+        if (nextProps.childParentWindowsLinked && nextProps.childClick && !prevState.childClick) {
             return {
-                bOpen: true
+                bOpen: true,
+                clicked: true,
+                childClick: true,
+                childCloseClick: false,
+            };
+        }
+        if (nextProps.childParentWindowsLinked && nextProps.childCloseClick && !prevState.childCloseClick) {
+            return {
+                childCloseClick: true,
+                childClick: false,
             };
         }
     }

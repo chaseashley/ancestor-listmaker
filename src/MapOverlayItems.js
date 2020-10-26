@@ -98,6 +98,7 @@ class MapOverlayItems extends React.Component {
             birthDeathWindowsLinked: true,
             childParentWindowsLinked: false,
             clickedChild: null,
+            closeClickedChild: null,
             mouseOverChild: null,
             mouseOutChild: null,
             optionsOpen: true,
@@ -308,6 +309,7 @@ class MapOverlayItems extends React.Component {
     }
 
     onCloseClickCallback(child) {
+        this.setState({closeClickedChild: child});
         this.setState({clickedChild: null});
     }
 
@@ -449,6 +451,7 @@ class MapOverlayItems extends React.Component {
                         birthDeathWindowsLinked={this.state.birthDeathWindowsLinked}
                         childParentWindowsLinked={this.state.childParentWindowsLinked}
                         childClick={(this.state.clickedChild === null || (this.state.clickedChild.Father !== ancestor.Id && this.state.clickedChild.Mother !== ancestor.Id)) ? false : true}
+                        childCloseClick={(this.state.closeClickedChild === null || (this.state.closeClickedChild.Father !== ancestor.Id && this.state.closeClickedChild.Mother !== ancestor.Id)) ? false : true}
                         childMouseOver={(this.state.mouseOverChild === null || (this.state.mouseOverChild.Father !== ancestor.Id && this.state.mouseOverChild.Mother !== ancestor.Id)) ? false : true}
                         childMouseOut={(this.state.mouseOutChild === null || (this.state.mouseOutChild.Father !== ancestor.Id && this.state.mouseOutChild.Mother !== ancestor.Id)) ? false : true}
                         onClickCallback={this.onClickCallback}
