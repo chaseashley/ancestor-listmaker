@@ -22,11 +22,11 @@ class StaticMarkers extends Component {
             dWindowZindex: null,
             clicked: false,
             mouseOver: false,
-            childMouseOver: false,
-            childMouseOut: false,
-            childClick: false,
-            childCloseClick: false,
-            childParentWindowsLinked: false
+            linkedAncestorClick: false,
+            linkedAncestorCloseClick: false,
+            linkedAncestorMouseOver: false,
+            linkedAncestorMouseOut: false,
+            ancestorWindowsLinked: false,
         }
     }
 
@@ -39,90 +39,98 @@ class StaticMarkers extends Component {
     }
 
     static getDerivedStateFromProps(nextProps, prevState) {
-        if (nextProps.childParentWindowsLinked && nextProps.childMouseOver && !prevState.childMouseOver) {
+        if (nextProps.ancestorWindowsLinked && nextProps.linkedAncestorMouseOver && !prevState.linkedAncestorMouseOver) {
             //mouseOver on child; simulate mouseOver on this parent marker
             return {
                 bOpen: true,
                 dOpen: true,
-                childMouseOver: true,
-                childMouseOut: false,
-                childParentWindowsLinked: true
+                linkedAncestorMouseOver: true,
+                linkedAncestorMouseOut: false,
+                ancestorWindowsLinked: true
             };
         }
-        if (nextProps.childParentWindowsLinked && nextProps.childMouseOut && !prevState.childMouseOut && !prevState.clicked) {
+        if (nextProps.ancestorWindowsLinked && nextProps.linkedAncestorMouseOut && !prevState.linkedAncestorMouseOut && !prevState.clicked) {
             //mouseOut on child; simulate mouseOut on this parent marker
             return {
                 bOpen: false,
                 dOpen: false,
-                childMouseOut: true,
-                childMouseOver: false,
-                childParentWindowsLinked: true
+                linkedAncestorMouseOut: true,
+                linkedAncestorMouseOver: false,
+                linkedAncestorClick: false,
+                linkedAncestorCloseClick: false,
+                ancestorWindowsLinked: true
             };
         }
-        if (nextProps.childParentWindowsLinked && nextProps.childMouseOut && !prevState.childMouseOut && prevState.clicked) {
+        if (nextProps.ancestorWindowsLinked && nextProps.linkedAncestorMouseOut && !prevState.linkedAncestorMouseOut && prevState.clicked) {
             //mouseOut on child, but this parent marker was clicked, so just record the child mouseOut
             return {
-                childMouseOut: true,
-                childMouseOver: false,
-                childParentWindowsLinked: true
+                linkedAncestorMouseOut: true,
+                linkedAncestorMouseOver: false,
+                linkedAncestorClick: false,
+                linkedAncestorCloseClick: false,
+                ancestorWindowsLinked: true
             };
         }
-        if (nextProps.childParentWindowsLinked && nextProps.childClick && !prevState.childClick) {
+        if (nextProps.ancestorWindowsLinked && nextProps.linkedAncestorClick && !prevState.linkedAncestorClick) {
             //click on child; simulate click on this parent marker
             return {
                 bOpen: true,
                 dOpen: true,
                 clicked: true,
-                mouseOver: false,
-                childClick: true,
-                childCloseClick: false,
-                childParentWindowsLinked: true
+                mouseOver: true,
+                linkedAncestorClick: true,
+                linkedAncestorCloseClick: false,
+                linkedAncestorMouseOver: false,
+                linkedAncestorMouseOut: false,
+                ancestorWindowsLinked: true
             };
         }
-        if (nextProps.childParentWindowsLinked && nextProps.childCloseClick && !prevState.childCloseClick) {
+        if (nextProps.ancestorWindowsLinked && nextProps.linkedAncestorCloseClick && !prevState.linkedAncestorCloseClick) {
             //closeClick on child; just record the child closeClick and don't change this parent marker's info window
             return {
-                childCloseClick: true,
-                childClick: false,
-                childParentWindowsLinked: true
+                linkedAncestorCloseClick: true,
+                linkedAncestorClick: false,
+                linkedAncestorMouseOut: false,
+                linkedAncestorMouseOver: false,
+                ancestorWindowsLinked: true
             };
         }
-        if (!nextProps.childParentWindowsLinked && prevState.childParentWindowsLinked) {
+        if (!nextProps.ancestorWindowsLinked && prevState.ancestorWindowsLinked) {
             //child-parent linking option turned off, so null out child parent states
             return {
                 bOpen: false,
                 dOpen: false,
                 clicked: false,
-                childClick: false,
-                childCloseClick: false,
-                childMouseOut: false,
-                childMouseOver: false,
-                childParentWindowsLinked: false
+                linkedAncestorClick: false,
+                linkedAncestorCloseClick: false,
+                linkedAncestorMouseOut: false,
+                linkedAncestorMouseOver: false,
+                ancestorWindowsLinked: false
             }
 
         }
     }
 
     onBClickHandler() {
-        if (this.props.childParentWindowsLinked) {
-            this.props.onClickCallback(this.props.ancestor);
-        }
-        if (this.state.mouseOver) { //this will be true if click occurs while window is open due to a mouseOver
-            let newZindex = Math.floor(Date.now()/1000);
-            if (this.props.birthDeathWindowsLinked) {
-                this.setState({
-                    dzIndex: newZindex,
-                    dWindowZindex: newZindex,
-                });
+        if (this.props.visible) {
+            if (this.props.ancestorWindowsLinked) {
+                this.props.onClickCallback(this.props.ancestor);
             }
-            this.setState({
-                bzIndex: newZindex+1,
-                bWindowZindex: newZindex+1,
-                clicked: true,
-                mouseOver: false
-            });
-        } else { //this will be true if click occurs while window is open due to a click or has been closed due to a click and not reopened with a mouseOver; close window and reactivate mouseOver by setting clicked to false
-            if (this.props.visible) {
+            if (this.state.mouseOver) { //this will be true if click occurs while window is open due to a mouseOver
+                let newZindex = Math.floor(Date.now()/1000);
+                if (this.props.birthDeathWindowsLinked) {
+                    this.setState({
+                        dzIndex: newZindex,
+                        dWindowZindex: newZindex,
+                    });
+                }
+                this.setState({
+                    bzIndex: newZindex+1,
+                    bWindowZindex: newZindex+1,
+                    clicked: true,
+                    //mouseOver: false
+                });
+            } else { //this will be true if click occurs while window is open due to a click or has been closed due to a click and not reopened with a mouseOver; close window and reactivate mouseOver by setting clicked to false
                 let newZindex = Math.floor(Date.now()/1000);
                 if (this.props.birthDeathWindowsLinked) {
                     this.setState({
@@ -134,56 +142,56 @@ class StaticMarkers extends Component {
                     bzIndex: newZindex+1,
                     bWindowZindex: newZindex+1
                 });
-                /* COMMENTED OUT CODE PROVIDES FOR CLOSING WINDOW WITH A CLICK
-                let dOpen;
-                if (this.state.dOpen) {
-                    dOpen = true;
-                } else {
-                    dOpen = false;
+                    /* COMMENTED OUT CODE PROVIDES FOR CLOSING WINDOW WITH A CLICK
+                    let dOpen;
+                    if (this.state.dOpen) {
+                        dOpen = true;
+                    } else {
+                        dOpen = false;
+                    }
+                    this.setState({dOpen: !this.state.dOpen});
+                    if (!dOpen) {
+                        this.setState({dWindowZindex: Math.floor(Date.now()/1000)})
+                    }
                 }
-                this.setState({dOpen: !this.state.dOpen});
-                if (!dOpen) {
-                    this.setState({dWindowZindex: Math.floor(Date.now()/1000)})
+                if (this.props.visible) {
+                    let bOpen;
+                    if (this.state.bOpen) {
+                        bOpen = true;
+                    } else {
+                        bOpen = false;
+                    }
+                    this.setState({bOpen: !this.state.bOpen});
+                    if (!bOpen) {
+                        this.setState({bWindowZindex: Math.floor(Date.now()/1000)+1})
+                    }
                 }
-            }
-            if (this.props.visible) {
-                let bOpen;
-                if (this.state.bOpen) {
-                    bOpen = true;
-                } else {
-                    bOpen = false;
-                }
-                this.setState({bOpen: !this.state.bOpen});
-                if (!bOpen) {
-                    this.setState({bWindowZindex: Math.floor(Date.now()/1000)+1})
-                }
-            }
-            this.setState({clicked: false})
-            */
+                this.setState({clicked: false})
+                */
             }
         }
     }
 
     onDClickHandler() {
-        if (this.props.childParentWindowsLinked) {
-            this.props.onClickCallback(this.props.ancestor);
-        }
-        if (this.state.mouseOver) { //this will be true if click occurs while window is open due to a mouseOver
-            let newZindex = Math.floor(Date.now()/1000);
-            if (this.props.birthDeathWindowsLinked) {
-                this.setState({
-                    bzIndex: newZindex,
-                    bWindowZindex: newZindex
-                });
+        if (this.props.visible) {
+            if (this.props.ancestorWindowsLinked) {
+                this.props.onClickCallback(this.props.ancestor);
             }
-            this.setState({
-                dzIndex: newZindex+1,
-                dWindowZindex: newZindex+1,
-                clicked: true,
-                mouseOver: false
-            });
-        } else { //this will be true if click occurs while window is open due to a click or has been closed due to a click and not reopened with a mouseOver; close window and reactivate mouseOver by setting clicked to false
-            if (this.props.visible) {
+            if (this.state.mouseOver) { //this will be true if click occurs while window is open due to a mouseOver
+                let newZindex = Math.floor(Date.now()/1000);
+                if (this.props.birthDeathWindowsLinked) {
+                    this.setState({
+                        bzIndex: newZindex,
+                        bWindowZindex: newZindex
+                    });
+                }
+                this.setState({
+                    dzIndex: newZindex+1,
+                    dWindowZindex: newZindex+1,
+                    clicked: true,
+                    //mouseOver: false
+                });
+            } else { //this will be true if click occurs while window is open due to a click or has been closed due to a click and not reopened with a mouseOver; close window and reactivate mouseOver by setting clicked to false
                 let newZindex = Math.floor(Date.now()/1000);
                 if (this.props.birthDeathWindowsLinked) {
                     this.setState({
@@ -195,40 +203,40 @@ class StaticMarkers extends Component {
                     dzIndex: newZindex+1,
                     dWindowZindex: newZindex+1
                 });
-                /* COMMENTED OUT CODE PROVIDES FOR CLOSING WINDOW WITH A CLICK
-                let bOpen;
-                if (this.state.bOpen) {
-                    bOpen = true;
-                } else {
-                    bOpen = false;
+                    /* COMMENTED OUT CODE PROVIDES FOR CLOSING WINDOW WITH A CLICK
+                    let bOpen;
+                    if (this.state.bOpen) {
+                        bOpen = true;
+                    } else {
+                        bOpen = false;
+                    }
+                    this.setState({bOpen: !this.state.bOpen});
+                    if (!bOpen) {
+                        this.setState({bWindowZindex: Math.floor(Date.now()/1000)})
+                    }
                 }
-                this.setState({bOpen: !this.state.bOpen});
-                if (!bOpen) {
-                    this.setState({bWindowZindex: Math.floor(Date.now()/1000)})
+                if (this.props.visible) {
+                    let dOpen;
+                    if (this.state.dOpen) {
+                        dOpen = true;
+                    } else {
+                        dOpen = false;
+                    }
+                    this.setState({dOpen: !this.state.dOpen});
+                    if (!dOpen) {
+                        this.setState({dWindowZindex: Math.floor(Date.now()/1000)+1})
+                    }
                 }
-            }
-            if (this.props.visible) {
-                let dOpen;
-                if (this.state.dOpen) {
-                    dOpen = true;
-                } else {
-                    dOpen = false;
-                }
-                this.setState({dOpen: !this.state.dOpen});
-                if (!dOpen) {
-                    this.setState({dWindowZindex: Math.floor(Date.now()/1000)+1})
-                }
-            }
-            this.setState({clicked: false})*/
+                this.setState({clicked: false})*/
             }
         }
     }
 
     onBMouseOverHandler() {
-        if (this.props.childParentWindowsLinked) {
-            this.props.onMouseOverCallback(this.props.ancestor);
-        }
-        if (this.props.visible && !this.state.clicked) {
+        if (this.props.visible) {
+            if (this.props.ancestorWindowsLinked) {
+                this.props.onMouseOverCallback(this.props.ancestor);
+            }
             let newZindex = Math.floor(Date.now()/1000);
             if (this.props.birthDeathWindowsLinked) {
                 this.setState({
@@ -247,10 +255,10 @@ class StaticMarkers extends Component {
     }
 
     onDMouseOverHandler() {
-        if (this.props.childParentWindowsLinked) {
-            this.props.onMouseOverCallback(this.props.ancestor);
-        }
-        if (this.props.visible && !this.state.clicked) {
+        if (this.props.visible) {
+            if (this.props.ancestorWindowsLinked) {
+                this.props.onMouseOverCallback(this.props.ancestor);
+            }
             let newZindex = Math.floor(Date.now()/1000);
             if (this.props.birthDeathWindowsLinked) {
                 this.setState({
@@ -268,47 +276,61 @@ class StaticMarkers extends Component {
         }
     }
 
-    onCloseClickHandler() {
-        if (this.props.childParentWindowsLinked) {
-            this.props.onCloseClickCallback(this.props.ancestor);
+    onMouseOutHandler() { //mouseOut only operative if the window isn't open due to a click
+        if (this.props.visible) {
+            if (this.props.ancestorWindowsLinked) {
+                this.props.onMouseOutCallback(this.props.ancestor);
+            }
+            if (!this.state.clicked) {
+                this.setState({
+                    bOpen: false,
+                    dOpen: false,
+                })
+            }
+            this.setState({mouseOver: false});
         }
-        this.setState({
-            bOpen: false,
-            dOpen: false,
-            clicked: false,
-            mouseOver: false
-        });
     }
 
-    onMouseOutHandler() { //mouseOut only operative if the window isn't open due to a click
-        if (!this.state.clicked) {
-            if (this.props.childParentWindowsLinked) {
-                this.props.onMouseOutCallback(this.props.ancestor);
+    onCloseClickHandler() {
+        if (this.props.visible) {
+            if (this.props.ancestorWindowsLinked) {
+                this.props.onCloseClickCallback(this.props.ancestor);
+                this.setState({ //if close info window, reset child relationship
+                    linkedAncestorClick: false,
+                    linkedAncestorCloseClick: false,
+                    linkedAncestorMouseOut: false,
+                    linkedAncestorMouseOver: false,
+                })
             }
             this.setState({
                 bOpen: false,
                 dOpen: false,
+                clicked: false,
                 mouseOver: false
-            })
+            });
         }
     }
 
     onBDblClickHandler() {
-        this.setState({
-            bOpen: false,
-            dOpen: false,
-            bzIndex: -Math.floor(Date.now()/1000)+1,
-            clicked: false
-        })
+        if (this.props.visible) {
+            this.setState({
+                bOpen: false,
+                dOpen: false,
+                bzIndex: -Math.floor(Date.now()/1000)+1,
+                clicked: false
+            })
+        }
     }
 
     onDDblClickHandler() {
-        this.setState({
-            bOpen: false,
-            dOpen: false,
-            dzIndex: -Math.floor(Date.now()/1000)+1,
-            clicked: false
-        })
+        if (this.props.visible) {
+            this.setState({
+                bOpen: false,
+                dOpen: false,
+                dzIndex: -Math.floor(Date.now()/1000)+1,
+                clicked: false
+            })
+        }
     }
 
     render() {

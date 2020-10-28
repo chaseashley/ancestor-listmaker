@@ -66,13 +66,19 @@ class MapOverlayItems extends React.Component {
 
     constructor(props) {
         super(props);
-        this.onCloseClickCallback = this.onCloseClickCallback.bind(this);
-        this.onMouseOutCallback = this.onMouseOutCallback.bind(this);
-        this.onChildParentWindowsLinkedChange = this.onChildParentWindowsLinkedChange.bind(this);
+        this.linkedAncestorClicked = this.linkedAncestorClicked.bind(this);
+        this.linkedAncestorCloseClicked = this.linkedAncestorCloseClicked.bind(this);
+        this.linkedAncestorMouseOver = this.linkedAncestorMouseOver.bind(this);
+        this.linkedAncestorMouseOut = this.linkedAncestorMouseOut.bind(this);
         this.onClickCallback = this.onClickCallback.bind(this);
+        this.onCloseClickCallback = this.onCloseClickCallback.bind(this);
         this.onMouseOverCallback = this.onMouseOverCallback.bind(this);
+        this.onMouseOutCallback = this.onMouseOutCallback.bind(this);
+        this.onParentWindowsLinkedChange = this.onParentWindowsLinkedChange.bind(this);
+        this.onChildWindowLinkedChange = this.onChildWindowLinkedChange.bind(this);
         this.getFather = this.getFather.bind(this);
         this.getMother = this.getMother.bind(this);
+        this.getChild = this.getChild.bind(this);
         this.ancestorVisible = this.ancestorVisible.bind(this);
         this.onBirthPinsChange = this.onBirthPinsChange.bind(this);
         this.onDeathPinsChange = this.onDeathPinsChange.bind(this);
@@ -96,11 +102,12 @@ class MapOverlayItems extends React.Component {
             birthDeathLines: false,
             parentChildLines: false,
             birthDeathWindowsLinked: false,
-            childParentWindowsLinked: false,
-            clickedChild: null,
-            closeClickedChild: null,
-            mouseOverChild: null,
-            mouseOutChild: null,
+            parentWindowsLinked: false,
+            childWindowLinked: false,
+            clickedAncestor: null,
+            closeClickedAncestor: null,
+            mouseOverAncestor: null,
+            mouseOutAncestor: null,
             optionsOpen: true,
             sliderMin: null,
             sliderMax: null,
@@ -295,28 +302,161 @@ class MapOverlayItems extends React.Component {
         }
     }
 
-    onClickCallback(child) {
-        this.setState({clickedChild: child});
+    getChild(ancestor) {
+        for (let i=0; i<this.state.ancestors.length; i++) {
+            if (this.state.ancestors[i].Father === ancestor.Id || this.state.ancestors[i].Mother === ancestor.Id) {
+                return this.state.ancestors[i];
+            }
+        }
+        return null;
     }
 
-    onMouseOverCallback(child) {
-        this.setState({mouseOverChild: child});
-    }
-
-    onMouseOutCallback(child) {
-        this.setState({mouseOutChild: child});
-        this.setState({mouseOverChild: null});
-    }
-
-    onCloseClickCallback(child) {
-        this.setState({closeClickedChild: child});
-        this.setState({clickedChild: null});
-    }
-
-    onChildParentWindowsLinkedChange(e) {
+    onClickCallback(ancestor) {
         this.setState({
-            childParentWindowsLinked: e.target.checked,
+            clickedAncestor: ancestor,
+            closeClickedAncestor: null,
+            mouseOverAncestor: null,
+            mouseOutAncestor: null
         });
+    }
+
+    onMouseOverCallback(ancestor) {
+        this.setState({
+            mouseOverAncestor: ancestor,
+            clickedAncestor: null,
+            closeClickedAncestor: null,
+            mouseOutAncestor: null
+        });
+    }
+
+    onMouseOutCallback(ancestor) {
+        this.setState({
+            mouseOutAncestor: ancestor,
+            clickedAncestor: null,
+            closeClickedAncestor: null,
+            mouseOverAncestor: null,
+        });
+    }
+
+    onCloseClickCallback(ancestor) {
+        this.setState({
+            closeClickedAncestor: ancestor,
+            clickedAncestor: null,
+            mouseOverAncestor: null,
+            mouseOutAncestor: null,
+        });
+    }
+
+    onParentWindowsLinkedChange(e) {
+        this.setState({
+            parentWindowsLinked: e.target.checked,
+            clickedAncestor: null,
+            closeClickedAncestor: null,
+            mouseOverAncestor: null,
+            mouseOutAncestor: null
+        });
+    }
+
+    onChildWindowLinkedChange(e) {
+        this.setState({
+            childWindowLinked: e.target.checked,
+            clickedAncestor: null,
+            closeClickedAncestor: null,
+            mouseOverAncestor: null,
+            mouseOutAncestor: null
+        });
+    }
+
+    linkedAncestorClicked(ancestor) {
+        if (this.state.clickedAncestor === null) {
+            return false;
+        }
+        if (this.state.parentWindowsLinked) {
+            if (this.state.clickedAncestor.Father === ancestor.Id || this.state.clickedAncestor.Mother === ancestor.Id) {
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+        if (this.state.childWindowLinked) {
+            if (ancestor.Father === this.state.clickedAncestor.Id || ancestor.Mother === this.state.clickedAncestor.Id) {
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+        return false;
+    }
+
+    linkedAncestorCloseClicked(ancestor) {
+        if (this.state.closeClickedAncestor === null) {
+            return false;
+        }
+        if (this.state.parentWindowsLinked) {
+            if (this.state.closeClickedAncestor.Father === ancestor.Id || this.state.closeClickedAncestor.Mother === ancestor.Id) {
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+        if (this.state.childWindowLinked) {
+            if (ancestor.Father === this.state.closeClickedAncestor.Id || ancestor.Mother === this.state.closeClickedAncestor.Id) {
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+        return false;
+    }
+
+    linkedAncestorMouseOver(ancestor) {
+        if (this.state.mouseOverAncestor === null) {
+            return false;
+        }
+        if (this.state.parentWindowsLinked) {
+            if (this.state.mouseOverAncestor.Father === ancestor.Id || this.state.mouseOverAncestor.Mother === ancestor.Id) {
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+        if (this.state.childWindowLinked) {
+            if (ancestor.Father === this.state.mouseOverAncestor.Id || ancestor.Mother === this.state.mouseOverAncestor.Id) {
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+        return false;
+    }
+
+    linkedAncestorMouseOut(ancestor) {
+        if (this.state.mouseOutAncestor === null) {
+            return false;
+        }
+        if (this.state.parentWindowsLinked) {
+            if (this.state.mouseOutAncestor.Father === ancestor.Id || this.state.mouseOutAncestor.Mother === ancestor.Id) {
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+        if (this.state.childWindowLinked) {
+            if (ancestor.Father === this.state.mouseOutAncestor.Id || ancestor.Mother === this.state.mouseOutAncestor.Id) {
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+        return false;
     }
 
     render() {
@@ -381,11 +521,17 @@ class MapOverlayItems extends React.Component {
                 <label for="parentChildLines">Show lines connecting parents to children</label>
             </div>
 
-        const childParentWindowsLinked = 
+        const parentWindowsLinked = 
             <div>
-                <input type="checkbox" name="childParentWindowsLinked" checked={this.state.childParentWindowsLinked} onChange={(e) => this.onChildParentWindowsLinkedChange(e)} disabled={this.state.birthPins && this.state.deathPins}/>
-                <label for="childParewntWindowsLink">Link opening/closing of parent info windows to child info window</label>
+                <input type="checkbox" name="parentWindowsLinked" checked={this.state.parentWindowsLinked} onChange={(e) => this.onParentWindowsLinkedChange(e)} disabled={(this.state.birthPins && this.state.deathPins) || this.state.childWindowLinked}/>
+                <label for="childParewntWindowsLinked">Show parent info windows on child hover or click (e.g., to go up an ancestral line)</label>
             </div>
+
+        const childWindowLinked = 
+        <div>
+            <input type="checkbox" name="childWindowLinked" checked={this.state.childWindowLinked} onChange={(e) => this.onChildWindowLinkedChange(e)} disabled={(this.state.birthPins && this.state.deathPins) || this.state.parentWindowsLinked}/>
+            <label for="childWindowLinked">Show child info window on parent hover or click (e.g., to go down a line of descent)</label>
+        </div>
 
         const birthDeathLines = 
             <div>
@@ -416,7 +562,10 @@ class MapOverlayItems extends React.Component {
                         <td colSpan='2' className={styles.parentChildLinesTD}>{parentChildLines}</td>
                     </tr>
                     <tr>
-                        <td colSpan='2' className={styles.childParentWindowsLinkedTD}>{childParentWindowsLinked}</td>
+                        <td colSpan='2' className={styles.parentWindowsLinkedTD}>{parentWindowsLinked}</td>
+                    </tr>
+                    <tr>
+                        <td colSpan='2' className={styles.childWindowLinkedTD}>{childWindowLinked}</td>
                     </tr>
                     <tr>
                         <td colSpan='2' className={styles.birthDeathLinesTD}>{birthDeathLines}</td>
@@ -442,11 +591,11 @@ class MapOverlayItems extends React.Component {
                         animated={this.state.animated}
                         visible={this.ancestorVisible(this.state.year, ancestor)}
                         birthDeathWindowsLinked={this.state.birthDeathWindowsLinked}
-                        childParentWindowsLinked={this.state.childParentWindowsLinked}
-                        childClick={(this.state.clickedChild === null || (this.state.clickedChild.Father !== ancestor.Id && this.state.clickedChild.Mother !== ancestor.Id)) ? false : true}
-                        childCloseClick={(this.state.closeClickedChild === null || (this.state.closeClickedChild.Father !== ancestor.Id && this.state.closeClickedChild.Mother !== ancestor.Id)) ? false : true}
-                        childMouseOver={(this.state.mouseOverChild === null || (this.state.mouseOverChild.Father !== ancestor.Id && this.state.mouseOverChild.Mother !== ancestor.Id)) ? false : true}
-                        childMouseOut={(this.state.mouseOutChild === null || (this.state.mouseOutChild.Father !== ancestor.Id && this.state.mouseOutChild.Mother !== ancestor.Id)) ? false : true}
+                        ancestorWindowsLinked={this.state.parentWindowsLinked || this.state.childWindowLinked}
+                        linkedAncestorClick={this.linkedAncestorClicked(ancestor)}
+                        linkedAncestorCloseClick={this.linkedAncestorCloseClicked(ancestor)}
+                        linkedAncestorMouseOver={this.linkedAncestorMouseOver(ancestor)}
+                        linkedAncestorMouseOut={this.linkedAncestorMouseOut(ancestor)}
                         onClickCallback={this.onClickCallback}
                         onMouseOverCallback={this.onMouseOverCallback}
                         onMouseOutCallback={this.onMouseOutCallback}
