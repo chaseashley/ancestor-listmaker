@@ -30,7 +30,16 @@ const trackStyle = [{
   
 ///////
 
-const pauseplayDivStyle = {
+const pauseDivStyle = {
+    left: "35px",
+    width: "20px",
+    height: "20px",
+    margin: 0,
+    position: "fixed",
+    bottom: "25px"
+}
+
+const reverseDivStyle = {
     left: "20px",
     width: "20px",
     height: "20px",
@@ -39,8 +48,17 @@ const pauseplayDivStyle = {
     bottom: "25px"
 }
 
+const playDivStyle = {
+    left: "45px",
+    width: "20px",
+    height: "20px",
+    margin: 0,
+    position: "fixed",
+    bottom: "25px"
+}
+
 const speedWrapperStyle = {
-    left: "52px",
+    left: "72px",
     width: "10px",
     height: "40px",
     margin: 0,
@@ -89,12 +107,16 @@ class MapOverlayItems extends React.Component {
         this.onOptionsOpenCloseClick = this.onOptionsOpenCloseClick.bind(this);
         this.getMarks = this.getMarks.bind(this);
         this.onAfterSliderChangeHandler = this.onAfterSliderChangeHandler.bind(this);
-        this.onPausePlayClick = this.onPausePlayClick.bind(this);
+        this.onPlayClick = this.onPlayClick.bind(this);
+        this.onReverseClick = this.onReverseClick.bind(this);
+        this.onPauseClick = this.onPauseClick.bind(this);
         this.incrementYear = this.incrementYear.bind(this);
+        this.decrementYear = this.decrementYear.bind(this);
         this.state={
             ancestors: this.props.ancestors,
             year: null,
-            intervalId: null,
+            incrementIntervalId: null,
+            decrementIntervalId:null,
             timeSeries: false,
             animated: false,
             birthPins: true,
@@ -185,26 +207,48 @@ class MapOverlayItems extends React.Component {
 
     incrementYear() {
         if (this.state.year >= this.state.sliderMax) {
-            clearInterval(this.state.intervalId);
+            clearInterval(this.state.incrementIntervalId);
             this.setState({animated: false});
         }
-        //let newAdjustedAncestors = adjustOverlappingMarkerCoordinates(this.state.ancestors, this.props.zoom, this.state.birthPins, this.state.deathPins);
         this.setState({
             year: this.state.year+(this.state.sliderSpeed * 0.1),
-            //visibleAncestors: newAdjustedAncestors
         });
     }
 
-    onPausePlayClick() {
-        if (!this.state.animated) {
-            let intervalId = setInterval(this.incrementYear, 10);
-            this.setState({intervalId: intervalId});
-        } else {
-            clearInterval(this.state.intervalId);
+    decrementYear() {
+        if (this.state.year <= this.state.sliderMin) {
+            clearInterval(this.state.decrementIntervalId);
+            this.setState({animated: false});
         }
+        this.setState({
+            year: this.state.year-(this.state.sliderSpeed * 0.1),
+        });
+    }
+
+    onPlayClick() {
         if (this.state.year < this.state.sliderMax) {
-            this.setState({animated: !this.state.animated})
+            let incrementIntervalId = setInterval(this.incrementYear, 10);
+            this.setState({
+                incrementIntervalId: incrementIntervalId,
+                animated: true,
+            });
         }
+    }
+
+    onReverseClick() {
+        if (this.state.year > this.state.sliderMin) {
+            let decrementIntervalId = setInterval(this.decrementYear, 10);
+            this.setState({
+                decrementIntervalId: decrementIntervalId,
+                animated: true,
+            });
+        }
+    }
+
+    onPauseClick() {
+        clearInterval(this.state.incrementIntervalId);
+        clearInterval(this.state.decrementIntervalId);
+        this.setState({animated: false});
     }
 
     onAllOrTimeSeriesClick() {
@@ -629,19 +673,26 @@ class MapOverlayItems extends React.Component {
             pauseplay = <></>;
         } else if (this.state.animated) {
             pauseplay =
-                <div style={pauseplayDivStyle}>
-                    <svg className="button" viewBox="0 0 60 60" onClick={this.onPausePlayClick}>
+                <div style={pauseDivStyle}>
+                    <svg className="button" viewBox="0 0 60 60" onClick={this.onPauseClick}>
                         <polygon points="0,0 15,0 15,60 0,60" fill="#404040"/>
                         <polygon points="25,0 40,0 40,60 25,60" fill="#404040"/>
                     </svg>
                 </div>
         } else { //not timeSeries and not animated
             pauseplay =
-                <div style={pauseplayDivStyle}>
-                    <svg className="button" viewBox="0 0 60 60" onClick={this.onPausePlayClick}>
+                <>
+                <div style={reverseDivStyle}>
+                    <svg className="button" viewBox="0 0 60 60" onClick={this.onReverseClick}>
+                        <polygon points="60,0 10,30 60,60" fill="#404040"/>
+                    </svg>
+                </div>
+                <div style={playDivStyle}>
+                    <svg className="button" viewBox="0 0 60 60" onClick={this.onPlayClick}>
                         <polygon points="0,0 50,30 0,60" fill="#404040"/>
                     </svg>
                 </div>
+                </>
         }
 
         let speedSlider;
