@@ -1,3 +1,20 @@
+.buttonbarDiv {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 20px;
+    width: 100%;
+    background: white;
+    padding: 10px;
+    padding-left: 20px;
+}
+
+.buttonbarspacer {
+    padding-left: 20px;
+    height: auto;
+    display: inline-block;
+}
+
 .optionsOpen {
     position: absolute;
     top: 0;

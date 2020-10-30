@@ -28,7 +28,7 @@ function get_retry(url, n) {
         console.log('response.date', error.response.data);
         console.log('response.status', error.response.status);
         console.log('response.headers', error.response.headers);
-        if (n===1) {
+        if (error.response.status !== 500 || n === 1) {
           /*
           console.log(error.response.data);
           console.log(error.response.status);
@@ -56,7 +56,7 @@ function get_retry(url, n) {
 
 export function getCoordinates(locationName) {
   const dbURL = 'https://ancestor-listmaker-backend.herokuapp.com/locations/' + locationName;
-  return get_retry(dbURL, 1)
+  return get_retry(dbURL, 5)
 }
     
 /*

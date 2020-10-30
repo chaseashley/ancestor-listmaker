@@ -365,7 +365,7 @@ class Map extends React.Component {
         }
 
         return(
-            <div className={styles.page}>
+            <div>
                 <div className={styles.topBox}>
                     <h1 className={styles.h1}>
                         Ancestor Listmaker
