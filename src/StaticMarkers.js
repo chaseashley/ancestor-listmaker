@@ -25,6 +25,7 @@ class StaticMarkers extends Component {
             linkedAncestorClick: false,
             linkedAncestorCloseClick: false,
             ancestorOnClick: false,
+            searchPerson: false,
         }
     }
 
@@ -80,14 +81,35 @@ class StaticMarkers extends Component {
                 ancestorOnClick: false*/
             }
         }
-        /*
-        if (nextProps.timeline && !prevState.timeline) {
-            //If turn on timeline, close all previously opened window (may want to rethink this)
-            return {
-                bOpen: false,
-                dOpen: false,
+        if (nextProps.searchPerson && !prevState.searchPerson) {
+            if (nextProps.birthPins && nextProps.deathPins) {
+                return {
+                    bOpen: true,
+                    bClicked: true,
+                    dOpen: true,
+                    dClicked: true,
+                    mouseOver: true,
+                    searchPerson: true,
+                }
+            } else if (nextProps.birthPins) {
+                return {
+                    bOpen: true,
+                    bClicked: true,
+                    mouseOver: true,
+                    searchPerson: true,
+                }
+            } else if (nextProps.deathPins) {
+                return {
+                    dOpen: true,
+                    dClicked: true,
+                    mouseOver: true,
+                    searchPerson: true,
+                }
             }
-        }*/
+        }
+        if (!nextProps.searchPerson && prevState.searchPerson) {
+            return { searchPerson: false}
+        }
     }
 
     onBClickHandler() {
