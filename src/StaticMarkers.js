@@ -39,19 +39,28 @@ class StaticMarkers extends Component {
     static getDerivedStateFromProps(nextProps, prevState) {
         if (nextProps.ancestorOnClick && nextProps.linkedAncestorClick && !prevState.linkedAncestorClick) {
             //click on child; simulate click on this parent marker
-            return {
-                bOpen: true,
-                dOpen: true,
-                bClicked: true,
-                dClicked: true,
-                mouseOver: true,
-                linkedAncestorClick: true,
-                linkedAncestorCloseClick: false,
-                ancestorOnClick: true
-            };
+            if (nextProps.birthPins) {
+                return {
+                    bOpen: true,
+                    bClicked: true,
+                    mouseOver: true,
+                    linkedAncestorClick: true,
+                    linkedAncestorCloseClick: false,
+                    ancestorOnClick: true
+                };
+            } else if (nextProps.deathPins) {
+                return {
+                    dOpen: true,
+                    dClicked: true,
+                    mouseOver: true,
+                    linkedAncestorClick: true,
+                    linkedAncestorCloseClick: false,
+                    ancestorOnClick: true
+                };
+            }
         }
         if (nextProps.ancestorOnClick && nextProps.linkedAncestorCloseClick && !prevState.linkedAncestorCloseClick) {
-            //closeClick on child; just record the child closeClick and don't change this parent marker's info window
+            //closeClick on linked ancestor; just record the linked ancestor closeClick and don't change this marker's info window
             return {
                 linkedAncestorCloseClick: true,
                 linkedAncestorClick: false,
@@ -59,25 +68,33 @@ class StaticMarkers extends Component {
             };
         }
         if (!nextProps.ancestorOnClick && prevState.ancestorOnClick) {
-            //child-parent linking option turned off, so null out child parent states
+            //ancestor linking option turned off, so null out linked ancestor states
+            return {
+                /*
+                bOpen: true,
+                dOpen: true,
+                bClicked: true,
+                dClicked: true,
+                linkedAncestorClick: false,
+                linkedAncestorCloseClick: false,
+                ancestorOnClick: false*/
+            }
+        }
+        /*
+        if (nextProps.timeline && !prevState.timeline) {
+            //If turn on timeline, close all previously opened window (may want to rethink this)
             return {
                 bOpen: false,
                 dOpen: false,
-                bClicked: false,
-                dClicked: false,
-                linkedAncestorClick: false,
-                linkedAncestorCloseClick: false,
-                ancestorOnClick: false
             }
-
-        }
+        }*/
     }
 
     onBClickHandler() {
         if (this.props.visible) {
-            if (this.props.ancestorOnClick) {
+            //if (this.props.ancestorOnClick) {
                 this.props.onClickCallback(this.props.ancestor);
-            }
+            //}
             if (this.state.mouseOver) { //this will be true if click occurs while window is open due to a mouseOver
                 let newZindex = Math.floor(Date.now()/1000);
                 if (this.props.birthDeathOnClick) {
@@ -113,9 +130,9 @@ class StaticMarkers extends Component {
 
     onDClickHandler() {
         if (this.props.visible) {
-            if (this.props.ancestorOnClick) {
+            //if (this.props.ancestorOnClick) {
                 this.props.onClickCallback(this.props.ancestor);
-            }
+            //}
             if (this.state.mouseOver) { //this will be true if click occurs while window is open due to a mouseOver
                 let newZindex = Math.floor(Date.now()/1000);
                 if (this.props.birthDeathOnClick) {
@@ -191,13 +208,13 @@ class StaticMarkers extends Component {
 
     onBCloseClickHandler() {
         if (this.props.visible) {
-            if (this.props.ancestorOnClick) {
+            //if (this.props.ancestorOnClick) {
                 this.props.onCloseClickCallback(this.props.ancestor);
                 this.setState({ //if close info window, reset child relationship
                     linkedAncestorClick: false,
                     linkedAncestorCloseClick: false,
                 })
-            }
+            //}
             this.setState({
                 bOpen: false,
                 bClicked: false,
@@ -208,13 +225,13 @@ class StaticMarkers extends Component {
 
     onDCloseClickHandler() {
         if (this.props.visible) {
-            if (this.props.ancestorOnClick) {
+            //if (this.props.ancestorOnClick) {
                 this.props.onCloseClickCallback(this.props.ancestor);
                 this.setState({ //if close info window, reset child relationship
                     linkedAncestorClick: false,
                     linkedAncestorCloseClick: false,
                 })
-            }
+            //}
             this.setState({
                 dOpen: false,
                 dClicked: false,
@@ -239,7 +256,7 @@ class StaticMarkers extends Component {
                     onMouseOver={this.onBMouseOverHandler}
                     onMouseOut={this.onMouseOutHandler}
                 >
-                    {this.props.visible && this.state.bOpen && <InfoWindow onCloseClick={this.onBCloseClickHandler} zIndex={(this.state.bWindowZindex !== null) ? this.state.bWindowZindex : 0}>
+                    {this.props.visible && this.state.bOpen && <InfoWindow options={{ disableAutoPan: true }} onCloseClick={this.onBCloseClickHandler} zIndex={(this.state.bWindowZindex !== null) ? this.state.bWindowZindex : 0}>
                         <div><div><a href={`https://www.wikitree.com/wiki/${this.props.ancestor.Name}`} target='_blank' rel='noopener noreferrer'>{this.props.ancestor.BirthNamePrivate}</a>, b. {this.props.ancestor.BirthDate}</div><div>{this.props.ancestor.BirthLocation}</div></div>
                     </InfoWindow>}
                 </Marker>
@@ -255,7 +272,7 @@ class StaticMarkers extends Component {
                     onCloseClck={this.onCloseClickHandler}
                     onDblClick={this.onDDblClickHandler}
                 >
-                    {this.props.visible && this.state.dOpen  && <InfoWindow onCloseClick={this.onDCloseClickHandler} zIndex={(this.state.dWindowZindex !== null) ? this.state.dWindowZindex : 0}>
+                    {this.props.visible && this.state.dOpen  && <InfoWindow options={{ disableAutoPan: true }} onCloseClick={this.onDCloseClickHandler} zIndex={(this.state.dWindowZindex !== null) ? this.state.dWindowZindex : 0}>
                     <div><div><a href={`https://www.wikitree.com/wiki/${this.props.ancestor.Name}`} target='_blank' rel='noopener noreferrer'>{this.props.ancestor.BirthNamePrivate}</a>, d. {this.props.ancestor.DeathDate}</div><div>{this.props.ancestor.DeathLocation}</div></div>
                     </InfoWindow>}
                 </Marker>
@@ -279,7 +296,7 @@ class StaticMarkers extends Component {
                     onMouseOut={this.onMouseOutHandler}
                     onDblClick={this.onBDblClickHandler}
                 >
-                    {this.props.visible && this.state.bOpen && <InfoWindow onCloseClick={this.onBCloseClickHandler} zIndex={(this.state.bWindowZindex !== null) ? this.state.bWindowZindex : 0}>
+                    {this.props.visible && this.state.bOpen && <InfoWindow options={{ disableAutoPan: true }} onCloseClick={this.onBCloseClickHandler} zIndex={(this.state.bWindowZindex !== null) ? this.state.bWindowZindex : 0}>
                     <div><div><a href={`https://www.wikitree.com/wiki/${this.props.ancestor.Name}`} target='_blank' rel='noopener noreferrer'>{this.props.ancestor.BirthNamePrivate}</a>, b. {this.props.ancestor.BirthDate}</div><div>{this.props.ancestor.BirthLocation}</div></div>
                     </InfoWindow>}
                 </Marker>
@@ -295,7 +312,7 @@ class StaticMarkers extends Component {
                     onCloseClck={this.onCloseClickHandler}
                     onDblClick={this.onDDblClickHandler}
                 >
-                    {this.props.visible && this.state.dOpen && <InfoWindow onCloseClick={this.onDCloseClickHandler} zIndex={(this.state.dWindowZindex !== null) ? this.state.dWindowZindex : 0}>
+                    {this.props.visible && this.state.dOpen && <InfoWindow options={{ disableAutoPan: true }} onCloseClick={this.onDCloseClickHandler} zIndex={(this.state.dWindowZindex !== null) ? this.state.dWindowZindex : 0}>
                     <div><div><a href={`https://www.wikitree.com/wiki/${this.props.ancestor.Name}`} target='_blank' rel='noopener noreferrer'>{this.props.ancestor.BirthNamePrivate}</a>, d. {this.props.ancestor.DeathDate}</div><div>{this.props.ancestor.DeathLocation}</div></div>
                     </InfoWindow>}
                 </Marker>
@@ -314,7 +331,7 @@ class StaticMarkers extends Component {
                     onMouseOut={this.onMouseOutHandler}
                     onDblClick={this.onBDblClickHandler}
                 >
-                    {this.props.visible && this.state.bOpen && <InfoWindow onCloseClick={this.onBCloseClickHandler} zIndex={(this.state.bWindowZindex !== null) ? this.state.bWindowZindex : 0}>
+                    {this.props.visible && this.state.bOpen && <InfoWindow options={{ disableAutoPan: true }} onCloseClick={this.onBCloseClickHandler} zIndex={(this.state.bWindowZindex !== null) ? this.state.bWindowZindex : 0}>
                     <div><div><a href={`https://www.wikitree.com/wiki/${this.props.ancestor.Name}`} target='_blank' rel='noopener noreferrer'>{this.props.ancestor.BirthNamePrivate}</a>, b. {this.props.ancestor.BirthDate}</div><div>{this.props.ancestor.BirthLocation}</div></div>
                     </InfoWindow>}
                 </Marker>
@@ -334,7 +351,7 @@ class StaticMarkers extends Component {
                     onCloseClck={this.onCloseClickHandler}
                     onDblClick={this.onDDblClickHandler}
                 >
-                    {this.props.visible && this.state.dOpen && <InfoWindow onCloseClick={this.onDCloseClickHandler} zIndex={(this.state.dWindowZindex !== null) ? this.state.dWindowZindex : 0}>
+                    {this.props.visible && this.state.dOpen && <InfoWindow options={{ disableAutoPan: true }} onCloseClick={this.onDCloseClickHandler} zIndex={(this.state.dWindowZindex !== null) ? this.state.dWindowZindex : 0}>
                     <div><div><a href={`https://www.wikitree.com/wiki/${this.props.ancestor.Name}`} target='_blank' rel='noopener noreferrer'>{this.props.ancestor.BirthNamePrivate}</a>, d. {this.props.ancestor.DeathDate}</div><div>{this.props.ancestor.DeathLocation}</div></div>
                     </InfoWindow>}
                 </Marker>
