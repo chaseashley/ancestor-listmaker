@@ -128,7 +128,7 @@ class StaticMarkers extends Component {
     onBClickHandler() {
         if (this.props.visible) {
             //if (this.props.ancestorOnClick) {
-                this.props.onClickCallback(this.props.ancestor);
+                this.props.onBClickCallback(this.props.ancestor);
             //}
             if (this.state.mouseOver) { //this will be true if click occurs while window is open due to a mouseOver
                 let newZindex = Math.floor(Date.now()/1000);
@@ -166,7 +166,7 @@ class StaticMarkers extends Component {
     onDClickHandler() {
         if (this.props.visible) {
             //if (this.props.ancestorOnClick) {
-                this.props.onClickCallback(this.props.ancestor);
+                this.props.onDClickCallback(this.props.ancestor);
             //}
             if (this.state.mouseOver) { //this will be true if click occurs while window is open due to a mouseOver
                 let newZindex = Math.floor(Date.now()/1000);
@@ -244,7 +244,7 @@ class StaticMarkers extends Component {
     onBCloseClickHandler() {
         if (this.props.visible) {
             //if (this.props.ancestorOnClick) {
-                this.props.onCloseClickCallback(this.props.ancestor);
+                this.props.onBCloseClickCallback(this.props.ancestor);
                 this.setState({ //if close info window, reset child relationship
                     linkedAncestorClick: false,
                     linkedAncestorCloseClick: false,
@@ -261,7 +261,7 @@ class StaticMarkers extends Component {
     onDCloseClickHandler() {
         if (this.props.visible) {
             //if (this.props.ancestorOnClick) {
-                this.props.onCloseClickCallback(this.props.ancestor);
+                this.props.onDCloseClickCallback(this.props.ancestor);
                 this.setState({ //if close info window, reset child relationship
                     linkedAncestorClick: false,
                     linkedAncestorCloseClick: false,

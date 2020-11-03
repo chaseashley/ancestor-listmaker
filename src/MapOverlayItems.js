@@ -90,8 +90,10 @@ class MapOverlayItems extends React.Component {
         super(props);
         this.linkedAncestorClicked = this.linkedAncestorClicked.bind(this);
         this.linkedAncestorCloseClicked = this.linkedAncestorCloseClicked.bind(this);
-        this.onClickCallback = this.onClickCallback.bind(this);
-        this.onCloseClickCallback = this.onCloseClickCallback.bind(this);
+        this.onBClickCallback = this.onBClickCallback.bind(this);
+        this.onBCloseClickCallback = this.onBCloseClickCallback.bind(this);
+        this.onDClickCallback = this.onDClickCallback.bind(this);
+        this.onDCloseClickCallback = this.onDCloseClickCallback.bind(this);
         this.getFather = this.getFather.bind(this);
         this.getMother = this.getMother.bind(this);
         this.ancestorVisible = this.ancestorVisible.bind(this);
@@ -136,9 +138,11 @@ class MapOverlayItems extends React.Component {
             sliderMax: null,
             sliderInterval: null,
             sliderSpeed: 1,
-            openAncestors: [],
+            openBAncestors: [],
+            openDAncestors: [],
             hideClosed: false,
-            hideClosedAncestors: [],
+            hideBClosedAncestors: [],
+            hideDClosedAncestors: [],
             searchPerson: null,
             zoom: null,
         }
@@ -149,7 +153,8 @@ class MapOverlayItems extends React.Component {
             if (this.hideClosed) {
                 this.setState({
                     ancestors: adjustOverlappingMarkerCoordinates(this.state.ancestors, this.props.zoom, this.state.birthPins, this.state.deathPins),
-                    hideClosedAncestors: adjustOverlappingMarkerCoordinates(this.statehideClosedAncestors, this.props.zoom, this.state.birthPins, this.state.deathPins),
+                    hideBClosedAncestors: adjustOverlappingMarkerCoordinates(this.statehideBClosedAncestors, this.props.zoom, this.state.birthPins, this.state.deathPins),
+                    hideDClosedAncestors: adjustOverlappingMarkerCoordinates(this.statehideDClosedAncestors, this.props.zoom, this.state.birthPins, this.state.deathPins),
                     zoom: this.props.zoom
                 });
             } else {
@@ -322,12 +327,22 @@ class MapOverlayItems extends React.Component {
     }
 
     onFindSelect(optionValue) {
-        let openAncestors = this.state.openAncestors;
-        openAncestors.push(optionValue[0]);
-        this.setState({
-            searchPerson: optionValue,
-            openAncestors: openAncestors,
-        })
+        if (this.state.birthPins) {
+            let openBAncestors = this.state.openBAncestors;
+            openBAncestors.push(optionValue[0]);
+            this.setState({
+                searchPerson: optionValue,
+                openBAncestors: openBAncestors,
+            })
+        }
+        if (this.state.deathPins) {
+            let openDAncestors = this.state.openDAncestors;
+            openDAncestors.push(optionValue[0]);
+            this.setState({
+                searchPerson: optionValue,
+                openDAncestors: openDAncestors,
+            })
+        }
     }
 
     onParentsOnClick() {
@@ -370,12 +385,14 @@ class MapOverlayItems extends React.Component {
         if (this.state.hideClosed) {
             this.setState({
                 hideClosed: false,
-                hideClosedAncestors: [],
+                hideClosedBAncestors: [],
+                hideClosedDAncestors: [],
             })
         } else {
             this.setState({
                 hideClosed: true,
-                hideClosedAncestors: this.state.openAncestors.slice(),
+                hideBClosedAncestors: this.state.openBAncestors.slice(),
+                hideDClosedAncestors: this.state.openDAncestors.slice(),
             })
         }
     }
@@ -536,12 +553,22 @@ class MapOverlayItems extends React.Component {
                 }
             };
         } else if (this.state.hideClosed) {
-            for (let i=0; i<this.state.hideClosedAncestors.length; i++) {
-                if (this.state.hideClosedAncestors[i].Id === ancestor.Id) {
-                    return true;
+            if (this.state.birthPins) {
+                for (let i=0; i<this.state.hideBClosedAncestors.length; i++) {
+                    if (this.state.hideBClosedAncestors[i].Id === ancestor.Id) {
+                        return true;
+                    }
                 }
+                return false;
+            } else {
+                for (let i=0; i<this.state.hideDClosedAncestors.length; i++) {
+                    if (this.state.hideDClosedAncestors[i].Id === ancestor.Id) {
+                        return true;
+                    }
+                }
+                return false;
             }
-            return false;
+            
         }
     }
 
@@ -571,78 +598,181 @@ class MapOverlayItems extends React.Component {
         }
     }
 
-    onClickCallback(ancestor) {
+    onBClickCallback(ancestor) {
         if (!this.state.hideClosed) {
-            let openAncestors = this.state.openAncestors;
-            openAncestors.push(ancestor);
+            let openBAncestors = this.state.openBAncestors;
+            openBAncestors.push(ancestor);
             if (this.state.parentsOnClick) {
                 let father = this.getFather(ancestor);
                 if (father !== null) {
-                    openAncestors.push(father);
+                    openBAncestors.push(father);
                 }
                 let mother = this.getMother(ancestor);
                 if (mother !== null) {
-                    openAncestors.push(mother);
+                    openBAncestors.push(mother);
                 }
             } else if (this.state.childrenOnClick) {
                 for (let i=0; i<this.state.ancestors.length; i++) {
                     if (this.state.ancestors[i].Father === ancestor.Id || this.state.ancestors[i].Mother === ancestor.Id) {
-                        openAncestors.push(this.state.ancestors[i]);
+                        openBAncestors.push(this.state.ancestors[i]);
                     }
                 }
             }
-            openAncestors = removeDuplicates(openAncestors);
-            this.setState({
-                openAncestors: openAncestors,
-                clickedAncestor: ancestor,
-                closeClickedAncestor: null,
-            });
+            if (this.state.birthDeathOnClick){
+                let openDAncestors = this.state.openDAncestors;
+                openDAncestors.push(ancestor);
+                openBAncestors = removeDuplicates(openBAncestors);
+                openDAncestors = removeDuplicates(openDAncestors);
+                this.setState({
+                    openBAncestors: openBAncestors,
+                    openDAncestors: openDAncestors,
+                    clickedAncestor: ancestor,
+                    closeClickedAncestor: null,
+                });
+            } else {
+                openBAncestors = removeDuplicates(openBAncestors);
+                this.setState({
+                    openBAncestors: openBAncestors,
+                    clickedAncestor: ancestor,
+                    closeClickedAncestor: null,
+                });
+            }
         } else if (this.state.hideClosed) {
-            let openAncestors = this.state.openAncestors;
-            let hideClosedAncestors = this.state.hideClosedAncestors;
-            openAncestors.push(ancestor);
-            hideClosedAncestors.push(ancestor);
+            let openBAncestors = this.state.openBAncestors;
+            let hideBClosedAncestors = this.state.hideBClosedAncestors;
+            openBAncestors.push(ancestor);
+            hideBClosedAncestors.push(ancestor);
             if (this.state.parentsOnClick) {
                 let father = this.getFather(ancestor);
                 if (father !== null) {
-                    openAncestors.push(father);
-                    hideClosedAncestors.push(father);
+                    openBAncestors.push(father);
+                    hideBClosedAncestors.push(father);
                 }
                 let mother = this.getMother(ancestor);
                 if (mother !== null) {
-                    openAncestors.push(mother);
-                    hideClosedAncestors.push(mother);
+                    openBAncestors.push(mother);
+                    hideBClosedAncestors.push(mother);
                 }
             } else if (this.state.childrenOnClick) {
                 for (let i=0; i<this.state.ancestors.length; i++) {
                     if (this.state.ancestors[i].Father === ancestor.Id || this.state.ancestors[i].Mother === ancestor.Id) {
-                        openAncestors.push(this.state.ancestors[i]);
-                        hideClosedAncestors.push(this.state.ancestors[i]);
+                        openBAncestors.push(this.state.ancestors[i]);
+                        hideBClosedAncestors.push(this.state.ancestors[i]);
                     }
                 }
             }
-            openAncestors = removeDuplicates(openAncestors);
-            hideClosedAncestors = removeDuplicates(hideClosedAncestors);
-            hideClosedAncestors = adjustOverlappingMarkerCoordinates(hideClosedAncestors, this.props.zoom, this.state.birthPins, this.state.deathPins);
+            openBAncestors = removeDuplicates(openBAncestors);
+            hideBClosedAncestors = removeDuplicates(hideBClosedAncestors);
+            hideBClosedAncestors = adjustOverlappingMarkerCoordinates(hideBClosedAncestors, this.props.zoom, this.state.birthPins, this.state.deathPins);
             this.setState({
-                openAncestors: openAncestors,
-                hideClosedAncestors: hideClosedAncestors,
+                openBAncestors: openBAncestors,
+                hideBClosedAncestors: hideBClosedAncestors,
                 clickedAncestor: ancestor,
                 closeClickedAncestor: null,
             });
         }
     }
 
-    onCloseClickCallback(ancestor) {
-        let openAncestors = this.state.openAncestors;
-        for (let i=0; i<openAncestors.length; i++) {
-            if (openAncestors[i].Id === ancestor.Id) {
-                openAncestors.splice(i,1);
+    onDClickCallback(ancestor) {
+        if (!this.state.hideClosed) {
+            let openDAncestors = this.state.openDAncestors;
+            openDAncestors.push(ancestor);
+            if (this.state.parentsOnClick) {
+                let father = this.getFather(ancestor);
+                if (father !== null) {
+                    openDAncestors.push(father);
+                }
+                let mother = this.getMother(ancestor);
+                if (mother !== null) {
+                    openDAncestors.push(mother);
+                }
+            } else if (this.state.childrenOnClick) {
+                for (let i=0; i<this.state.ancestors.length; i++) {
+                    if (this.state.ancestors[i].Father === ancestor.Id || this.state.ancestors[i].Mother === ancestor.Id) {
+                        openDAncestors.push(this.state.ancestors[i]);
+                    }
+                }
+            }
+            if (this.state.birthDeathOnClick){
+                let openBAncestors = this.state.openDAncestors;
+                openBAncestors.push(ancestor);
+                openDAncestors = removeDuplicates(openDAncestors);
+                openBAncestors = removeDuplicates(openBAncestors);
+                this.setState({
+                    openBAncestors: openBAncestors,
+                    openDAncestors: openDAncestors,
+                    clickedAncestor: ancestor,
+                    closeClickedAncestor: null,
+                });
+            } else {
+                openDAncestors = removeDuplicates(openDAncestors);
+                this.setState({
+                    openDAncestors: openDAncestors,
+                    clickedAncestor: ancestor,
+                    closeClickedAncestor: null,
+                });
+            }
+        } else if (this.state.hideClosed) {
+            let openDAncestors = this.state.openDAncestors;
+            let hideDClosedAncestors = this.state.hideDClosedAncestors;
+            openDAncestors.push(ancestor);
+            hideDClosedAncestors.push(ancestor);
+            if (this.state.parentsOnClick) {
+                let father = this.getFather(ancestor);
+                if (father !== null) {
+                    openDAncestors.push(father);
+                    hideDClosedAncestors.push(father);
+                }
+                let mother = this.getMother(ancestor);
+                if (mother !== null) {
+                    openDAncestors.push(mother);
+                    hideDClosedAncestors.push(mother);
+                }
+            } else if (this.state.childrenOnClick) {
+                for (let i=0; i<this.state.ancestors.length; i++) {
+                    if (this.state.ancestors[i].Father === ancestor.Id || this.state.ancestors[i].Mother === ancestor.Id) {
+                        openDAncestors.push(this.state.ancestors[i]);
+                        hideDClosedAncestors.push(this.state.ancestors[i]);
+                    }
+                }
+            }
+            openDAncestors = removeDuplicates(openDAncestors);
+            hideDClosedAncestors = removeDuplicates(hideDClosedAncestors);
+            hideDClosedAncestors = adjustOverlappingMarkerCoordinates(hideDClosedAncestors, this.props.zoom, this.state.birthPins, this.state.deathPins);
+            this.setState({
+                openDAncestors: openDAncestors,
+                hideDClosedAncestors: hideDClosedAncestors,
+                clickedAncestor: ancestor,
+                closeClickedAncestor: null,
+            });
+        }
+    }
+
+    onBCloseClickCallback(ancestor) {
+        let openBAncestors = this.state.openBAncestors;
+        for (let i=0; i<openBAncestors.length; i++) {
+            if (openBAncestors[i].Id === ancestor.Id) {
+                openBAncestors.splice(i,1);
                 break;
             }
         }
         this.setState({
-            openAncestors: openAncestors,
+            openBAncestors: openBAncestors,
+            closeClickedAncestor: ancestor,
+            clickedAncestor: null,
+        });
+    }
+
+    onDCloseClickCallback(ancestor) {
+        let openDAncestors = this.state.openDAncestors;
+        for (let i=0; i<openDAncestors.length; i++) {
+            if (openDAncestors[i].Id === ancestor.Id) {
+                openDAncestors.splice(i,1);
+                break;
+            }
+        }
+        this.setState({
+            openDAncestors: openDAncestors,
             closeClickedAncestor: ancestor,
             clickedAncestor: null,
         });
@@ -697,7 +827,11 @@ class MapOverlayItems extends React.Component {
     render() {
         let ancestors;
         if (this.state.hideClose) {
-            ancestors = this.state.hideClosedAncestors;
+            if (this.state.birthPins) {
+                ancestors = this.state.hideBClosedAncestors;
+            } else {
+                ancestors = this.state.hideDClosedAncestors;
+            }
         } else {
             ancestors = this.state.ancestors;
         }
@@ -759,8 +893,10 @@ class MapOverlayItems extends React.Component {
                         ancestorOnClick={this.state.parentsOnClick || this.state.childrenOnClick}
                         linkedAncestorClick={this.linkedAncestorClicked(ancestor)}
                         linkedAncestorCloseClick={this.linkedAncestorCloseClicked(ancestor)}
-                        onClickCallback={this.onClickCallback}
-                        onCloseClickCallback={this.onCloseClickCallback}
+                        onBClickCallback={this.onBClickCallback}
+                        onBCloseClickCallback={this.onBCloseClickCallback}
+                        onDClickCallback={this.onDClickCallback}
+                        onDCloseClickCallback={this.onDCloseClickCallback}
                         searchPerson={this.state.searchPerson && (ancestor.Id === this.state.searchPerson[0].Id)}
                     />
         })
