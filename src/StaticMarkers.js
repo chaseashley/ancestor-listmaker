@@ -44,6 +44,8 @@ class StaticMarkers extends Component {
                 return {
                     bOpen: true,
                     bClicked: true,
+                    bzIndex: Math.floor(Date.now()/1000)+999999,
+                    bWindowZindex: Math.floor(Date.now()/1000)+999999,
                     mouseOver: true,
                     linkedAncestorClick: true,
                     linkedAncestorCloseClick: false,
@@ -53,6 +55,8 @@ class StaticMarkers extends Component {
                 return {
                     dOpen: true,
                     dClicked: true,
+                    dzIndex: Math.floor(Date.now()/1000)+999999,
+                    dWindowZindex: Math.floor(Date.now()/1000)+999999,
                     mouseOver: true,
                     linkedAncestorClick: true,
                     linkedAncestorCloseClick: false,
@@ -86,8 +90,12 @@ class StaticMarkers extends Component {
                 return {
                     bOpen: true,
                     bClicked: true,
+                    bzIndex: Math.floor(Date.now()/1000),
+                    bWindowZindex: Math.floor(Date.now()/1000),
                     dOpen: true,
                     dClicked: true,
+                    dzIndex: Math.floor(Date.now()/1000),
+                    dWindowZindex: Math.floor(Date.now()/1000),
                     mouseOver: true,
                     searchPerson: true,
                 }
@@ -95,6 +103,8 @@ class StaticMarkers extends Component {
                 return {
                     bOpen: true,
                     bClicked: true,
+                    bzIndex: Math.floor(Date.now()/1000),
+                    bWindowZindex: Math.floor(Date.now()/1000),
                     mouseOver: true,
                     searchPerson: true,
                 }
@@ -102,6 +112,8 @@ class StaticMarkers extends Component {
                 return {
                     dOpen: true,
                     dClicked: true,
+                    dzIndex: Math.floor(Date.now()/1000),
+                    dWindowZIndex: Math.floor(Date.now()/1000),
                     mouseOver: true,
                     searchPerson: true,
                 }
@@ -110,6 +122,7 @@ class StaticMarkers extends Component {
         if (!nextProps.searchPerson && prevState.searchPerson) {
             return { searchPerson: false}
         }
+        return prevState;
     }
 
     onBClickHandler() {
@@ -119,33 +132,33 @@ class StaticMarkers extends Component {
             //}
             if (this.state.mouseOver) { //this will be true if click occurs while window is open due to a mouseOver
                 let newZindex = Math.floor(Date.now()/1000);
-                if (this.props.birthDeathOnClick) {
-                    this.setState({
-                        dOpen: true,
-                        dClicked: true,
-                        dzIndex: newZindex,
-                        dWindowZindex: newZindex,
-                    });
-                }
                 this.setState({
-                    bzIndex: newZindex+1,
-                    bWindowZindex: newZindex+1,
+                    bzIndex: newZindex,
+                    bWindowZindex: newZindex,
                     bClicked: true,
                 });
-            } else { //this will be true if click occurs while window is open due to a click or has been closed due to a click and not reopened with a mouseOver; close window and reactivate mouseOver by setting clicked to false
-                let newZindex = Math.floor(Date.now()/1000);
                 if (this.props.birthDeathOnClick) {
                     this.setState({
                         dOpen: true,
                         dClicked: true,
-                        dzIndex: newZindex,
-                        dWindowZindex: newZindex,
+                        dzIndex: newZindex+1,
+                        dWindowZindex: newZindex+1,
                     });
                 }
+            } else { //this will be true if click occurs while window is open due to a click or has been closed due to a click and not reopened with a mouseOver; close window and reactivate mouseOver by setting clicked to false
+                let newZindex = Math.floor(Date.now()/1000);
                 this.setState({
-                    bzIndex: newZindex+1,
+                    bzIndex: newZindex,
                     bWindowZindex: newZindex+1
                 });
+                if (this.props.birthDeathOnClick) {
+                    this.setState({
+                        dOpen: true,
+                        dClicked: true,
+                        dzIndex: newZindex+1,
+                        dWindowZindex: newZindex+1,
+                    });
+                }
             }
         }
     }
@@ -157,33 +170,33 @@ class StaticMarkers extends Component {
             //}
             if (this.state.mouseOver) { //this will be true if click occurs while window is open due to a mouseOver
                 let newZindex = Math.floor(Date.now()/1000);
-                if (this.props.birthDeathOnClick) {
-                    this.setState({
-                        bOpen: true,
-                        bClicked: true,
-                        bzIndex: newZindex,
-                        bWindowZindex: newZindex
-                    });
-                }
                 this.setState({
-                    dzIndex: newZindex+1,
-                    dWindowZindex: newZindex+1,
+                    dzIndex: newZindex,
+                    dWindowZindex: newZindex,
                     dClicked: true,
                 });
-            } else { //this will be true if click occurs while window is open due to a click or has been closed due to a click and not reopened with a mouseOver; close window and reactivate mouseOver by setting clicked to false
-                let newZindex = Math.floor(Date.now()/1000);
                 if (this.props.birthDeathOnClick) {
                     this.setState({
                         bOpen: true,
                         bClicked: true,
-                        bzIndex: newZindex,
-                        bWindowZindex: newZindex
+                        bzIndex: newZindex+1,
+                        bWindowZindex: newZindex+1,
                     });
                 }
+            } else { //this will be true if click occurs while window is open due to a click or has been closed due to a click and not reopened with a mouseOver; close window and reactivate mouseOver by setting clicked to false
+                let newZindex = Math.floor(Date.now()/1000);
                 this.setState({
-                    dzIndex: newZindex+1,
-                    dWindowZindex: newZindex+1
+                    dzIndex: newZindex,
+                    dWindowZindex: newZindex
                 });
+                if (this.props.birthDeathOnClick) {
+                    this.setState({
+                        bOpen: true,
+                        bClicked: true,
+                        bzIndex: newZindex+1,
+                        bWindowZindex: newZindex+1
+                    });
+                }
             }
         }
     }
@@ -264,120 +277,128 @@ class StaticMarkers extends Component {
 
     render() {
         let personMarkers;
-        if (this.props.birthPins && this.props.ancestor.adjustedblat !== undefined && this.props.deathPins && this.props.ancestor.adjusteddlat !== undefined && this.props.birthDeathLines) {
-            personMarkers =
-            <>
-                <Marker
-                    //key={this.props.ancestor.Id + this.props.ancestor.blat}
-                    visible={this.props.visible}
-                    position={{lat: this.props.ancestor.adjustedblat, lng: this.props.ancestor.adjustedblng}}
-                    icon={`http://maps.google.com/mapfiles/ms/icons/green-dot.png`}
-                    options={{ disableAutoPan: true }}
-                    zIndex={(this.state.bzIndex !== null) ? this.state.bzIndex : 0}
-                    onClick={this.onBClickHandler}
-                    onMouseOver={this.onBMouseOverHandler}
-                    onMouseOut={this.onMouseOutHandler}
-                >
-                    {this.props.visible && this.state.bOpen && <InfoWindow options={{ disableAutoPan: true }} onCloseClick={this.onBCloseClickHandler} zIndex={(this.state.bWindowZindex !== null) ? this.state.bWindowZindex : 0}>
+        if (this.props.visible) {
+            if (this.props.birthPins && this.props.ancestor.adjustedblat !== undefined && this.props.deathPins && this.props.ancestor.adjusteddlat !== undefined && this.props.birthDeathLines) {
+                personMarkers =
+                <>
+                    <Marker
+                        //key={this.props.ancestor.Id + this.props.ancestor.blat}
+                        visible={this.props.visible}
+                        position={{lat: this.props.ancestor.adjustedblat, lng: this.props.ancestor.adjustedblng}}
+                        icon={`http://maps.google.com/mapfiles/ms/icons/green-dot.png`}
+                        options={{ disableAutoPan: true }}
+                        zIndex={(this.state.bzIndex !== null) ? this.state.bzIndex : 0}
+                        onClick={this.onBClickHandler}
+                        onMouseOver={this.onBMouseOverHandler}
+                        onMouseOut={this.onMouseOutHandler}
+                        onCloseClck={this.onBCloseClickHandler}
+                    >
+                        {this.props.visible && this.state.bOpen && <InfoWindow options={{ disableAutoPan: true }} onCloseClick={this.onBCloseClickHandler} zIndex={(this.state.bWindowZindex !== null) ? this.state.bWindowZindex : 0}>
+                            <div><div><a href={`https://www.wikitree.com/wiki/${this.props.ancestor.Name}`} target='_blank' rel='noopener noreferrer'>{this.props.ancestor.BirthNamePrivate}</a>, b. {this.props.ancestor.BirthDate}</div><div>{this.props.ancestor.BirthLocation}</div></div>
+                        </InfoWindow>}
+                    </Marker>
+                    <Marker
+                        visible={this.props.visible}
+                        position={{lat: this.props.ancestor.adjusteddlat, lng: this.props.ancestor.adjusteddlng}}
+                        icon={`http://maps.google.com/mapfiles/ms/icons/red-dot.png`}
+                        options={{ disableAutoPan: true }}
+                        zIndex={(this.state.dzIndex !== null) ? this.state.dzIndex : 0}
+                        onClick={this.onDClickHandler}
+                        onMouseOver={this.onDMouseOverHandler}
+                        onMouseOut={this.onMouseOutHandler}
+                        onCloseClck={this.onDCloseClickHandler}
+                        onDblClick={this.onDDblClickHandler}
+                    >
+                        {this.props.visible && this.state.dOpen  && <InfoWindow options={{ disableAutoPan: true }} onCloseClick={this.onDCloseClickHandler} zIndex={(this.state.dWindowZindex !== null) ? this.state.dWindowZindex : 0}>
+                        <div><div><a href={`https://www.wikitree.com/wiki/${this.props.ancestor.Name}`} target='_blank' rel='noopener noreferrer'>{this.props.ancestor.BirthNamePrivate}</a>, d. {this.props.ancestor.DeathDate}</div><div>{this.props.ancestor.DeathLocation}</div></div>
+                        </InfoWindow>}
+                    </Marker>
+                    <Polyline
+                        visible={this.props.visible}
+                        path={[{ lat: this.props.ancestor.adjustedblat, lng: this.props.ancestor.adjustedblng },{ lat: this.props.ancestor.adjusteddlat, lng: this.props.ancestor.adjusteddlng }]}
+                        options={{ disableAutoPan: true }, {strokeOpacity: 1, strokeWeight: 1}}
+                    />
+                </>
+            } else if (this.props.birthPins && this.props.ancestor.adjustedblat !== undefined && this.props.deathPins && this.props.ancestor.adjusteddlat !== undefined) {
+                personMarkers =
+                <>
+                    <Marker
+                        visible={this.props.visible}
+                        position={{lat: this.props.ancestor.adjustedblat, lng: this.props.ancestor.adjustedblng}}
+                        icon={`http://maps.google.com/mapfiles/ms/icons/green-dot.png`}
+                        options={{ disableAutoPan: true }}
+                        zIndex={(this.state.bzIndex !== null) ? this.state.bzIndex : 0}
+                        onClick={this.onBClickHandler}
+                        onMouseOver={this.onBMouseOverHandler}
+                        onMouseOut={this.onMouseOutHandler}
+                        onCloseClck={this.onBCloseClickHandler}
+                        onDblClick={this.onBDblClickHandler}
+                    >
+                        {this.props.visible && this.state.bOpen && <InfoWindow options={{ disableAutoPan: true }} onCloseClick={this.onBCloseClickHandler} zIndex={(this.state.bWindowZindex !== null) ? this.state.bWindowZindex : 0}>
                         <div><div><a href={`https://www.wikitree.com/wiki/${this.props.ancestor.Name}`} target='_blank' rel='noopener noreferrer'>{this.props.ancestor.BirthNamePrivate}</a>, b. {this.props.ancestor.BirthDate}</div><div>{this.props.ancestor.BirthLocation}</div></div>
-                    </InfoWindow>}
-                </Marker>
-                <Marker
-                    visible={this.props.visible}
-                    position={{lat: this.props.ancestor.adjusteddlat, lng: this.props.ancestor.adjusteddlng}}
-                    icon={`http://maps.google.com/mapfiles/ms/icons/red-dot.png`}
-                    options={{ disableAutoPan: true }}
-                    zIndex={(this.state.dzIndex !== null) ? this.state.dzIndex : 0}
-                    onClick={this.onDClickHandler}
-                    onMouseOver={this.onDMouseOverHandler}
-                    onMouseOut={this.onMouseOutHandler}
-                    onCloseClck={this.onCloseClickHandler}
-                    onDblClick={this.onDDblClickHandler}
-                >
-                    {this.props.visible && this.state.dOpen  && <InfoWindow options={{ disableAutoPan: true }} onCloseClick={this.onDCloseClickHandler} zIndex={(this.state.dWindowZindex !== null) ? this.state.dWindowZindex : 0}>
-                    <div><div><a href={`https://www.wikitree.com/wiki/${this.props.ancestor.Name}`} target='_blank' rel='noopener noreferrer'>{this.props.ancestor.BirthNamePrivate}</a>, d. {this.props.ancestor.DeathDate}</div><div>{this.props.ancestor.DeathLocation}</div></div>
-                    </InfoWindow>}
-                </Marker>
-                <Polyline
-                    visible={this.props.visible}
-                    path={[{ lat: this.props.ancestor.adjustedblat, lng: this.props.ancestor.adjustedblng },{ lat: this.props.ancestor.adjusteddlat, lng: this.props.ancestor.adjusteddlng }]}
-                    options={{ disableAutoPan: true }, {strokeOpacity: 1, strokeWeight: 1}}
-                />
-            </>
-        } else if (this.props.birthPins && this.props.ancestor.adjustedblat !== undefined && this.props.deathPins && this.props.ancestor.adjusteddlat !== undefined) {
-            personMarkers =
-            <>
-                <Marker
-                    visible={this.props.visible}
-                    position={{lat: this.props.ancestor.adjustedblat, lng: this.props.ancestor.adjustedblng}}
-                    icon={`http://maps.google.com/mapfiles/ms/icons/green-dot.png`}
-                    options={{ disableAutoPan: true }}
-                    zIndex={(this.state.bzIndex !== null) ? this.state.bzIndex : 0}
-                    onClick={this.onBClickHandler}
-                    onMouseOver={this.onBMouseOverHandler}
-                    onMouseOut={this.onMouseOutHandler}
-                    onDblClick={this.onBDblClickHandler}
-                >
-                    {this.props.visible && this.state.bOpen && <InfoWindow options={{ disableAutoPan: true }} onCloseClick={this.onBCloseClickHandler} zIndex={(this.state.bWindowZindex !== null) ? this.state.bWindowZindex : 0}>
-                    <div><div><a href={`https://www.wikitree.com/wiki/${this.props.ancestor.Name}`} target='_blank' rel='noopener noreferrer'>{this.props.ancestor.BirthNamePrivate}</a>, b. {this.props.ancestor.BirthDate}</div><div>{this.props.ancestor.BirthLocation}</div></div>
-                    </InfoWindow>}
-                </Marker>
-                <Marker
-                    visible={this.props.visible}
-                    position={{lat: this.props.ancestor.adjusteddlat, lng: this.props.ancestor.adjusteddlng}}
-                    icon={`http://maps.google.com/mapfiles/ms/icons/red-dot.png`}
-                    options={{ disableAutoPan: true }}
-                    zIndex={(this.state.dzIndex !== null) ? this.state.dzIndex : 0}
-                    onClick={this.onDClickHandler}
-                    onMouseOver={this.onDMouseOverHandler}
-                    onMouseOut={this.onMouseOutHandler}
-                    onCloseClck={this.onCloseClickHandler}
-                    onDblClick={this.onDDblClickHandler}
-                >
-                    {this.props.visible && this.state.dOpen && <InfoWindow options={{ disableAutoPan: true }} onCloseClick={this.onDCloseClickHandler} zIndex={(this.state.dWindowZindex !== null) ? this.state.dWindowZindex : 0}>
-                    <div><div><a href={`https://www.wikitree.com/wiki/${this.props.ancestor.Name}`} target='_blank' rel='noopener noreferrer'>{this.props.ancestor.BirthNamePrivate}</a>, d. {this.props.ancestor.DeathDate}</div><div>{this.props.ancestor.DeathLocation}</div></div>
-                    </InfoWindow>}
-                </Marker>
-            </>
-        } else if (this.props.birthPins && this.props.ancestor.adjustedblat !== undefined) {
-            personMarkers =
-            <>
-                <Marker
-                    visible={this.props.visible}
-                    position={{lat: this.props.ancestor.adjustedblat, lng: this.props.ancestor.adjustedblng}}
-                    icon={`http://maps.google.com/mapfiles/ms/icons/green-dot.png`}
-                    options={{ disableAutoPan: true }}
-                    zIndex={(this.state.bzIndex !== null) ? this.state.bzIndex : 0}
-                    onClick={this.onBClickHandler}
-                    onMouseOver={this.onBMouseOverHandler}
-                    onMouseOut={this.onMouseOutHandler}
-                    onDblClick={this.onBDblClickHandler}
-                >
-                    {this.props.visible && this.state.bOpen && <InfoWindow options={{ disableAutoPan: true }} onCloseClick={this.onBCloseClickHandler} zIndex={(this.state.bWindowZindex !== null) ? this.state.bWindowZindex : 0}>
-                    <div><div><a href={`https://www.wikitree.com/wiki/${this.props.ancestor.Name}`} target='_blank' rel='noopener noreferrer'>{this.props.ancestor.BirthNamePrivate}</a>, b. {this.props.ancestor.BirthDate}</div><div>{this.props.ancestor.BirthLocation}</div></div>
-                    </InfoWindow>}
-                </Marker>
-            </>
-        } else if (this.props.deathPins && this.props.ancestor.adjusteddlat !== undefined) {
-            personMarkers =
-            <>
-                <Marker
-                    visible={this.props.visible}
-                    position={{lat: this.props.ancestor.adjusteddlat, lng: this.props.ancestor.adjusteddlng}}
-                    icon={`http://maps.google.com/mapfiles/ms/icons/red-dot.png`}
-                    options={{ disableAutoPan: true }}
-                    zIndex={(this.state.dzIndex !== null) ? this.state.dzIndex : 0}
-                    onClick={this.onDClickHandler}
-                    onMouseOver={this.onDMouseOverHandler}
-                    onMouseOut={this.onMouseOutHandler}
-                    onCloseClck={this.onCloseClickHandler}
-                    onDblClick={this.onDDblClickHandler}
-                >
-                    {this.props.visible && this.state.dOpen && <InfoWindow options={{ disableAutoPan: true }} onCloseClick={this.onDCloseClickHandler} zIndex={(this.state.dWindowZindex !== null) ? this.state.dWindowZindex : 0}>
-                    <div><div><a href={`https://www.wikitree.com/wiki/${this.props.ancestor.Name}`} target='_blank' rel='noopener noreferrer'>{this.props.ancestor.BirthNamePrivate}</a>, d. {this.props.ancestor.DeathDate}</div><div>{this.props.ancestor.DeathLocation}</div></div>
-                    </InfoWindow>}
-                </Marker>
-            </>
+                        </InfoWindow>}
+                    </Marker>
+                    <Marker
+                        visible={this.props.visible}
+                        position={{lat: this.props.ancestor.adjusteddlat, lng: this.props.ancestor.adjusteddlng}}
+                        icon={`http://maps.google.com/mapfiles/ms/icons/red-dot.png`}
+                        options={{ disableAutoPan: true }}
+                        zIndex={(this.state.dzIndex !== null) ? this.state.dzIndex : 0}
+                        onClick={this.onDClickHandler}
+                        onMouseOver={this.onDMouseOverHandler}
+                        onMouseOut={this.onMouseOutHandler}
+                        onCloseClck={this.onDCloseClickHandler}
+                        onDblClick={this.onDDblClickHandler}
+                    >
+                        {this.props.visible && this.state.dOpen && <InfoWindow options={{ disableAutoPan: true }} onCloseClick={this.onDCloseClickHandler} zIndex={(this.state.dWindowZindex !== null) ? this.state.dWindowZindex : 0}>
+                        <div><div><a href={`https://www.wikitree.com/wiki/${this.props.ancestor.Name}`} target='_blank' rel='noopener noreferrer'>{this.props.ancestor.BirthNamePrivate}</a>, d. {this.props.ancestor.DeathDate}</div><div>{this.props.ancestor.DeathLocation}</div></div>
+                        </InfoWindow>}
+                    </Marker>
+                </>
+            } else if (this.props.birthPins && this.props.ancestor.adjustedblat !== undefined) {
+                personMarkers =
+                <>
+                    <Marker
+                        visible={this.props.visible}
+                        position={{lat: this.props.ancestor.adjustedblat, lng: this.props.ancestor.adjustedblng}}
+                        icon={`http://maps.google.com/mapfiles/ms/icons/green-dot.png`}
+                        options={{ disableAutoPan: true }}
+                        zIndex={(this.state.bzIndex !== null) ? this.state.bzIndex : 0}
+                        onClick={this.onBClickHandler}
+                        onMouseOver={this.onBMouseOverHandler}
+                        onMouseOut={this.onMouseOutHandler}
+                        onCloseClck={this.onBCloseClickHandler}
+                        onDblClick={this.onBDblClickHandler}
+                    >
+                        {this.props.visible && this.state.bOpen && <InfoWindow options={{ disableAutoPan: true }} onCloseClick={this.onBCloseClickHandler} zIndex={(this.state.bWindowZindex !== null) ? this.state.bWindowZindex : 0}>
+                        <div><div><a href={`https://www.wikitree.com/wiki/${this.props.ancestor.Name}`} target='_blank' rel='noopener noreferrer'>{this.props.ancestor.BirthNamePrivate}</a>, b. {this.props.ancestor.BirthDate}</div><div>{this.props.ancestor.BirthLocation}</div></div>
+                        </InfoWindow>}
+                    </Marker>
+                </>
+            } else if (this.props.deathPins && this.props.ancestor.adjusteddlat !== undefined) {
+                personMarkers =
+                <>
+                    <Marker
+                        visible={this.props.visible}
+                        position={{lat: this.props.ancestor.adjusteddlat, lng: this.props.ancestor.adjusteddlng}}
+                        icon={`http://maps.google.com/mapfiles/ms/icons/red-dot.png`}
+                        options={{ disableAutoPan: true }}
+                        zIndex={(this.state.dzIndex !== null) ? this.state.dzIndex : 0}
+                        onClick={this.onDClickHandler}
+                        onMouseOver={this.onDMouseOverHandler}
+                        onMouseOut={this.onMouseOutHandler}
+                        onCloseClck={this.onDCloseClickHandler}
+                        onDblClick={this.onDDblClickHandler}
+                    >
+                        {this.props.visible && this.state.dOpen && <InfoWindow options={{ disableAutoPan: true }} onCloseClick={this.onDCloseClickHandler} zIndex={(this.state.dWindowZindex !== null) ? this.state.dWindowZindex : 0}>
+                        <div><div><a href={`https://www.wikitree.com/wiki/${this.props.ancestor.Name}`} target='_blank' rel='noopener noreferrer'>{this.props.ancestor.BirthNamePrivate}</a>, d. {this.props.ancestor.DeathDate}</div><div>{this.props.ancestor.DeathLocation}</div></div>
+                        </InfoWindow>}
+                    </Marker>
+                </>
+            } else {
+                personMarkers = <></>;
+            }
+
         }
         return (<>{personMarkers}</>)
     }

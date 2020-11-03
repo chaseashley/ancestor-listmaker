@@ -140,6 +140,24 @@ class MapOverlayItems extends React.Component {
             hideClosed: false,
             hideClosedAncestors: [],
             searchPerson: null,
+            zoom: null,
+        }
+    }
+
+    componentDidUpdate() {
+        if (this.props.zoom !== this.state.zoom) {
+            if (this.hideClosed) {
+                this.setState({
+                    ancestors: adjustOverlappingMarkerCoordinates(this.state.ancestors, this.props.zoom, this.state.birthPins, this.state.deathPins),
+                    hideClosedAncestors: adjustOverlappingMarkerCoordinates(this.statehideClosedAncestors, this.props.zoom, this.state.birthPins, this.state.deathPins),
+                    zoom: this.props.zoom
+                });
+            } else {
+                this.setState({
+                    ancestors: adjustOverlappingMarkerCoordinates(this.state.ancestors, this.props.zoom, this.state.birthPins, this.state.deathPins),
+                    zoom: this.props.zoom
+                })
+            }
         }
     }
 
@@ -279,9 +297,17 @@ class MapOverlayItems extends React.Component {
     }
 
     onBirthDeathOnClick() {
-        this.setState({
-            birthDeathOnClick: !this.state.birthDeathOnClick
-        })
+        if (this.state.birthDeathOnClick) {
+            this.setState({
+                birthDeathOnClick: false,
+            });
+        } else {
+            this.setState({
+                birthDeathOnClick: true,
+                parentsOnClick: false,
+                childrenOnClick: false,
+            });
+        }
     }
 
     onFindClick() {
@@ -315,6 +341,7 @@ class MapOverlayItems extends React.Component {
             this.setState({
                 parentsOnClick: true,
                 childrenOnClick: false,
+                birthDeathOnClick: false,
                 clickedAncestor: null,
                 closeClickedAncestor: null,
             });
@@ -332,6 +359,7 @@ class MapOverlayItems extends React.Component {
             this.setState({
                 childrenOnClick: true,
                 parentsOnClick: false,
+                birthDeathOnClick: false,
                 clickedAncestor: null,
                 closeClickedAncestor: null,
             });
@@ -420,7 +448,59 @@ class MapOverlayItems extends React.Component {
         this.setState({animated: false});
     }
 
-    ancestorVisible(year, ancestor) {
+    /*
+    getVisibleAncestors() {
+        if (this.state.hideClosed) {
+            return this.state.hideClosedAncestors;
+        }
+        let visibleAncestors = [];
+        let year = this.state.year;
+        for (let i=0; i<this.state.ancestors.length; i++) {
+            let ancestor = this.state.ancestors[i];
+            let visible = false;
+            if (ancestor !== null) {
+                if (!this.state.timeline) {
+                    visible = true;
+                } else {
+                    const birthdateString = ancestor.BirthDate;
+                    const deathdateString = ancestor.DeathDate;
+                    if ((birthdateString === '0000-00-00' || birthdateString === '') && (deathdateString === '0000-00-00'  || deathdateString === '')) {
+                        visible = false;
+                    }
+                    let birthdate = Number(birthdateString.substring(0,4));
+                    let deathdate = Number(deathdateString.substring(0,4));
+                    if (birthdateString !== '0000-00-00' && deathdateString !== '0000-00-00') {
+                        if (birthdate <= year && deathdate >= year) {
+                            visible = true;
+                        } else {
+                            visible = false;
+                        }
+                    }
+                    if (birthdateString !== '0000-00-00' && deathdateString === '0000-00-00') {
+                        if (birthdate <= year && (birthdate+60) >= year) {
+                            visible = true;
+                        } else {
+                            visible = false;
+                        }
+                    }
+                    if (birthdateString === '0000-00-00' && deathdateString !== '0000-00-00') {
+                        if ((deathdate-60) <= year && deathdate >= year) {
+                            visible = true;
+                        } else {
+                            visible = false;
+                        }
+                    }
+                }
+            }
+            if (visible) {
+                visibleAncestors.push(ancestor);
+            }
+        }
+        return visibleAncestors;
+    }*/
+
+    ancestorVisible(ancestor) {
+        let year = this.state.year;
         if (ancestor === null) {
             return false;
         }
@@ -492,37 +572,65 @@ class MapOverlayItems extends React.Component {
     }
 
     onClickCallback(ancestor) {
-        let openAncestors = this.state.openAncestors;
-        let hideClosedAncestors = this.state.hideClosedAncestors;
-        openAncestors.push(ancestor);
-        hideClosedAncestors.push(ancestor);
-        if (this.state.parentsOnClick) {
-            let father = this.getFather(ancestor);
-            if (father !== null) {
-                openAncestors.push(father);
-                hideClosedAncestors.push(father);
-            }
-            let mother = this.getMother(ancestor);
-            if (mother !== null) {
-                openAncestors.push(mother);
-                hideClosedAncestors.push(mother);
-            }
-        } else if (this.state.childrenOnClick) {
-            for (let i=0; i<this.state.ancestors.length; i++) {
-                if (this.state.ancestors[i].Father === ancestor.Id || this.state.ancestors[i].Mother === ancestor.Id) {
-                    openAncestors.push(this.state.ancestors[i]);
-                    hideClosedAncestors.push(this.state.ancestors[i]);
+        if (!this.state.hideClosed) {
+            let openAncestors = this.state.openAncestors;
+            openAncestors.push(ancestor);
+            if (this.state.parentsOnClick) {
+                let father = this.getFather(ancestor);
+                if (father !== null) {
+                    openAncestors.push(father);
+                }
+                let mother = this.getMother(ancestor);
+                if (mother !== null) {
+                    openAncestors.push(mother);
+                }
+            } else if (this.state.childrenOnClick) {
+                for (let i=0; i<this.state.ancestors.length; i++) {
+                    if (this.state.ancestors[i].Father === ancestor.Id || this.state.ancestors[i].Mother === ancestor.Id) {
+                        openAncestors.push(this.state.ancestors[i]);
+                    }
                 }
             }
+            openAncestors = removeDuplicates(openAncestors);
+            this.setState({
+                openAncestors: openAncestors,
+                clickedAncestor: ancestor,
+                closeClickedAncestor: null,
+            });
+        } else if (this.state.hideClosed) {
+            let openAncestors = this.state.openAncestors;
+            let hideClosedAncestors = this.state.hideClosedAncestors;
+            openAncestors.push(ancestor);
+            hideClosedAncestors.push(ancestor);
+            if (this.state.parentsOnClick) {
+                let father = this.getFather(ancestor);
+                if (father !== null) {
+                    openAncestors.push(father);
+                    hideClosedAncestors.push(father);
+                }
+                let mother = this.getMother(ancestor);
+                if (mother !== null) {
+                    openAncestors.push(mother);
+                    hideClosedAncestors.push(mother);
+                }
+            } else if (this.state.childrenOnClick) {
+                for (let i=0; i<this.state.ancestors.length; i++) {
+                    if (this.state.ancestors[i].Father === ancestor.Id || this.state.ancestors[i].Mother === ancestor.Id) {
+                        openAncestors.push(this.state.ancestors[i]);
+                        hideClosedAncestors.push(this.state.ancestors[i]);
+                    }
+                }
+            }
+            openAncestors = removeDuplicates(openAncestors);
+            hideClosedAncestors = removeDuplicates(hideClosedAncestors);
+            hideClosedAncestors = adjustOverlappingMarkerCoordinates(hideClosedAncestors, this.props.zoom, this.state.birthPins, this.state.deathPins);
+            this.setState({
+                openAncestors: openAncestors,
+                hideClosedAncestors: hideClosedAncestors,
+                clickedAncestor: ancestor,
+                closeClickedAncestor: null,
+            });
         }
-        openAncestors = removeDuplicates(openAncestors);
-        hideClosedAncestors = removeDuplicates(hideClosedAncestors);
-        this.setState({
-            openAncestors: openAncestors,
-            hideClosedAncestors: hideClosedAncestors,
-            clickedAncestor: ancestor,
-            closeClickedAncestor: null,
-        });
     }
 
     onCloseClickCallback(ancestor) {
@@ -587,12 +695,18 @@ class MapOverlayItems extends React.Component {
     }
 
     render() {
+        let ancestors;
+        if (this.state.hideClose) {
+            ancestors = this.state.hideClosedAncestors;
+        } else {
+            ancestors = this.state.ancestors;
+        }
 
         let buttonbar = 
             <div className={styles.buttonbarDiv}>
-                <ToggleButton label={'Births'} active={this.state.birthPins} onClick={this.onBirthClick} disabled={(this.state.deathPins && this.state.hideClosed)}/>
+                <ToggleButton label={'Births'} active={this.state.birthPins} onClick={this.onBirthClick} disabled={this.state.deathPins && this.state.hideClosed}/>
                 <div className={styles.buttonbarspacer}/>
-                <ToggleButton label={'Deaths'} active={this.state.deathPins} onClick={this.onDeathClick} disabled={(this.state.birthPins && this.state.hideClosed)}/>
+                <ToggleButton label={'Deaths'} active={this.state.deathPins} onClick={this.onDeathClick} disabled={this.state.birthPins && this.state.hideClosed}/>
                 <div className={styles.buttonbarspacer}/>
                 <ToggleButton label={'Timeline'} active={this.state.timeline} onClick={this.onTimelineClick} disabled={this.state.hideClosed}/>
                 <div className={styles.buttonbarspacer}/>
@@ -600,7 +714,7 @@ class MapOverlayItems extends React.Component {
                 <div className={styles.buttonbarspacer}/>
                 <ToggleButton label={'Birth-Death Lines'} active={this.state.birthDeathLines} onClick={this.onBirthDeathLinesClick} disabled={(!this.state.birthPins || !this.state.deathPins)}/>
                 <div className={styles.buttonbarspacer}/>
-                <ToggleButton label={'Hide Closed'} active={this.state.hideClosed} onClick={this.onHideClosedClick} disabled={(this.state.timeline || (this.state.birthPins && this.state.deathPins))}/>
+                <ToggleButton label={'Hide Closed'} active={this.state.hideClosed} onClick={this.onHideClosedClick} disabled={this.state.timeline || (this.state.birthPins && this.state.deathPins)}/>
                 <div className={styles.buttonbarspacer}/>
                 <ToggleButton label={'Birth-Death on Click'} active={this.state.birthDeathOnClick} onClick={this.onBirthDeathOnClick} disabled={(!this.state.birthPins || !this.state.deathPins)}/>
                 <div className={styles.buttonbarspacer}/>
@@ -616,9 +730,9 @@ class MapOverlayItems extends React.Component {
             searchBox = <></>
         } else {
             let searchList = [];
-            let ancestors = sortByName(this.state.ancestors, 'forward');
+            ancestors = sortByName(ancestors, 'forward');
             for (let i=0; i<ancestors.length; i++) {
-                if (this.ancestorVisible(this.state.year, ancestors[i]) && ((this.state.birthPins && ancestors[i].adjustedblat !== undefined) || (this.state.deathPins && ancestors[i].adjusteddlat !== undefined))) {
+                if (this.ancestorVisible(ancestors[i]) && ((this.state.birthPins && ancestors[i].adjustedblat !== undefined) || (this.state.deathPins && ancestors[i].adjusteddlat !== undefined))) {
                     let labelString;
                     if (this.state.birthPins && ancestors[i].adjustedblat !== undefined) {
                         labelString = `${ancestors[i].BirthNamePrivate} b. ${ancestors[i].BirthDate} ${ancestors[i].BirthLocation}`;
@@ -632,7 +746,7 @@ class MapOverlayItems extends React.Component {
                 <div><Dropdown className={styles.searchBox} value={(this.state.searchPerson===null) ? null : this.state.searchPerson[1]} options={searchList} onChange={(option) => this.onFindSelect(option.value)} placeholder="Select ancestor to find"/></div>
             }        
 
-        let markers = this.state.ancestors.map((ancestor, index) => {
+        let markers = ancestors.map((ancestor, index) => {
             return <StaticMarkers key={index} id={index}
                         ancestor={ancestor}
                         birthPins={this.state.birthPins}
@@ -640,7 +754,7 @@ class MapOverlayItems extends React.Component {
                         birthDeathLines={this.state.birthDeathLines}
                         timeline={this.state.timeline}
                         animated={this.state.animated}
-                        visible={this.ancestorVisible(this.state.year, ancestor)}
+                        visible={this.ancestorVisible(ancestor)}
                         birthDeathOnClick={this.state.birthDeathOnClick}
                         ancestorOnClick={this.state.parentsOnClick || this.state.childrenOnClick}
                         linkedAncestorClick={this.linkedAncestorClicked(ancestor)}
@@ -655,7 +769,7 @@ class MapOverlayItems extends React.Component {
         if (!this.state.parentChildLines || (this.state.birthPins && this.state.deathPins)) {
             generationLines = <></>
         } else {
-            generationLines = this.state.ancestors.map((ancestor, index) => {
+            generationLines = ancestors.map((ancestor, index) => {
                 let father = this.getFather(ancestor);
                 let mother = this.getMother(ancestor);
                 return <GenerationLines key={index} id={index}
@@ -665,9 +779,9 @@ class MapOverlayItems extends React.Component {
                     birthPins={this.state.birthPins}
                     deathPins={this.state.deathPins}
                     animated={this.state.animated}
-                    visible={this.ancestorVisible(this.state.year, ancestor)}
-                    fatherVisible={this.ancestorVisible(this.state.year, father)}
-                    motherVisible={this.ancestorVisible(this.state.year, mother)}
+                    visible={this.ancestorVisible(ancestor)}
+                    fatherVisible={this.ancestorVisible(father)}
+                    motherVisible={this.ancestorVisible(mother)}
                 />
             })
         }

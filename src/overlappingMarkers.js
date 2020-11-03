@@ -4,61 +4,61 @@ function getUniqueCoordinatesArray(ancestors,zoom,birthPins,deathPins) {
     for (let i=0; i<ancestors.length; i++){
         if (uniqueCoordinates.length===0){
             if (birthPins && ancestors[i].blat!==undefined) {
-                uniqueCoordinates.push([{lat: ancestors[i].blat, lng: ancestors[i].blng},[['birth',i]]]);
+                uniqueCoordinates.push([{lat: ancestors[i].blat, lng: ancestors[i].blng},[['birth',i,{lat: ancestors[i].blat, lng: ancestors[i].blng}]]]);
             } else if (deathPins && ancestors[i].dlat!==undefined) {
-                uniqueCoordinates.push([{lat: ancestors[i].dlat, lng: ancestors[i].dlng},[['death',i]]]);
+                uniqueCoordinates.push([{lat: ancestors[i].dlat, lng: ancestors[i].dlng},[['death',i,{lat: ancestors[i].dlat, lng: ancestors[i].dlng}]]]);
             }
         }
         //check birth marker coordinates
         let boffset = true;
         if (birthPins && ancestors[i].blat !== undefined) {
             for (let j=0; j<uniqueCoordinates.length; j++) {
-                let bjoffset = false;
                 if ('birth' !== uniqueCoordinates[0][1][0][0] || i !== uniqueCoordinates[0][1][0][1]) {
+                    let bjoffset = false;
                     let bPixelLatOffset = latDegreesToPixels(ancestors[i].blat-uniqueCoordinates[j][0].lat, zoom);
-                    if (Math.abs(bPixelLatOffset) >= 1) {
+                    if (Math.abs(bPixelLatOffset) >= 16) {
                         bjoffset = true;
                     } else {
                         let bPixelLngOffset = lngDegreesToPixels(ancestors[i].blng-uniqueCoordinates[j][0].lng, zoom);
-                        if (Math.abs(bPixelLngOffset) >= 1) {
+                        if (Math.abs(bPixelLngOffset) >= 24) {
                             bjoffset = true;
                         }
                     }
                     if (bjoffset === false) {
-                        uniqueCoordinates[j][1].push(['birth',i]);
+                        uniqueCoordinates[j][1].push(['birth',i,{lat: ancestors[i].blat, lng: ancestors[i].blng}]);
                         boffset = false;
                         break;
                     }
                 }
             }
             if (boffset && ('birth' !== uniqueCoordinates[0][1][0][0] || i !== uniqueCoordinates[0][1][0][1])) {
-                uniqueCoordinates.push([{lat: ancestors[i].blat, lng: ancestors[i].blng}, [['birth', i]]]);
+                uniqueCoordinates.push([{lat: ancestors[i].blat, lng: ancestors[i].blng}, [['birth', i,{lat: ancestors[i].blat, lng: ancestors[i].blng}]]]);
             }
         }
         //check death marker coordinates
         let doffset = true;
         if (deathPins && ancestors[i].dlat !== undefined) {
             for (let j=0; j<uniqueCoordinates.length; j++) {
-                let djoffset = false;
                 if ('death' !== uniqueCoordinates[0][1][0][0] || i !== uniqueCoordinates[0][1][0][1]) {
+                    let djoffset = false;
                     let dPixelLatOffset = latDegreesToPixels(ancestors[i].dlat-uniqueCoordinates[j][0].lat, zoom);
-                    if (Math.abs(dPixelLatOffset) >= 1) {
+                    if (Math.abs(dPixelLatOffset) >= 19) {
                         djoffset = true;
                     } else {
                         let dPixelLngOffset = lngDegreesToPixels(ancestors[i].dlng-uniqueCoordinates[j][0].lng, zoom);
-                        if (Math.abs(dPixelLngOffset) >= 1) {
-                            djoffset = true;
+                        if (Math.abs(dPixelLngOffset) >= 30) {    
+                            djoffset = true; 
                         }
                     }
                     if (djoffset === false) {
-                        uniqueCoordinates[j][1].push(['death',i]);
+                        uniqueCoordinates[j][1].push(['death',i,{lat: ancestors[i].dlat, lng: ancestors[i].dlng}]);
                         doffset = false;
                         break;
                     }
                 }
             }
             if (doffset && ('death' !== uniqueCoordinates[0][1][0][0] || i !== uniqueCoordinates[0][1][0][1])) {
-                uniqueCoordinates.push([{lat: ancestors[i].dlat, lng: ancestors[i].dlng}, [['death', i]]]);
+                uniqueCoordinates.push([{lat: ancestors[i].dlat, lng: ancestors[i].dlng}, [['death', i,{lat: ancestors[i].dlat, lng: ancestors[i].dlng}]]]);
             }
         }
     }
@@ -67,24 +67,16 @@ function getUniqueCoordinatesArray(ancestors,zoom,birthPins,deathPins) {
 
 export function adjustOverlappingMarkerCoordinates(ancestors, zoom, birthPins, deathPins) {
     let uniqueCoordinates = getUniqueCoordinatesArray(ancestors, zoom, birthPins, deathPins);
-    /*
-    let maxOverlaps = 0;
-    uniqueCoordinates.forEach(uniqueCoordinate => {
-        if (uniqueCoordinate[1].length > maxOverlaps) {
-            maxOverlaps = uniqueCoordinate[1].length;
-        }
-    })
-    const variableLngOffset = (Math.pow(2,zoom-(Math.log2(maxOverlaps))) + 1)/4 * pixelToLngDegrees(zoom);
-    const maxLngOffset = 18 * pixelToLngDegrees(zoom);
-    let lngOffset;
-    if (variableLngOffset > maxLngOffset) {
-        lngOffset = maxLngOffset;
-    } else {
-        lngOffset = variableLngOffset;
-    }
-    */
     for (let i=0; i<uniqueCoordinates.length; i++) {
-        const variableLngOffset = (Math.pow(2,zoom-(Math.log1p(uniqueCoordinates[i][1].length))) + 1)/12 * pixelToLngDegrees(zoom);
+        let latSum = 0;
+        let lngSum = 0;
+        for (let j=0; j<uniqueCoordinates[i][1].length; j++) {
+            latSum = latSum + uniqueCoordinates[i][1][j][2].lat;
+            lngSum = lngSum + uniqueCoordinates[i][1][j][2].lng;
+        }
+        let meanLat = latSum/uniqueCoordinates[i][1].length;
+        let meanLng = lngSum/uniqueCoordinates[i][1].length;
+        const variableLngOffset = (Math.pow(2,(zoom-Math.log1p(uniqueCoordinates[i][1].length))) + 1)/12 * pixelToLngDegrees(zoom);
         const maxLngOffset = 19 * pixelToLngDegrees(zoom);
         let lngOffset;
         if (variableLngOffset > maxLngOffset) {
@@ -101,8 +93,8 @@ export function adjustOverlappingMarkerCoordinates(ancestors, zoom, birthPins, d
             latOffset = variableLatOffset;
         }
         const rowLength = Math.round((maxLatOffset/maxLngOffset) * Math.ceil(Math.sqrt(uniqueCoordinates[i][1].length)));
-        const topLeftLat = uniqueCoordinates[i][0].lat + (latOffset * Math.floor((rowLength-1)/2));
-        const topLeftLng = uniqueCoordinates[i][0].lng - (lngOffset * Math.floor((rowLength-1)/2));
+        const topLeftLat = meanLat + (latOffset * Math.floor((rowLength-1)/2));
+        const topLeftLng = meanLng - (lngOffset * Math.floor((rowLength-1)/2));
         let rowIndex = 0;
         let columnIndex = 0;
         for (let j=0; j<uniqueCoordinates[i][1].length; j++) {//for each ancestor in the array for those coordinates

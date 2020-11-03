@@ -163,12 +163,12 @@ class Map extends React.Component {
             }
         })
         map.fitBounds(bounds);
-        let adjustedAncestors = adjustOverlappingMarkerCoordinates(this.state.ancestors, map.getZoom(), this.state.birthPins, this.state.deathPins);
+        //let adjustedAncestors = adjustOverlappingMarkerCoordinates(this.state.ancestors, map.getZoom(), this.state.birthPins, this.state.deathPins);
         this.setState({
             map: map,
             mapZoom: map.getZoom(),
             mapCenter: map.getCenter(),
-            ancestors: adjustedAncestors
+            //ancestors: adjustedAncestors
         });
     }
 
@@ -188,6 +188,7 @@ class Map extends React.Component {
         for (let i=0; i<this.state.ancestors.length; i++) {
             if (this.state.ancestors[i].BirthLocation !== '' && this.state.ancestors[i].BirthLocation !== null) {
                 let standardizedBirthLocation = standardizeAddress(this.state.ancestors[i].BirthLocation);
+                //console.log(this.state.ancestors[i].BirthLocation, standardizedBirthLocation);
                 let locationFound = false;
                 for (let j=0; j<locations.length; j++) {
                     if (standardizedBirthLocation === locations[j]) {
@@ -201,6 +202,7 @@ class Map extends React.Component {
             }
             if (this.state.ancestors[i].DeathLocation !== '' && this.state.ancestors[i].DeathLocation !== null) {
                 let standardizedDeathLocation = standardizeAddress(this.state.ancestors[i].DeathLocation);
+                //console.log(this.state.ancestors[i].DeathLocation, standardizedDeathLocation);
                 let locationFound = false;
                 for (let j=0; j<locations.length; j++) {
                     if (standardizedDeathLocation === locations[j]) {
@@ -334,8 +336,8 @@ class Map extends React.Component {
                             onZoomChanged={() => {
                                 if (this.state.map!==null) {
                                     this.setState({mapZoom: this.state.map.getZoom()});
-                                    let adjustedAncestors = adjustOverlappingMarkerCoordinates(this.state.ancestors, this.state.map.getZoom(), this.state.birthPins, this.state.deathPins);
-                                    this.setState({ancestors: adjustedAncestors});
+                                    //let adjustedAncestors = adjustOverlappingMarkerCoordinates(this.state.ancestors, this.state.map.getZoom(), this.state.birthPins, this.state.deathPins);
+                                    //this.setState({ancestors: adjustedAncestors});
                                 }
                             }}
                         >

@@ -1,5 +1,5 @@
 export function standardizeAddress(address) {
-    //generic standardizations
+    //formatting standardizations
     address = address.toUpperCase();
     address = address.replace(/  /g,' ');
     address = address.replace(/, /g,',');
@@ -77,33 +77,259 @@ export function standardizeAddress(address) {
     if (address.indexOf('ENG') !== -1 && address.indexOf('ENG') === address.length-3) {
         address = address.substring(0,address.length-3) + 'ENGLAND';
     }
-    address = address.replace('DEVONSHIRE','DEVON');
-    address = address.replace('COUNTY DEVON','DEVON');
-    address = address.replace('CO DEVON','DEVON');
-    address = address.replace('DORSETSHIRE','DORSET');
-    address = address.replace('COUNTY DORSET','DORSET');
-    address = address.replace('CO DORSET','DORSET');
-    address = address.replace('DURHAMSHIRE','DURHAM');
-    address = address.replace('COUNTY DURHAM','DURHAM');
-    address = address.replace('CO DURHAM','DURHAM');
-    address = address.replace('ESSEXSHIRE','ESSEX');
-    address = address.replace('COUNTY ESSEX','ESSEX');
-    address = address.replace('CO ESSEX','ESSEX');
-    address = address.replace('COUNTY KENT','KENT');
-    address = address.replace('CO KENT','KENT');
-    address = address.replace('NORFOLKSHIRE','NORFOLK');
-    address = address.replace('COUNTY NORFOLK','NORFOLK');
-    address = address.replace('CO NORFOLK','NORFOLK');
-    address = address.replace('RUTLANDSHIRE','RUTLAND');
-    address = address.replace('COUNTY RUTLAND','RUTLAND');
-    address = address.replace('CO RUTLAND','RUTLAND');
-    address = address.replace('SOMERSETSHIRE','SOMERSET');
-    address = address.replace('COUNTY SOMERSET','SOMERSET');
-    address = address.replace('CO SOMERSET','SOMERSET');
-    address = address.replace('SUFFOLKSHIRE','SUFFOLK');
-    address = address.replace('COUNTY SUFFOLK','SUFFOLK');
-    address = address.replace('CO SUFFOLK','SUFFOLK');
+    if (address.indexOf('BEDFORDSHIRE') !== -1 && address.indexOf('BEDFORDSHIRE') === address.length-12) {
+        address = address + ',ENGLAND';
+    }
+    if (address.indexOf('BUCKINGHAMSHIRE') !== -1 && address.indexOf('BUCKINGHAMSHIRE') === address.length-15) {
+        address = address + ',ENGLAND';
+    }
+    if (address.indexOf('CAMBRIDGESHIRE') !== -1 && address.indexOf('CAMBRIDGESHIRE') === address.length-14) {
+        address = address + ',ENGLAND';
+    }
+    if (address.indexOf('CUMBERLANDSHIRE') !== -1 && address.indexOf('CUMBERLANDSHIRE') === address.length-15) {
+        address = address + ',ENGLAND';
+    }
+    if (address.indexOf('DEVONSHIRE') !== -1 && address.indexOf('DEVONSHIRE') === address.length-10) {
+        address = address + ',ENGLAND';
+    }
+    if (address.indexOf('DORSETSHIRE') !== -1 && address.indexOf('DORSETSHIRE') === address.length-11) {
+        address = address + ',ENGLAND';
+    }
+    if (address.indexOf('DURHAMSHIRE') !== -1 && address.indexOf('DURHAMSHIRE') === address.length-11) {
+        address = address + ',ENGLAND';
+    }
+    if (address.indexOf('ESSEXSHIRE') !== -1 && address.indexOf('ESSEXSHIRE') === address.length-10){
+        address = address + ',ENGLAND';
+    }
+    if (address.indexOf('GLOUCESTERSHIRE') !== -1 && address.indexOf('GLOUCESTERSHIRE') === address.length-15){
+        address = address + ',ENGLAND';
+    }
+    if (address.indexOf('HEREFORDSHIRE') !== -1 && address.indexOf('HEREFORDSHIRE') === address.length-13){
+        address = address + ',ENGLAND';
+    }
+    if (address.indexOf('HERTFORDSHIRE') !== -1 && address.indexOf('HERTFORDSHIRE') === address.length-13){
+        address = address + ',ENGLAND';
+    }
+    if (address.indexOf('HUNTINDONSHIRE') !== -1 && address.indexOf('HUNTINDONSHIRE') === address.length-14){
+        address = address + ',ENGLAND';
+    }
+    if (address.indexOf(',KENT') !== -1 && address.indexOf(',KENT') === address.length-5){
+        address = address + ',ENGLAND';
+    }
+    if (address.indexOf('LANCASHIRE') !== -1 && address.indexOf('LANCASHIRE') === address.length-10){
+        address = address + ',ENGLAND';
+    }
+    if (address.indexOf('LEICESTERSHIRE') !== -1 && address.indexOf('LEICESTERSHIRE') === address.length-14){
+        address = address + ',ENGLAND';
+    }
+    if (address.indexOf('LINCOLNSHIRE') !== -1 && address.indexOf('LINCOLNSHIRE') === address.length-12){
+        address = address + ',ENGLAND';
+    }
+    if (address.indexOf('NORTHAMPTONSHIRE') !== -1 && address.indexOf('NORTHAMPTONSHIRE') === address.length-16){
+        address = address + ',ENGLAND';
+    }
+    if (address.indexOf('NORTHUMBERLAND') !== -1 && address.indexOf('NORTHUMBERLAND') === address.length-14){
+        address = address + ',ENGLAND';
+    }
+    if (address.indexOf('NOTTINGHAMSHIRE') !== -1 && address.indexOf('NOTTINGHAMSHIRE') === address.length-15){
+        address = address + ',ENGLAND';
+    }
+    if (address.indexOf('OXFORDSHIRE') !== -1 && address.indexOf('OXFORDSHIRE') === address.length-11){
+        address = address + ',ENGLAND';
+    }
+    if (address.indexOf('SHROPSHIRE') !== -1 && address.indexOf('SHROPSHIRE') === address.length-10){
+        address = address + ',ENGLAND';
+    }
+    if (address.indexOf('SOMERSETSHIRE') !== -1 && address.indexOf('SOMERSETSHIRE') === address.length-13){
+        address = address + ',ENGLAND';
+    }
+    if (address.indexOf('STAFFORDSHIRE') !== -1 && address.indexOf('STAFFORDSHIRE') === address.length-13){
+        address = address + ',ENGLAND';
+    }
+    if (address.indexOf('WARWICKSHIRE') !== -1 && address.indexOf('WARWICKSHIRE') === address.length-12){
+        address = address + ',ENGLAND';
+    }
+    if (address.indexOf('WILTSHIRE') !== -1 && address.indexOf('WILTSHIRE') === address.length-9){
+        address = address + ',ENGLAND';
+    }
+    if (address.indexOf('WORCESTERSHIRE') !== -1 && address.indexOf('WORCESTERSHIRE') === address.length-14){
+        address = address + ',ENGLAND';
+    }
+    if (address.indexOf('YORKSHIRE') !== -1 && address.indexOf('YORKSHIRE') === address.length-9){
+        address = address + ',ENGLAND';
+    }
 
+    if (address.indexOf(',ENGLAND') !== -1 && address.indexOf(',ENGLAND') === address.length-8) {
+        address = address.replace('BEDFORDSHIRE COUNTY,','BEDFORDSHIRE,');
+        address = address.replace('BEDFORDSHIRE CO,','BEDFORDSHIRE,');
+        address = address.replace('BEDFORD COUNTY,','BEDFORDSHIRE,');
+        address = address.replace('BEDFORD CO,','BEDFORDSHIRE,');
+        address = address.replace('COUNTY BEDFORD,','BEDFORDSHIRE,');
+        address = address.replace(',CO BEDFORD,',',BEDFORDSHIRE,');
+        address = address.replace(',BEDS,',',BEDFORDSHIRE,');
+        address = address.replace('COUNTY BEDS,','BEDFORDSHIRE,');
+        address = address.replace(',CO BEDS,',',BEDFORDSHIRE,');
+        address = address.replace(',BEDS COUNTY,',',BEDFORDSHIRE,');
+        address = address.replace(',BEDS CO,',',BEDFORDSHIRE,');
+
+        address = address.replace('BERKSHIRE COUNTY,','BERKSHIRE,');
+        address = address.replace('BERKSHIRE CO,','BERKSHIRE,');
+        address = address.replace(',BERKS,',',BERKSHIRE,');
+        address = address.replace(',BERKS COUNTY,',',BERKSHIRE,');
+        address = address.replace(',BERKS CO,',',BERKSHIRE,');
+        address = address.replace('COUNTY BERKS,','BERKSHIRE,');
+        address = address.replace(',CO BERKS,',',BERKSHIRE,');
+
+        address = address.replace('BUCKINGHAMSHIRE COUNTY,','BUCKINGHAMSHIRE,');
+        address = address.replace('BUCKINGHAMSHIRE CO,','BUCKINGHAMSHIRE,');
+        address = address.replace('BUCKINGHAM COUNTY,','BUCKINGHAMSHIRE,');
+        address = address.replace('BUCKINGHAM CO,','BUCKINGHAMSHIRE,');
+        address = address.replace('COUNTY BUCKINGHAM,','BUCKINGHAMSHIRE,');
+        address = address.replace(',CO BUCKINGHAM,',',BUCKINGHAMSHIRE,');
+        address = address.replace(',BUCKS,',',BUCKINGHAMSHIRE,');
+        address = address.replace(',BUCKS COUNTY,',',BUCKINGHAMSHIRE,');
+        address = address.replace(',BUCKS CO,',',BUCKINGHAMSHIRE,');
+        address = address.replace('COUNTY BUCKS,','BUCKINGHAMSHIRE,');
+        address = address.replace(',CO BUCKS,',',BUCKINGHAMSHIRE,');
+
+        address = address.replace(',CAMBS,',',CAMBRIDGESHIRE,');
+        address = address.replace(',CAMBS COUNTY,',',CAMBRIDGESHIRE,');
+        address = address.replace(',CAMBS CO,',',CAMBRIDGESHIRE,');
+        address = address.replace('COUNTY CAMBS,','CAMBRIDGESHIRE,');
+        address = address.replace(',CO CAMBS,',',CAMBRIDGESHIRE,');
+
+        address = address.replace('CHESHIRE COUNTY,','CHESHIRE,');
+        address = address.replace('CHESHIRE CO,','CHESHIRE,');
+        address = address.replace('COUNTY CHESHIRE,','CHESHIRE,');
+        address = address.replace(',CO CHESHIRE,',',CHESHIRE,');
+
+        address = address.replace('CORNWALL COUNTY,','CORNWALL,');
+        address = address.replace('CORNWALL CO,','CORNWALL,');
+        address = address.replace('COUNTY CORNWALL,','CORNWALL,');
+        address = address.replace(',CO CORNWALL,',',CORNWALL,');
+
+        address = address.replace('CUMBERLANDSHIRE,','CUMBERLAND,');
+        address = address.replace('CUMBERLAND COUNTY,','CUMBERLAND,');
+        address = address.replace('CUMBERLAND CO,','CUMBERLAND,');
+        address = address.replace('COUNTY CUMBERLAND,','CUMBERLAND,');
+        address = address.replace(',CUMB,',',CUMBERLAND,');
+        address = address.replace(',CUMB COUNTY,',',CUMBERLAND,');
+        address = address.replace(',CUMB CO,',',CUMBERLAND,');
+        address = address.replace(',CO CUMB,',',CUMBERLAND,');
+
+        address = address.replace('DEVONSHIRE,','DEVON,');
+        address = address.replace(',DEVON COUNTY,',',DEVON,');
+        address = address.replace(',DEVON CO,',',DEVON,');
+        address = address.replace('COUNTY DEVON,','DEVON,');
+        address = address.replace(',CO DEVON,',',DEVON,');
+
+        address = address.replace('DORSETSHIRE,','DORSET,');
+        address = address.replace('DORSET COUNTY,','DORSET,');
+        address = address.replace(',DORSET CO,',',DORSET,');
+        address = address.replace('COUNTY DORSET,','DORSET,');
+        address = address.replace(',CO DORSET,',',DORSET,');
+
+        address = address.replace('DURHAMSHIRE,','DURHAM,');
+        address = address.replace('DURHAM COUNTY,','DURHAM,');
+        address = address.replace(',DURHAM CO,',',DURHAM,');
+        address = address.replace('COUNTY DURHAM,','DURHAM,');
+        address = address.replace(',CO DURHAM,',',DURHAM,');
+
+        address = address.replace('ESSEXSHIRE,','ESSEX,');
+        address = address.replace(',ESSEX COUNTY,',',ESSEX,');
+        address = address.replace(',ESSEX CO,',',ESSEX,');
+        address = address.replace('COUNTY ESSEX,','ESSEX,');
+        address = address.replace(',CO ESSEX,',',ESSEX,');
+
+        address = address.replace(',GLOUCS,',',GLOUCESTERSHIRE,');
+        address = address.replace('GLOUCS COUNTY',',GLOUCESTERSHIRE,');
+        address = address.replace(',GLOUCS CO,',',GLOUCESTERSHIRE,');
+        address = address.replace('COUNTY GLOUCS,','GLOUCESTERSHIRE,');
+        address = address.replace(',CO GLOUCS,',',GLOUCESTERSHIRE,');
+
+        address = address.replace('HAMPSHIRE COUNTY,','HAMPSHIRE,');
+        address = address.replace('HAMPSHIRE CO,','HAMPSHIRE,');
+        address = address.replace(',CO HAMPSHIRE,',',HAMPSHIRE,');
+        address = address.replace(',HANTS,',',HAMPSHIRE,');
+        address = address.replace(',HANTS COUNTY,',',HAMPSHIRE,');
+        address = address.replace(',HANTS CO,',',HAMPSHIRE,');
+        address = address.replace('COUNTY HANTS,','HAMPSHIRE,');
+        address = address.replace(',CO HANTS,',',HAMPSHIRE,');
+
+        address = address.replace('HEREFORDSHIRE COUNTY,','HEREFORDSHIRE,');
+        address = address.replace('HEREFORDSHIRE CO,','HEREFORDSHIRE,');
+        address = address.replace('HEREFORD COUNTY,','HEREFORDSHIRE,');
+        address = address.replace('HEREFORD CO,','HEREFORDSHIRE,');
+        address = address.replace('COUNTY HEREFORD,','HEREFORDSHIRE,');
+        address = address.replace(',CO HEREFORD,',',HEREFORDSHIRE,');
+        address = address.replace(',HERE,',',HEREFORDSHIRE,');
+        address = address.replace(',HERE COUNTY,',',HEREFORDSHIRE,');
+        address = address.replace(',HERE CO,',',HEREFORDSHIRE,');
+        address = address.replace(',COUNTY HERE,',',HEREFORDSHIRE,');
+        address = address.replace(',CO HERE,',',HEREFORDSHIRE,');
+
+        address = address.replace('HERTFORDSHIRE COUNTY,','HERTFORDSHIRE,');
+        address = address.replace('HERTFORDSHIRE CO,','HERTFORDSHIRE,');
+        address = address.replace('HERTFORD COUNTY,','HERTFORDSHIRE,');
+        address = address.replace('HERTFORD CO,','HERTFORDSHIRE,');
+        address = address.replace('COUNTY HERTFORD,','HERTFORDSHIRE,');
+        address = address.replace(',CO HERTFORD,',',HERTFORDSHIRE,');
+        address = address.replace(',HERTS,',',HERTFORDSHIRE,');
+        address = address.replace(',HERTS COUNTY,',',HERTFORDSHIRE,');
+        address = address.replace(',HERTS CO,',',HERTFORDSHIRE,');
+        address = address.replace('COUNTY HERTS,','HERTFORDSHIRE,');
+        address = address.replace(',CO HERTS,',',HERTFORDSHIRE,');
+
+        address = address.replace('HUNTINGDONSHIRE COUNTY,','HUNTINGDONSHIRE,');
+        address = address.replace('HUNTINGDONSHIRE CO,','HUNTINGDONSHIRE,');
+        address = address.replace('HUNTINGDON COUNTY,','HUNTINGDONSHIRE,');
+        address = address.replace('HUNTINGDON CO,','HUNTINGDONSHIRE,');
+        address = address.replace('COUNTY HUNTINGDON,','HUNTINGDONSHIRE,');
+        address = address.replace(',CO HUNTINGDON,',',HUNTINGDONSHIRE,');
+        address = address.replace(',HUNTS,',',HUNTINGDONSHIRE,');
+        address = address.replace(',HUNTS COUNTY,',',HUNTINGDONSHIRE,');
+        address = address.replace(',HUNTS CO,',',HUNTINGDONSHIRE,');
+        address = address.replace('COUNTY HUNTS,','HUNTINGDONSHIRE,');
+        address = address.replace(',CO HUNTS,',',HUNTINGDONSHIRE,');
+
+
+        address = address.replace('KENT COUNTY,','KENT,');
+        address = address.replace(',KENT CO,',',KENT,');
+        address = address.replace('COUNTY KENT,','KENT,');
+        address = address.replace(',CO KENT,',',KENT,');
+
+        address = address.replace('NORFOLKSHIRE,','NORFOLK,');
+        address = address.replace('COUNTY NORFOLK,','NORFOLK,');
+        address = address.replace(',CO NORFOLK,',',NORFOLK,',);
+
+        address = address.replace(',NOTTS,',',NOTTINGHAMSHIRE,');
+
+        address = address.replace('RUTLANDSHIRE,','RUTLAND,');
+        address = address.replace('COUNTY RUTLAND,','RUTLAND,');
+        address = address.replace(',CO RUTLAND,',',RUTLAND,');
+        address = address.replace('RUTLAND COUNTY,','RUTLAND,');
+        address = address.replace('RUTLAND CO,','RUTLAND,');
+
+        address = address.replace('SOMERSETSHIRE,','SOMERSET,');
+        address = address.replace('COUNTY SOMERSET,','SOMERSET,');
+        address = address.replace(',CO SOMERSET,',',SOMERSET,');
+        address = address.replace('SOMERSET COUNTY,','SOMERSET,');
+        address = address.replace('SOMERSET CO,','SOMERSET,');
+
+        address = address.replace('SUFFOLKSHIRE,','SUFFOLK,');
+        address = address.replace('COUNTY SUFFOLK,','SUFFOLK,');
+        address = address.replace(',CO SUFFOLK,',',SUFFOLK,');
+        address = address.replace('SUFFOLK COUNTY,','SUFFOLK,');
+        address = address.replace('SUFFOLK CO,','SUFFOLK,');
+
+        address = address.replace('WORCESTERSHIRE COUNTY,','WORCESTERSHIRE,');
+        address = address.replace('WORCESTERSHIRE CO,','WORCESTERSHIRE,');
+        address = address.replace('WORCESTER COUNTY,','WORCESTERSHIRE,');
+        address = address.replace('WORCESTER CO,','WORCESTERSHIRE,');
+        address = address.replace('COUNTY WORCESTER,','WORCESTERSHIRE,');
+        address = address.replace(',CO WORCESTER,',',WORCESTERSHIRE,');
+    }
+    
     //USA standardizations
     if (address.indexOf('UNITED STATES OF AMERICA') !== -1 && address.indexOf('UNITED STATES OF AMERICA') === address.length-24) {
         address = address.substring(0,address.length-24) + 'USA';
@@ -130,10 +356,13 @@ export function standardizeAddress(address) {
         address = address.substring(0,address.length-8);
     }
     address = address.replace(',PLYMOUTH COLONY',',MASSACHUSETTS');
+    address = address.replace('MASS BAY COLONY','MASSACHUSETTS BAY COLONY');
+    if (address.indexOf('MASSACHUSETTS BAY COLONY') === -1) {
+        address = address.replace(',MASSACHUSETTS BAY',',MASSACHUSETTS BAY COLONY');
+    }
+    address = address.replace('MASSACHUSETTS COLONY','MASSACHUSETTS BAY COLONY');
+    address = address.replace('COLONY OF MASSACHUSETTS','MASSACHUSETTS BAY COLONY');
     address = address.replace(',MASSACHUSETTS BAY COLONY',',MASSACHUSETTS');
-    address = address.replace(',MASSACHUSETTS BAY',',MASSACHUSETTS');
-    address = address.replace(',MASSACHUSETTS COLONY',',MASSACHUSETTS');
-    address = address.replace(',COLONY OF MASSACHUSETTS',',MASSACHUSETTS');
     address = address.replace('PROVINCE OF MASSACHUSETTS BAY','MASSACHUSETTS');
     address = address.replace('MASSACHUSETTS BAY PROVINCE','MASSACHUSETTS');
     address = address.replace('PROVINCE OF MASSACHUSETTS','MASSACHUSETTS');
@@ -159,20 +388,6 @@ export function standardizeAddress(address) {
     address = address.replace('VIRGINIA COLONY','VIRGINIA');
     address = address.replace('PROVINCE OF NORTH CAROLINA','NORTH CAROLINA');
     address = address.replace('PROVINCE OF SOUTH CAROLINA','SOUTH CAROLINA');
-    if (address.indexOf(' COUNTY,') !== -1) {
-        let end = address.indexOf(' COUNTY,');
-        let front = address.substring(0,end);
-        if (front.indexOf(',') !== -1) {
-            address = address.replace(' COUNTY,',',');
-        }
-    }
-    if (address.indexOf(' CO,') !== -1) {
-        let end = address.indexOf(' CO,');
-        let front = address.substring(0,end);
-        if (front.indexOf(',') !== -1) {
-            address = address.replace(' CO,',',');
-        }
-    }
     if (address.indexOf('ALABAMA') !== -1 && address.indexOf('ALABAMA') === address.length-7) {
         address = address + ',USA';
     }
@@ -613,6 +828,22 @@ export function standardizeAddress(address) {
     }
     if (address.indexOf(',WY,USA') !== -1 && address.indexOf(',WY,USA') === address.length-7) {
         address = address.substring(0,address.length-7) + ',WYOMING,USA';
+    }
+    if (address.indexOf(',USA') !== -1 && address.indexOf(',USA') === address.length-4) {
+        if (address.indexOf(' COUNTY,') !== -1) {
+            let end = address.indexOf(' COUNTY,');
+            let front = address.substring(0,end);
+            if (front.indexOf(',') !== -1) {
+                address = address.replace(' COUNTY,',',');
+            }
+        }
+        if (address.indexOf(' CO,') !== -1) {
+            let end = address.indexOf(' CO,');
+            let front = address.substring(0,end);
+            if (front.indexOf(',') !== -1) {
+                address = address.replace(' CO,',',');
+            }
+        }
     }
 
     return address;
