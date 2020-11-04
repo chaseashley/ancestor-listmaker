@@ -300,6 +300,7 @@ class Map extends React.Component {
 
     onSkipAllClick() {
         this.setState({coordinatesLoaded: true});
+        this.centerMap(this.state.map);
     }
 
     fixCoordinatesCallback() {
@@ -320,12 +321,12 @@ class Map extends React.Component {
                     app’s database. Births and deaths with these location names will not be mapped until you or another user confirms the 
                     proper placement of these locations names on the map so they can be added to the database.</p>
                     <p>Click 'Proceed' if you 
-                    wish to review the placement of these location names. (For each location name, the app will suggest its placement for you to confirm or change. 
+                    wish to review the placement of these locations. (For each location, the app will suggest its placement for you to confirm or change. 
                     If you stop partway through, your results will be saved.)</p>
                     <p>Click 'Skip All' if you don't wish to review the placement 
-                    of the location names. (Birth and deaths with these location names will not be included on the map.)</p> 
-                    <p>Click 'Return to List' if you want to return to the ancestor list page. (For example, to generate a shorter list (e.g., fewer generations) 
-                    with fewer location names whose placement will need to be confirmed.)</p>
+                    of the locations. (Birth and deaths with these location names will not be included on the map.)</p> 
+                    <p>Click 'Return to List' if you want to return to the ancestor list page. (For example, to generate a shorter list (e.g., with fewer generations
+                    and fewer locations whose placement will need to be confirmed.)</p>
                     </div>
                     <table className={styles.formTable}><tbody>
                         <tr className={styles.buttonsTr}>
@@ -387,7 +388,7 @@ class Map extends React.Component {
                                 this.setState({map: map})
                             }}
                         >
-                            <MissingCoordinatesOverlay location={this.state.missingCoordinates[0][0]} ancestorName={this.state.missingCoordinates[0][1]} id={this.state.missingCoordinates[0][2]} birthDeath={this.state.missingCoordinates[0][3]} markerCoordinates={this.state.markerCoordinates} numberMissing={this.state.missingCoordinates.length} onClickCoordinatesSubmit={this.onClickCoordinatesSubmit} onClickCoordinatesSkip={this.onClickCoordinatesSkip}/>
+                            <MissingCoordinatesOverlay location={this.state.missingCoordinates[0][0]} ancestorName={this.state.missingCoordinates[0][1]} id={this.state.missingCoordinates[0][2]} birthDeath={this.state.missingCoordinates[0][3]} markerCoordinates={this.state.markerCoordinates} numberMissing={this.state.missingCoordinates.length} onClickCoordinatesSubmit={this.onClickCoordinatesSubmit} onClickCoordinatesSkip={this.onClickCoordinatesSkip} onSkipAllClick={this.onSkipAllClick}/>
                         </GoogleMap>
                     </LoadScript>
             }

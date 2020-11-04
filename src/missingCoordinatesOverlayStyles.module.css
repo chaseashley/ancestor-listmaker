@@ -3,13 +3,13 @@
     position: absolute;
     top: 0;
     left: 0;
-    height: 125px;
+    height: 135px;
     width: 100%;
     background-color: white;
 }
 
 .coordinatesSearchTable {
-    margin: 20px 25px 25px 30px;
+    margin: 15px 25px 20px 25px;
 }
 
 .locationCell {
@@ -22,10 +22,10 @@
 
 .submitCell {
     padding-top: 10px;
-    width: 100px;
+    width: 90px;
 }
 
 .skipCell {
     padding-top: 10px;
-    width: 100px;
+    width: 90px;
 }
