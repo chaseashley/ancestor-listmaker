@@ -18,6 +18,7 @@ class Map extends React.Component {
     constructor(props) {
         super(props);
         this.fixCoordinatesCallback = this.fixCoordinatesCallback.bind(this);
+        this.onSkipAllClick = this.onSkipAllClick.bind(this);
         this.onProceedClick = this.onProceedClick.bind(this);
         this.checkAddressesForCoordinates = this.checkAddressesForCoordinates.bind(this);
         this.makeLocationsList = this.makeLocationsList.bind(this);
@@ -76,6 +77,7 @@ class Map extends React.Component {
 
     async onClickCoordinatesSkip(location) {
         let ancestors = this.state.ancestors;
+        /*
         ancestors.forEach(ancestor => {
             if (ancestor.BirthLocation === location) {
                 ancestor.BirthLocation = '';
@@ -83,7 +85,7 @@ class Map extends React.Component {
             if (ancestor.DeathLocation === location) {
                 ancestor.DeathLocation = '';
             }
-        })
+        })*/
         this.setState({ancestors: ancestors});
         let missingCoordinates = this.state.missingCoordinates;
         for (let i=0; i<missingCoordinates.length; i++) {
@@ -296,6 +298,10 @@ class Map extends React.Component {
         this.setState({proceed: true});
     }
 
+    onSkipAllClick() {
+        this.setState({coordinatesLoaded: true});
+    }
+
     fixCoordinatesCallback() {
         this.setState({fixCoordinates: true});
     }
@@ -310,17 +316,22 @@ class Map extends React.Component {
         } else if (!this.state.coordinatesLoaded && this.state.missingCoordinates !== null && !this.state.proceed) {
             mapOrLoading = 
                 <div className={styles.reviewWarningDiv}>
-                    <div><p>The ancestor list contains {this.state.missingCoordinates.length} locations that are not yet in the 
-                    app’s database and that you will need to review and add to the database before a map of the ancestor list 
-                    can be generated.</p><p>If you wish to review these locations and add them to the database so that a map of the 
-                    ancestor list can be generated, click 'Proceed'. (If you stop partway through, your results will be saved.)</p>
-                    <p>If you do not wish to review that many locations, click 'Return to List' or the browser back arrow to return to the 
-                    ancestor list page and consider starting with a shorter list (e.g., one with fewer generations) to map.</p>
+                    <div><p>The ancestor list contains {this.state.missingCoordinates.length} location names that are not yet in the 
+                    app’s database. Births and deaths with these location names will not be mapped until you or another user confirms the 
+                    proper placement of these locations names on the map so they can be added to the database.</p>
+                    <p>Click 'Proceed' if you 
+                    wish to review the placement of these location names. (For each location name, the app will suggest its placement for you to confirm or change. 
+                    If you stop partway through, your results will be saved.)</p>
+                    <p>Click 'Skip All' if you don't wish to review the placement 
+                    of the location names. (Birth and deaths with these location names will not be included on the map.)</p> 
+                    <p>Click 'Return to List' if you want to return to the ancestor list page. (For example, to generate a shorter list (e.g., fewer generations) 
+                    with fewer location names whose placement will need to be confirmed.)</p>
                     </div>
                     <table className={styles.formTable}><tbody>
                         <tr className={styles.buttonsTr}>
                             <td className={styles.buttonSpacer}></td>
                             <td className={styles.buttonsTd}><button onClick={this.onProceedClick} className={styles.button}>Proceed</button></td>
+                            <td className={styles.buttonsTd}><button onClick={this.onSkipAllClick} className={styles.button}>Skip All</button></td>
                             <td className={styles.buttonsTd}><Link to={{ pathname: '/apps/ashley1950/listmaker/'}}><button className={styles.button}>Return to List</button></Link></td>
                             <td></td>
                         </tr></tbody>

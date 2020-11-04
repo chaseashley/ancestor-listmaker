@@ -58,10 +58,10 @@
 
 .reviewWarningDiv {
     position: relative;
-    top: 125px;
+    top: 100px;
     left: 20%;
     width: 700px;
-    height: 270px;
+    height: 330px;
     background-color: rgb(243, 241, 234);
     border:1px solid black;
     padding-left: 20px;
@@ -74,7 +74,7 @@
 }
 
 .buttonSpacer {
-    width: 28%;
+    width: 20%;
 }
 
 .buttonsTr {
