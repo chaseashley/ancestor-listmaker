@@ -12,6 +12,8 @@ class StaticMarkers extends Component {
         this.onMouseOutHandler = this.onMouseOutHandler.bind(this);
         this.onBCloseClickHandler = this.onBCloseClickHandler.bind(this);
         this.onDCloseClickHandler = this.onDCloseClickHandler.bind(this);
+        this.onBDblClickHandler = this.onBDblClickHandler.bind(this);
+        this.onDDblClickHandler = this.onDDblClickHandler.bind(this);
         this.state = {
             bOpen: false,
             dOpen: false,
@@ -44,8 +46,8 @@ class StaticMarkers extends Component {
                 return {
                     bOpen: true,
                     bClicked: true,
-                    bzIndex: Math.floor(Date.now()/1000)+999999,
-                    bWindowZindex: Math.floor(Date.now()/1000)+999999,
+                    bzIndex: Math.floor(Date.now()/1000)+99,
+                    bWindowZindex: Math.floor(Date.now()/1000)+99,
                     mouseOver: true,
                     linkedAncestorClick: true,
                     linkedAncestorCloseClick: false,
@@ -55,8 +57,8 @@ class StaticMarkers extends Component {
                 return {
                     dOpen: true,
                     dClicked: true,
-                    dzIndex: Math.floor(Date.now()/1000)+999999,
-                    dWindowZindex: Math.floor(Date.now()/1000)+999999,
+                    dzIndex: Math.floor(Date.now()/1000)+99,
+                    dWindowZindex: Math.floor(Date.now()/1000)+99,
                     mouseOver: true,
                     linkedAncestorClick: true,
                     linkedAncestorCloseClick: false,
@@ -275,6 +277,26 @@ class StaticMarkers extends Component {
         }
     }
 
+    onBDblClickHandler() {
+        if (this.props.visible && this.state.bOpen && !this.props.ancestorOnClick) {
+            this.setState({
+                bOpen: false,
+                bzIndex: -Math.floor(Date.now()/1000)+1,
+                bClicked: false
+            })
+        }
+    }
+
+    onDDblClickHandler() {
+        if (this.props.visible && this.state.dOpen && !this.props.ancestorOnClick) {
+            this.setState({
+                dOpen: false,
+                dzIndex: -Math.floor(Date.now()/1000)+1,
+                dClicked: false
+            })
+        }
+    }
+
     render() {
         let personMarkers;
         if (this.props.visible) {
@@ -292,6 +314,7 @@ class StaticMarkers extends Component {
                         onMouseOver={this.onBMouseOverHandler}
                         onMouseOut={this.onMouseOutHandler}
                         onCloseClck={this.onBCloseClickHandler}
+                        onDblClick={this.onBDblClickHandler}
                     >
                         {this.props.visible && this.state.bOpen && <InfoWindow options={{ disableAutoPan: true }} onCloseClick={this.onBCloseClickHandler} zIndex={(this.state.bWindowZindex !== null) ? this.state.bWindowZindex : 0}>
                             <div><div><a href={`https://www.wikitree.com/wiki/${this.props.ancestor.Name}`} target='_blank' rel='noopener noreferrer'>{this.props.ancestor.BirthNamePrivate}</a>, b. {this.props.ancestor.BirthDate}</div><div>{this.props.ancestor.BirthLocation}</div></div>

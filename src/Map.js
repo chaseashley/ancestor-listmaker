@@ -17,6 +17,7 @@ class Map extends React.Component {
 
     constructor(props) {
         super(props);
+        this.fixCoordinatesCallback = this.fixCoordinatesCallback.bind(this);
         this.onProceedClick = this.onProceedClick.bind(this);
         this.checkAddressesForCoordinates = this.checkAddressesForCoordinates.bind(this);
         this.makeLocationsList = this.makeLocationsList.bind(this);
@@ -40,6 +41,7 @@ class Map extends React.Component {
             birthPins: true,
             deathPins: false,
             proceed: false,
+            fixCoordinates: false,
         }
     }
 
@@ -294,6 +296,10 @@ class Map extends React.Component {
         this.setState({proceed: true});
     }
 
+    fixCoordinatesCallback() {
+        this.setState({fixCoordinates: true});
+    }
+
     render() {
         let mapOrLoading;
         if (!this.state.coordinatesLoaded && this.state.missingCoordinates === null) {
@@ -322,7 +328,7 @@ class Map extends React.Component {
                 </div>
         } else {
             let MapWithOverlay;
-            if (this.state.coordinatesLoaded) {
+            if (this.state.coordinatesLoaded && !this.state.fixCoordinates) {
                 MapWithOverlay = 
                     <LoadScript googleMapsApiKey={API_KEY}>
                         <GoogleMap
@@ -341,7 +347,21 @@ class Map extends React.Component {
                                 }
                             }}
                         >
-                            <MapOverlayItems ancestors={this.state.ancestors} birthPinsCallback={this.birthPinsCallback} deathPinsCallback={this.deathPinsCallback} zoom={this.state.mapZoom}/>
+                            <MapOverlayItems ancestors={this.state.ancestors} birthPinsCallback={this.birthPinsCallback} deathPinsCallback={this.deathPinsCallback} fixCoordinatesCallback={this.fixCoordinatesCallback} zoom={this.state.mapZoom}/>
+                        </GoogleMap>
+                    </LoadScript>
+            } else if (this.state.coordinatesLoaded && this.state.fixCoordinates) {
+                MapWithOverlay =
+                    <LoadScript googleMapsApiKey={API_KEY}>
+                        <GoogleMap
+                            mapContainerStyle={{ width: '100%', height: '600px'}}
+                            options={{fullscreenControl: false, scaleControl: true, mapTypeControl: false, streetViewControl: false, styles: [ { featureType: 'poi', stylers: [{ visibility: 'off' }] } ] }}
+                            zoom={(this.state.markerCoordinates===undefined) ? 2 : 2} //2 : 9
+                            center={(this.state.markerCoordinates===undefined) ? { lat: 20, lng: 0 } : { lat: 20, lng: 0 }} //{ lat: 20, lng: 0 } : this.state.markerCoordinates}
+                            onLoad={map => {
+                                this.setState({map: map})
+                            }}
+                        >
                         </GoogleMap>
                     </LoadScript>
             } else if (this.state.missingCoordinates !== null) {

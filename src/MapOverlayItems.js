@@ -128,7 +128,7 @@ class MapOverlayItems extends React.Component {
             birthPins: true,
             deathPins: false,
             birthDeathLines: false,
-            parentChildLines: false,
+            parentChildLines: true,
             birthDeathOnClick: false,
             parentsOnClick: false,
             childrenOnClick: false,
@@ -838,26 +838,30 @@ class MapOverlayItems extends React.Component {
 
         let buttonbar = 
             <div className={styles.buttonbarDiv}>
-                <ToggleButton label={'Births'} active={this.state.birthPins} onClick={this.onBirthClick} disabled={this.state.deathPins && this.state.hideClosed}/>
+                <ToggleButton label={'Births'} active={this.state.birthPins} onClick={this.onBirthClick} disabled={((this.state.deathPins && this.state.hideClosed) || this.state.animated)}/>
                 <div className={styles.buttonbarspacer}/>
-                <ToggleButton label={'Deaths'} active={this.state.deathPins} onClick={this.onDeathClick} disabled={this.state.birthPins && this.state.hideClosed}/>
+                <ToggleButton label={'Deaths'} active={this.state.deathPins} onClick={this.onDeathClick} disabled={((this.state.birthPins && this.state.hideClosed) || this.state.animated)}/>
                 <div className={styles.buttonbarspacer}/>
-                <ToggleButton label={'Timeline'} active={this.state.timeline} onClick={this.onTimelineClick} disabled={this.state.hideClosed}/>
+                <ToggleButton label={'Timeline'} active={this.state.timeline} onClick={this.onTimelineClick} disabled={this.state.hideClosed || this.state.animated}/>
                 <div className={styles.buttonbarspacer}/>
-                <ToggleButton label={'Parent-Child Lines'} active={this.state.parentChildLines} onClick={this.onParentChildLinesClick} disabled={(this.state.birthPins && this.state.deathPins)}/>
+                <ToggleButton label={'Parent-Child Lines'} active={this.state.parentChildLines} onClick={this.onParentChildLinesClick} disabled={((this.state.birthPins && this.state.deathPins) || this.state.animated)}/>
                 <div className={styles.buttonbarspacer}/>
-                <ToggleButton label={'Birth-Death Lines'} active={this.state.birthDeathLines} onClick={this.onBirthDeathLinesClick} disabled={(!this.state.birthPins || !this.state.deathPins)}/>
+                <ToggleButton label={'Birth-Death Lines'} active={this.state.birthDeathLines} onClick={this.onBirthDeathLinesClick} disabled={((!this.state.birthPins || !this.state.deathPins) || this.state.animated)}/>
+                <div className={styles.buttonbarspacer}/>
+                <ToggleButton label={'Birth-Death on Click'} active={this.state.birthDeathOnClick} onClick={this.onBirthDeathOnClick} disabled={((!this.state.birthPins || !this.state.deathPins) || this.state.animated)}/>
+                <div className={styles.buttonbarspacer}/>
+                <ToggleButton label={'Find'} active={this.state.find} onClick={this.onFindClick} disabled={this.state.animated}/>
                 <div className={styles.buttonbarspacer}/>
                 <ToggleButton label={'Hide Closed'} active={this.state.hideClosed} onClick={this.onHideClosedClick} disabled={this.state.timeline || (this.state.birthPins && this.state.deathPins)}/>
                 <div className={styles.buttonbarspacer}/>
-                <ToggleButton label={'Birth-Death on Click'} active={this.state.birthDeathOnClick} onClick={this.onBirthDeathOnClick} disabled={(!this.state.birthPins || !this.state.deathPins)}/>
+                <ToggleButton label={'Parents on Click'} active={this.state.parentsOnClick} onClick={this.onParentsOnClick} disabled={((this.state.birthPins && this.state.deathPins) || this.state.animated)}/>
                 <div className={styles.buttonbarspacer}/>
-                <ToggleButton label={'Parents on Click'} active={this.state.parentsOnClick} onClick={this.onParentsOnClick} disabled={(this.state.birthPins && this.state.deathPins)}/>
+                <ToggleButton label={'Children on Click'} active={this.state.childrenOnClick} onClick={this.onChildrenOnClick} disabled={((this.state.birthPins && this.state.deathPins) || this.state.animated)}/>
                 <div className={styles.buttonbarspacer}/>
-                <ToggleButton label={'Children on Click'} active={this.state.childrenOnClick} onClick={this.onChildrenOnClick} disabled={(this.state.birthPins && this.state.deathPins)}/>
+                <ToggleButton label={'Fix'} active={false} onClick={this.props.fixCoordinatesCallback} disabled={this.state.animated}/>
                 <div className={styles.buttonbarspacer}/>
-                <ToggleButton label={'Find'} active={this.state.find} onClick={this.onFindClick} disabled={false}/>
-            </div>
+                <ToggleButton label={'Return'} active={false} disabled={this.state.animated}/>
+                </div>
 
         let searchBox;
         if (!this.state.find) {
