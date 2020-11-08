@@ -3,6 +3,54 @@
     height: 60px;
 }
 
+.fixcoordinatesLinkDiv {
+    position: absolute;
+    top: 50px;
+    left: 70%;
+    width: 150px
+}
+
+.fixcoordinatesLink {
+    background: none;
+	margin: 0;
+	padding: 0;
+	border: none;
+    cursor: pointer;
+    text-decoration:underline;
+}
+
+.fixCoordinatesDialogBox {
+    background: white;
+    border: 1px solid;
+    height: 300px;
+    width: 600px;
+}
+
+.dragBox {
+    background: #010d84;
+    height: 15px;
+    width: 100%;
+    cursor: grabbing;
+}
+
+.fixCoordinatesDialogInnerDiv {
+    padding: 20px;
+}
+
+.cancelButton {
+    position: relative;
+    font-size: 16px;
+    left: 150px;
+    width: 75px;
+}
+
+.fixcoordinatesButton {
+    position: relative;
+    font-size: 16px;
+    left: 250px;
+    width: 75px;
+}
+
 .h1 {
     font-size: 2.5em;
     font-style: italic;

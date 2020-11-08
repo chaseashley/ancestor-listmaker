@@ -9,7 +9,7 @@ class FixCoordinatesOverlay extends React.Component {
         this.onDragEndHandler = this.onDragEndHandler.bind(this);
         this.state={
             finalCoordinates: null,
-            markerCoordinates: (this.props.markerCoordinates === undefined) ? { lat: 20, lng: 0 } : this.props.markerCoordinates
+            markerCoordinates: this.props.markerCoordinates
         }
     }
 
@@ -29,54 +29,26 @@ class FixCoordinatesOverlay extends React.Component {
     render() {
 
         let fixCoordinatesOverlay, marker;
-        if (this.props.markerCoordinates !== null && this.props.markerCoordinates !== undefined) {
-            fixCoordinatesOverlay =
-                <div className={styles.coordinatesSearchBox}>
-                    <table className={styles.coordinatesSearchTable}>
-                        <tbody>
-                            <tr><td colSpan='4'>The location below is one of {this.props.numberMissing} locations in the ancestor list not in the app’s database. The marker is where Google Maps suggests the location is. If the marker placement is incorrect, drag and drop it at the correct place. Zoom in/out as necessary. Click 'Submit' when you are confident the marker is in the correct place to add it to the app's database. If the location field is incorrect, correct it in the profile and click 'Skip'.</td></tr>
-                            <tr><td className={styles.locationCell}>{this.props.location}</td><td className={styles.nameCell}>Found in {this.props.birthDeath} Location field for <a href={`https://www.wikitree.com/wiki/${this.props.id}`} target='_blank' rel='noopener noreferrer'>{this.props.ancestorName}</a></td>
-                            <td className={styles.submitCell}><button onClick={() => this.props.onClickCoordinatesSubmit(this.state.finalCoordinates === null ? {lat: this.state.markerCoordinates.lat, lng: this.state.markerCoordinates.lng} : {lat: this.state.finalCoordinates.lat, lng: this.state.finalCoordinates.lng})}>Submit</button></td>
-                            <td className={styles.skipCell}><button onClick={() => this.props.onClickCoordinatesSkip(this.props.location)}>Skip</button></td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            marker =
-                <Marker
-                    icon={`http://maps.google.com/mapfiles/ms/icons/blue-dot.png`}
-                    position={this.state.finalCoordinates === null ? {lat: this.state.markerCoordinates.lat, lng: this.state.markerCoordinates.lng} : {lat: this.state.finalCoordinates.lat, lng: this.state.finalCoordinates.lng}}
-                    draggable={true}
-                    onDragEnd={this.onDragEndHandler}
-                />
-        } else if (this.props.markerCoordinates === undefined) {
-            missingCoordinatesOverlay =
+        fixCoordinatesOverlay =
             <div className={styles.coordinatesSearchBox}>
                 <table className={styles.coordinatesSearchTable}>
                     <tbody>
-                        <tr><td colSpan='4'>The location below is one of {this.props.numberMissing} locations in the ancestor list not in the app’s database. Google Maps could not find the location. Drag and drop the marker at the correct place for the location. Zoom in/out as necessary. Click 'Submit' when you are confident the marker is in the correct place to add it to the app's database. If the location field is incorrect, correct it in the profile and click 'Skip'.</td></tr>
+                        <tr><td colSpan='2'>The marker is at the coordinates currently in the app's database for the location name/description below. If the marker placement is incorrect, drag and drop it at the correct place. Zoom in/out as necessary. Click 'Submit' when you are confident the marker is in the correct place to add it to the app's database. If the location name/description is incorrect, correct it in the profile and do not change the marker position.</td></tr>
                         <tr><td className={styles.locationCell}>{this.props.location}</td><td className={styles.nameCell}>Found in {this.props.birthDeath} Location field for <a href={`https://www.wikitree.com/wiki/${this.props.id}`} target='_blank' rel='noopener noreferrer'>{this.props.ancestorName}</a></td>
-                        <td className={styles.submitCell}><button onClick={() => this.props.onClickCoordinatesSubmit(this.state.finalCoordinates === null ? {lat: this.state.markerCoordinates.lat, lng: this.state.markerCoordinates.lng} : {lat: this.state.finalCoordinates.lat, lng: this.state.finalCoordinates.lng})}>Submit</button></td>
-                        <td className={styles.skipCell}><button onClick={() => this.props.onClickCoordinatesSkip(this.props.location)}>Skip</button></td></tr>
+                        <td className={styles.skipCell}><button onClick={() => this.props.onCancelClick()}>Cancel</button></td></tr>
                     </tbody>
                 </table>
             </div>
-            marker =
-                <Marker
-                    icon={`http://maps.google.com/mapfiles/ms/icons/blue-dot.png`}
-                    position={this.state.finalCoordinates === null ? { lat: 20, lng: 0 } : {lat: this.state.finalCoordinates.lat, lng: this.state.finalCoordinates.lng}}
-                    draggable={true}
-                    onDragEnd={this.onDragEndHandler}
-                />
-        } else {
-            missingCoordinatesOverlay =
-                <></>
-            marker = 
-                <></>
-        }
-
+        marker =
+            <Marker
+                icon={`http://maps.google.com/mapfiles/ms/icons/blue-dot.png`}
+                position={this.state.finalCoordinates === null ? {lat: this.state.markerCoordinates.lat, lng: this.state.markerCoordinates.lng} : {lat: this.state.finalCoordinates.lat, lng: this.state.finalCoordinates.lng}}
+                draggable={true}
+                onDragEnd={this.onDragEndHandler}
+            />
         return (
             <div>
-                {missingCoordinatesOverlay}
+                {fixCoordinatesOverlay}
                 {marker}
             </div> 
         )

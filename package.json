@@ -19,6 +19,7 @@
     "react-compound-slider": "^2.5.0",
     "react-csv": "^2.0.3",
     "react-dom": "^16.13.1",
+    "react-draggable": "^4.4.3",
     "react-dropdown": "^1.7.0",
     "react-geocode": "^0.2.1",
     "react-google-maps": "^9.4.5",

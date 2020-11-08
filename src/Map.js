@@ -5,11 +5,13 @@ import Geocode from "react-geocode";
 import styles from './mapstyles.module.css';
 import MapOverlayItems from './MapOverlayItems';
 import MissingCoordinatesOverlay from './MissingCoordinatesOverlay';
+import FixCoordinatesOverlay from './FixCoordinatesOverlay';
 import { getCoordinates, postCoordinates } from './locationsDBqueries';
 import { adjustOverlappingMarkerCoordinates } from './overlappingMarkers';
 import db from './db';
 import { standardizeAddress } from './standardizeAddress';
 import { Link } from "react-router-dom";
+import Draggable from 'react-draggable';
 
 const API_KEY='AIzaSyD5VQNhUE4UQlIZbaJo4aHE1pt9zuZFzPw';
 
@@ -17,7 +19,12 @@ class Map extends React.Component {
 
     constructor(props) {
         super(props);
-        this.fixCoordinatesCallback = this.fixCoordinatesCallback.bind(this);
+        this.fixCancelClick = this.fixCancelClick.bind(this);
+        this.hideBClosedAncestorsCallBack = this.hideBClosedAncestorsCallBack.bind(this);
+        this.hideDClosedAncestorsCallBack = this.hideDClosedAncestorsCallBack.bind(this);
+        this.closeFixCoordinatesDialog = this.closeFixCoordinatesDialog.bind(this);
+        this.openFixCoordinatesDialog = this.openFixCoordinatesDialog.bind(this);
+        this.fixCoordinatesClick = this.fixCoordinatesClick.bind(this);
         this.onSkipAllClick = this.onSkipAllClick.bind(this);
         this.onProceedClick = this.onProceedClick.bind(this);
         this.checkAddressesForCoordinates = this.checkAddressesForCoordinates.bind(this);
@@ -43,6 +50,8 @@ class Map extends React.Component {
             deathPins: false,
             proceed: false,
             fixCoordinates: false,
+            hideBClosedAncestors: [],
+            hideDClosedAncestors: [],
         }
     }
 
@@ -294,6 +303,13 @@ class Map extends React.Component {
         //db.table('map').put(JSON.stringify(this.state),0).catch(function(e){console.log('Dixie IndexedDB error:',e)});
     }
 
+    hideBClosedAncestorsCallBack(hideBClosedAncestors) {
+        this.setState({hideBClosedAncestors: hideBClosedAncestors});
+    }
+    hideDClosedAncestorsCallBack(hideDClosedAncestors) {
+        this.setState({hideDClosedAncestors: hideDClosedAncestors});
+    }
+
     onProceedClick() {
         this.setState({proceed: true});
     }
@@ -303,11 +319,77 @@ class Map extends React.Component {
         this.centerMap(this.state.map);
     }
 
-    fixCoordinatesCallback() {
-        this.setState({fixCoordinates: true});
+    fixCoordinatesClick() {
+        this.setState({
+            fixCoordinates: true,
+            mapCenter: this.state.map.getCenter(),
+            zoom: this.state.map.getZoom()
+        });
+    }
+
+    openFixCoordinatesDialog() {
+        this.setState({openFixCoordinatesDialog: true});
+    }
+
+    closeFixCoordinatesDialog() {
+        this.setState({openFixCoordinatesDialog: false});
+    }
+
+    fixCancelClick() {
+        this.setState({fixCoordinates: false});
+        this.centerMap(this.state.map);
+        //this.state.map.fitBounds(this.state.mapBounds);
+        //this.state.map.setZoom(this.state.zoom);
     }
 
     render() {
+        let fixCoordinatesLink;
+        if (this.state.coordinatesLoaded && !this.state.fixCoordinates) {
+            fixCoordinatesLink =
+                <div className={styles.fixcoordinatesLinkDiv}>
+                    <button className={styles.fixcoordinatesLink} onClick={this.openFixCoordinatesDialog}>Fix Coordinates</button>
+                </div>
+        } else {
+            fixCoordinatesLink = <></>
+        }
+
+        let topBox =
+            <div className={styles.topBox}>
+                <h1 className={styles.h1}>
+                    Ancestor Explorer
+                </h1>
+                {fixCoordinatesLink}
+            </div>
+
+        let fixCoordinatesDialogBox;
+        if (this.state.openFixCoordinatesDialog) {
+            const dragHandlers = {onStart: this.onStart, onStop: this.onStop};
+            fixCoordinatesDialogBox =
+                <Draggable defaultPosition={{x: 325, y: 100}} bounds='body' handle='handle' {...dragHandlers}>
+                    <div className={styles.fixCoordinatesDialogBox}>
+                        <handle><div name='.dragBox' className={styles.dragBox}></div></handle>
+                        <div className={styles.fixCoordinatesDialogInnerDiv}>
+                            To open a window that will allow you to correct the coordinates of a location:
+                            <ol>
+                            <li>Have the info window for a single marker at that location open and have the info 
+                            windows for all other markers closed.</li>
+                            <li>Click ‘Hide Closed’ 
+                            to hide all markers other than the marker with the open info window.</li>
+                            <li><b>Confirm that the 
+                            marker is not at the correct place when it is the only visible marker.</b> (Note that when 
+                            multiple markers are shown, they may not appear at their exact correct places due to 
+                            “clustering” of markers at or near the same location. This should NOT be corrected.)</li>
+                            <li>Click ‘OK’.</li>
+                            </ol>
+                            <button className={styles.cancelButton} onClick={this.closeFixCoordinatesDialog}>Cancel</button>
+                            <button className={styles.fixcoordinatesButton} onClick={this.fixCoordinatesClick} disabled={!((this.state.hideBClosedAncestors.length === 1 && this.state.hideDClosedAncestors.length === 0) || (this.state.hideBClosedAncestors.length === 0 && this.state.hideDClosedAncestors.length === 1))}>OK</button>
+                        </div>
+                    </div>
+                </Draggable>
+        } else {
+            fixCoordinatesDialogBox = <></>
+        }
+
         let mapOrLoading;
         if (!this.state.coordinatesLoaded && this.state.missingCoordinates === null) {
             mapOrLoading = 
@@ -359,21 +441,35 @@ class Map extends React.Component {
                                 }
                             }}
                         >
-                            <MapOverlayItems ancestors={this.state.ancestors} birthPinsCallback={this.birthPinsCallback} deathPinsCallback={this.deathPinsCallback} fixCoordinatesCallback={this.fixCoordinatesCallback} zoom={this.state.mapZoom}/>
+                            <MapOverlayItems ancestors={this.state.ancestors} birthPinsCallback={this.birthPinsCallback} deathPinsCallback={this.deathPinsCallback} hideBClosedAncestorsCallBack={this.hideBClosedAncestorsCallBack} hideDClosedAncestorsCallBack={this.hideDClosedAncestorsCallBack} zoom={this.state.mapZoom}/>
+                            {fixCoordinatesDialogBox}
                         </GoogleMap>
                     </LoadScript>
             } else if (this.state.coordinatesLoaded && this.state.fixCoordinates) {
+                let markerCoordinates, ancestor, location, birthDeath;
+                if (this.state.hideBClosedAncestors.length !== 0) {
+                    markerCoordinates = { lat: this.state.hideBClosedAncestors[0].blat, lng: this.state.hideBClosedAncestors[0].blng };
+                    ancestor = this.state.hideBClosedAncestors[0];
+                    location = ancestor.BirthLocation;
+                    birthDeath = 'Birth';
+                } else {
+                    markerCoordinates = { lat: this.state.hideDClosedAncestors[0].dlat, lng: this.state.hideDClosedAncestors[0].dlng };
+                    ancestor = this.state.hideDClosedAncestors[0];
+                    location = ancestor.DeathLocation;
+                    birthDeath = 'Death';
+                }
                 MapWithOverlay =
                     <LoadScript googleMapsApiKey={API_KEY}>
                         <GoogleMap
                             mapContainerStyle={{ width: '100%', height: '600px'}}
                             options={{fullscreenControl: false, scaleControl: true, mapTypeControl: false, streetViewControl: false, styles: [ { featureType: 'poi', stylers: [{ visibility: 'off' }] } ] }}
-                            zoom={(this.state.markerCoordinates===undefined) ? 2 : 2} //2 : 9
-                            center={(this.state.markerCoordinates===undefined) ? { lat: 20, lng: 0 } : { lat: 20, lng: 0 }} //{ lat: 20, lng: 0 } : this.state.markerCoordinates}
+                            zoom={this.state.zoom}
+                            center={this.state.mapCenter}
                             onLoad={map => {
                                 this.setState({map: map})
                             }}
                         >
+                            <FixCoordinatesOverlay location={location} ancestorName={ancestor.BirthNamePrivate} id={ancestor.Id} birthDeath={birthDeath} markerCoordinates={markerCoordinates} onCancelClick={this.fixCancelClick}/>
                         </GoogleMap>
                     </LoadScript>
             } else if (this.state.missingCoordinates !== null) {
@@ -400,11 +496,7 @@ class Map extends React.Component {
 
         return(
             <div>
-                <div className={styles.topBox}>
-                    <h1 className={styles.h1}>
-                        Ancestor Listmaker
-                    </h1>
-                </div>
+                {topBox}
                 {mapOrLoading}
             </div>
         );

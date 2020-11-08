@@ -9,6 +9,7 @@ import ToggleButton from './ToggleButton';
 import { removeDuplicates} from './filters';
 import Dropdown from 'react-dropdown';
 import { sortByName } from './sort';
+import { Link } from "react-router-dom";
 
 ///// slider constants ///////
 const dotStyle = {
@@ -388,12 +389,22 @@ class MapOverlayItems extends React.Component {
                 hideClosedBAncestors: [],
                 hideClosedDAncestors: [],
             })
+            this.props.hideBClosedAncestorsCallBack([]);
+            this.props.hideDClosedAncestorsCallBack([]);
         } else {
-            this.setState({
-                hideClosed: true,
-                hideBClosedAncestors: this.state.openBAncestors.slice(),
-                hideDClosedAncestors: this.state.openDAncestors.slice(),
-            })
+            if (this.state.birthPins) {
+                this.setState({
+                    hideClosed: true,
+                    hideBClosedAncestors: this.state.openBAncestors.slice(),
+                })
+                this.props.hideBClosedAncestorsCallBack(this.state.openBAncestors.slice());
+            } else {
+                this.setState({
+                    hideClosed: true,
+                    hideDClosedAncestors: this.state.openDAncestors.slice(),
+                })
+                this.props.hideDClosedAncestorsCallBack(this.state.openDAncestors.slice());
+            }
         }
     }
 
@@ -670,6 +681,7 @@ class MapOverlayItems extends React.Component {
                 clickedAncestor: ancestor,
                 closeClickedAncestor: null,
             });
+            this.props.hideBClosedAncestorsCallBack(hideBClosedAncestors);
         }
     }
 
@@ -745,6 +757,7 @@ class MapOverlayItems extends React.Component {
                 clickedAncestor: ancestor,
                 closeClickedAncestor: null,
             });
+            this.props.hideDClosedAncestorsCallBack(hideDClosedAncestors);
         }
     }
 
@@ -858,9 +871,7 @@ class MapOverlayItems extends React.Component {
                 <div className={styles.buttonbarspacer}/>
                 <ToggleButton label={'Children on Click'} active={this.state.childrenOnClick} onClick={this.onChildrenOnClick} disabled={((this.state.birthPins && this.state.deathPins) || this.state.animated)}/>
                 <div className={styles.buttonbarspacer}/>
-                <ToggleButton label={'Fix'} active={false} onClick={this.props.fixCoordinatesCallback} disabled={this.state.animated}/>
-                <div className={styles.buttonbarspacer}/>
-                <ToggleButton label={'Return'} active={false} disabled={this.state.animated}/>
+                <Link to={{ pathname: '/apps/ashley1950/listmaker/'}}><ToggleButton label={'Return to List'} active={false} disabled={this.state.animated}/></Link>
                 </div>
 
         let searchBox;
