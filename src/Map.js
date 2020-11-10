@@ -365,20 +365,23 @@ class Map extends React.Component {
                     <div className={styles.fixCoordinatesDialogBox}>
                         <handle><div name='.dragBox' className={styles.dragBox}></div></handle>
                         <div className={styles.fixCoordinatesDialogInnerDiv}>
-                            To open a window that will allow you to correct the coordinates of a location:
+                            To access the functionality that will allow you to correct the coordinates of a location:
                             <ol>
-                            <li>Have the info window for a single marker at that location open and have the info 
-                            windows for all other markers closed.</li>
+                            <li>Open the info window for a single marker at that location and close all other info 
+                            windows.</li>
                             <li>Click ‘Hide Closed’ 
                             to hide all markers other than the marker with the open info window.</li>
-                            <li><b>Confirm that the 
-                            marker is not at the correct place when it is the only visible marker.</b> (Note that when 
+                            <li>Check the location of the 
+                            marker when it is the only visible marker to see if it is in the correct place. (When 
                             multiple markers are shown, they may not appear at their exact correct places due to 
-                            “clustering” of markers at or near the same location. This should NOT be corrected.)</li>
-                            <li>Click ‘OK’.</li>
+                            “clustering” of markers at or near the same location. You should not attempt to change this. Only 
+                            change the location of a marker when it is in an incorrect location when it is the only 
+                            visible marker.)</li>
+                            <li>If the marker is in the correct location when it is the only visible marker, click 'Cancel'. If 
+                                the marker is in an incorrect location when it is the only visible marker, click ‘Proceed’.</li>
                             </ol>
                             <button className={styles.cancelButton} onClick={this.closeFixCoordinatesDialog}>Cancel</button>
-                            <button className={styles.fixcoordinatesButton} onClick={this.fixCoordinatesClick} disabled={!((this.state.hideBClosedAncestors.length === 1 && this.state.hideDClosedAncestors.length === 0) || (this.state.hideBClosedAncestors.length === 0 && this.state.hideDClosedAncestors.length === 1))}>OK</button>
+                            <button className={styles.fixcoordinatesButton} onClick={this.fixCoordinatesClick} disabled={!((this.state.hideBClosedAncestors.length === 1 && this.state.hideDClosedAncestors.length === 0) || (this.state.hideBClosedAncestors.length === 0 && this.state.hideDClosedAncestors.length === 1))}>Proceed</button>
                         </div>
                     </div>
                 </Draggable>

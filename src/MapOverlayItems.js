@@ -1122,7 +1122,8 @@ class MapOverlayItems extends React.Component {
                 <div className={styles.coordinatesSearchBox}>
                     <table className={styles.coordinatesSearchTable}>
                         <tbody>
-                            <tr><td colSpan='3'>The marker is at the coordinates currently in the app's database for the location name/description below. If the marker placement is incorrect, drag and drop it at the correct place. Zoom in/out as necessary. Click 'Submit' when you are confident the marker is in the correct place to add it to the app's database. If the location name/description is incorrect, correct it in the profile and do not change the marker position.</td></tr>
+                            <tr><td colSpan='4'>The marker is at the coordinates currently in the app's database for the location name below. If the marker placement is incorrect, drag and drop it at the correct place. Zoom in/out as necessary. Click 'Submit' when you are confident the marker is in the correct place to change the coordinates 
+                            in the app's database. If the location name is incorrect or ambiguous, correct it in the profile (a location name change will not be reflected in the map until the related list is regenerated).</td></tr>
                             <tr><td className={styles.locationCell}>{location}</td><td className={styles.nameCell}>Found in {birthDeath} Location field for <a href={`https://www.wikitree.com/wiki/${this.props.id}`} target='_blank' rel='noopener noreferrer'>{ancestor.BirthNamePrivate}</a></td>
                             <td className={styles.submitCell}><button onClick={() => this.submitFinalFixCoordinates(location)}>Submit</button></td>
                             <td className={styles.cancelCell}><button onClick={() => this.fixCancelClick()}>Cancel</button></td></tr>
