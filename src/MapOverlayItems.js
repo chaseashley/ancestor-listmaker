@@ -10,6 +10,7 @@ import { removeDuplicates} from './filters';
 import Dropdown from 'react-dropdown';
 import { sortByName } from './sort';
 import { Link } from "react-router-dom";
+import { Marker } from '@react-google-maps/api';
 
 ///// slider constants ///////
 const dotStyle = {
@@ -89,6 +90,8 @@ class MapOverlayItems extends React.Component {
 
     constructor(props) {
         super(props);
+        this.fixCancelClick = this.fixCancelClick.bind(this);
+        this.onDragEndHandler = this.onDragEndHandler.bind(this);
         this.linkedAncestorClicked = this.linkedAncestorClicked.bind(this);
         this.linkedAncestorCloseClicked = this.linkedAncestorCloseClicked.bind(this);
         this.onBClickCallback = this.onBClickCallback.bind(this);
@@ -146,6 +149,8 @@ class MapOverlayItems extends React.Component {
             hideDClosedAncestors: [],
             searchPerson: null,
             zoom: null,
+            fixCoordinates: null,
+            finalFixCoordinates: null,
         }
     }
 
@@ -837,201 +842,253 @@ class MapOverlayItems extends React.Component {
         return false;
     }
 
+    onDragEndHandler(event) {
+        this.setState({finalFixCoordinates: {lat: Number(event.latLng.lat().toFixed(6)), lng: Number(event.latLng.lng().toFixed(6))}});
+    }
+
+    fixCancelClick() {
+        this.setState({fixCoordinates: false});
+        this.props.fixCoordinatesCancelCallback();
+    }
+
     render() {
-        let ancestors;
-        if (this.state.hideClose) {
-            if (this.state.birthPins) {
-                ancestors = this.state.hideBClosedAncestors;
-            } else {
-                ancestors = this.state.hideDClosedAncestors;
-            }
-        } else {
-            ancestors = this.state.ancestors;
-        }
-
-        let buttonbar = 
-            <div className={styles.buttonbarDiv}>
-                <ToggleButton label={'Births'} active={this.state.birthPins} onClick={this.onBirthClick} disabled={((this.state.deathPins && this.state.hideClosed) || this.state.animated)}/>
-                <div className={styles.buttonbarspacer}/>
-                <ToggleButton label={'Deaths'} active={this.state.deathPins} onClick={this.onDeathClick} disabled={((this.state.birthPins && this.state.hideClosed) || this.state.animated)}/>
-                <div className={styles.buttonbarspacer}/>
-                <ToggleButton label={'Timeline'} active={this.state.timeline} onClick={this.onTimelineClick} disabled={this.state.hideClosed || this.state.animated}/>
-                <div className={styles.buttonbarspacer}/>
-                <ToggleButton label={'Parent-Child Lines'} active={this.state.parentChildLines} onClick={this.onParentChildLinesClick} disabled={((this.state.birthPins && this.state.deathPins) || this.state.animated)}/>
-                <div className={styles.buttonbarspacer}/>
-                <ToggleButton label={'Birth-Death Lines'} active={this.state.birthDeathLines} onClick={this.onBirthDeathLinesClick} disabled={((!this.state.birthPins || !this.state.deathPins) || this.state.animated)}/>
-                <div className={styles.buttonbarspacer}/>
-                <ToggleButton label={'Birth-Death on Click'} active={this.state.birthDeathOnClick} onClick={this.onBirthDeathOnClick} disabled={((!this.state.birthPins || !this.state.deathPins) || this.state.animated)}/>
-                <div className={styles.buttonbarspacer}/>
-                <ToggleButton label={'Find'} active={this.state.find} onClick={this.onFindClick} disabled={this.state.animated}/>
-                <div className={styles.buttonbarspacer}/>
-                <ToggleButton label={'Hide Closed'} active={this.state.hideClosed} onClick={this.onHideClosedClick} disabled={this.state.timeline || (this.state.birthPins && this.state.deathPins)}/>
-                <div className={styles.buttonbarspacer}/>
-                <ToggleButton label={'Parents on Click'} active={this.state.parentsOnClick} onClick={this.onParentsOnClick} disabled={((this.state.birthPins && this.state.deathPins) || this.state.animated)}/>
-                <div className={styles.buttonbarspacer}/>
-                <ToggleButton label={'Children on Click'} active={this.state.childrenOnClick} onClick={this.onChildrenOnClick} disabled={((this.state.birthPins && this.state.deathPins) || this.state.animated)}/>
-                <div className={styles.buttonbarspacer}/>
-                <Link to={{ pathname: '/apps/ashley1950/listmaker/'}}><ToggleButton label={'Return to List'} active={false} disabled={this.state.animated}/></Link>
-                </div>
-
-        let searchBox;
-        if (!this.state.find) {
-            searchBox = <></>
-        } else {
-            let searchList = [];
-            ancestors = sortByName(ancestors, 'forward');
-            for (let i=0; i<ancestors.length; i++) {
-                if (this.ancestorVisible(ancestors[i]) && ((this.state.birthPins && ancestors[i].adjustedblat !== undefined) || (this.state.deathPins && ancestors[i].adjusteddlat !== undefined))) {
-                    let labelString;
-                    if (this.state.birthPins && ancestors[i].adjustedblat !== undefined) {
-                        labelString = `${ancestors[i].BirthNamePrivate} b. ${ancestors[i].BirthDate} ${ancestors[i].BirthLocation}`;
-                    } else if (this.state.deathPins && ancestors[i].adjusteddlat !== undefined) {
-                        labelString = `${ancestors[i].BirthNamePrivate} d. ${ancestors[i].DeathDate} ${ancestors[i].DeathLocation}`;
-                    }
-                    searchList.push({value: [ancestors[i], labelString], label: labelString});
+        let mapOverlay;
+        if (this.props.fixCoordinates === false || this.state.fixCoordinates === false) {
+            let ancestors;
+            if (this.state.hideClose) {
+                if (this.state.birthPins) {
+                    ancestors = this.state.hideBClosedAncestors;
+                } else {
+                    ancestors = this.state.hideDClosedAncestors;
                 }
+            } else {
+                ancestors = this.state.ancestors;
             }
-            searchBox =
-                <div><Dropdown className={styles.searchBox} value={(this.state.searchPerson===null) ? null : this.state.searchPerson[1]} options={searchList} onChange={(option) => this.onFindSelect(option.value)} placeholder="Select ancestor to find"/></div>
-            }        
 
-        let markers = ancestors.map((ancestor, index) => {
-            return <StaticMarkers key={index} id={index}
+            let buttonbar = 
+                <div className={styles.buttonbarDiv}>
+                    <ToggleButton label={'Births'} active={this.state.birthPins} onClick={this.onBirthClick} disabled={((this.state.deathPins && this.state.hideClosed) || this.state.animated)}/>
+                    <div className={styles.buttonbarspacer}/>
+                    <ToggleButton label={'Deaths'} active={this.state.deathPins} onClick={this.onDeathClick} disabled={((this.state.birthPins && this.state.hideClosed) || this.state.animated)}/>
+                    <div className={styles.buttonbarspacer}/>
+                    <ToggleButton label={'Timeline'} active={this.state.timeline} onClick={this.onTimelineClick} disabled={this.state.hideClosed || this.state.animated}/>
+                    <div className={styles.buttonbarspacer}/>
+                    <ToggleButton label={'Parent-Child Lines'} active={this.state.parentChildLines} onClick={this.onParentChildLinesClick} disabled={((this.state.birthPins && this.state.deathPins) || this.state.animated)}/>
+                    <div className={styles.buttonbarspacer}/>
+                    <ToggleButton label={'Birth-Death Lines'} active={this.state.birthDeathLines} onClick={this.onBirthDeathLinesClick} disabled={((!this.state.birthPins || !this.state.deathPins) || this.state.animated)}/>
+                    <div className={styles.buttonbarspacer}/>
+                    <ToggleButton label={'Birth-Death on Click'} active={this.state.birthDeathOnClick} onClick={this.onBirthDeathOnClick} disabled={((!this.state.birthPins || !this.state.deathPins) || this.state.animated)}/>
+                    <div className={styles.buttonbarspacer}/>
+                    <ToggleButton label={'Find'} active={this.state.find} onClick={this.onFindClick} disabled={this.state.animated}/>
+                    <div className={styles.buttonbarspacer}/>
+                    <ToggleButton label={'Hide Closed'} active={this.state.hideClosed} onClick={this.onHideClosedClick} disabled={this.state.timeline || (this.state.birthPins && this.state.deathPins)}/>
+                    <div className={styles.buttonbarspacer}/>
+                    <ToggleButton label={'Parents on Click'} active={this.state.parentsOnClick} onClick={this.onParentsOnClick} disabled={((this.state.birthPins && this.state.deathPins) || this.state.animated)}/>
+                    <div className={styles.buttonbarspacer}/>
+                    <ToggleButton label={'Children on Click'} active={this.state.childrenOnClick} onClick={this.onChildrenOnClick} disabled={((this.state.birthPins && this.state.deathPins) || this.state.animated)}/>
+                    <div className={styles.buttonbarspacer}/>
+                    <Link to={{ pathname: '/apps/ashley1950/listmaker/'}}><ToggleButton label={'Return to List'} active={false} disabled={this.state.animated}/></Link>
+                    </div>
+
+            let searchBox;
+            if (!this.state.find) {
+                searchBox = <></>
+            } else {
+                let searchList = [];
+                ancestors = sortByName(ancestors, 'forward');
+                for (let i=0; i<ancestors.length; i++) {
+                    if (this.ancestorVisible(ancestors[i]) && ((this.state.birthPins && ancestors[i].adjustedblat !== undefined) || (this.state.deathPins && ancestors[i].adjusteddlat !== undefined))) {
+                        let labelString;
+                        if (this.state.birthPins && ancestors[i].adjustedblat !== undefined) {
+                            labelString = `${ancestors[i].BirthNamePrivate} b. ${ancestors[i].BirthDate} ${ancestors[i].BirthLocation}`;
+                        } else if (this.state.deathPins && ancestors[i].adjusteddlat !== undefined) {
+                            labelString = `${ancestors[i].BirthNamePrivate} d. ${ancestors[i].DeathDate} ${ancestors[i].DeathLocation}`;
+                        }
+                        searchList.push({value: [ancestors[i], labelString], label: labelString});
+                    }
+                }
+                searchBox =
+                    <div><Dropdown className={styles.searchBox} value={(this.state.searchPerson===null) ? null : this.state.searchPerson[1]} options={searchList} onChange={(option) => this.onFindSelect(option.value)} placeholder="Select ancestor to find"/></div>
+                }        
+
+            let markers = ancestors.map((ancestor, index) => {
+                return <StaticMarkers key={index} id={index}
+                            ancestor={ancestor}
+                            birthPins={this.state.birthPins}
+                            deathPins={this.state.deathPins}
+                            birthDeathLines={this.state.birthDeathLines}
+                            timeline={this.state.timeline}
+                            animated={this.state.animated}
+                            visible={this.ancestorVisible(ancestor)}
+                            birthDeathOnClick={this.state.birthDeathOnClick}
+                            ancestorOnClick={this.state.parentsOnClick || this.state.childrenOnClick}
+                            linkedAncestorClick={this.linkedAncestorClicked(ancestor)}
+                            linkedAncestorCloseClick={this.linkedAncestorCloseClicked(ancestor)}
+                            onBClickCallback={this.onBClickCallback}
+                            onBCloseClickCallback={this.onBCloseClickCallback}
+                            onDClickCallback={this.onDClickCallback}
+                            onDCloseClickCallback={this.onDCloseClickCallback}
+                            searchPerson={this.state.searchPerson && (ancestor.Id === this.state.searchPerson[0].Id)}
+                        />
+            })
+
+            let generationLines;
+            if (!this.state.parentChildLines || (this.state.birthPins && this.state.deathPins)) {
+                generationLines = <></>
+            } else {
+                generationLines = ancestors.map((ancestor, index) => {
+                    let father = this.getFather(ancestor);
+                    let mother = this.getMother(ancestor);
+                    return <GenerationLines key={index} id={index}
                         ancestor={ancestor}
+                        father={father}
+                        mother={mother}
                         birthPins={this.state.birthPins}
                         deathPins={this.state.deathPins}
-                        birthDeathLines={this.state.birthDeathLines}
-                        timeline={this.state.timeline}
                         animated={this.state.animated}
                         visible={this.ancestorVisible(ancestor)}
-                        birthDeathOnClick={this.state.birthDeathOnClick}
-                        ancestorOnClick={this.state.parentsOnClick || this.state.childrenOnClick}
-                        linkedAncestorClick={this.linkedAncestorClicked(ancestor)}
-                        linkedAncestorCloseClick={this.linkedAncestorCloseClicked(ancestor)}
-                        onBClickCallback={this.onBClickCallback}
-                        onBCloseClickCallback={this.onBCloseClickCallback}
-                        onDClickCallback={this.onDClickCallback}
-                        onDCloseClickCallback={this.onDCloseClickCallback}
-                        searchPerson={this.state.searchPerson && (ancestor.Id === this.state.searchPerson[0].Id)}
+                        fatherVisible={this.ancestorVisible(father)}
+                        motherVisible={this.ancestorVisible(mother)}
                     />
-        })
+                })
+            }
 
-        let generationLines;
-        if (!this.state.parentChildLines || (this.state.birthPins && this.state.deathPins)) {
-            generationLines = <></>
+            let pauseplay;
+            if (!this.state.timeline) {
+                pauseplay = <></>;
+            } else if (this.state.animated) {
+                pauseplay =
+                    <div style={pauseDivStyle}>
+                        <svg className="button" viewBox="0 0 60 60" onClick={this.onPauseClick}>
+                            <polygon points="0,0 15,0 15,60 0,60" fill="#404040"/>
+                            <polygon points="25,0 40,0 40,60 25,60" fill="#404040"/>
+                        </svg>
+                    </div>
+            } else { //not timeline and not animated
+                pauseplay =
+                    <>
+                    <div style={reverseDivStyle}>
+                        <svg className="button" viewBox="0 0 60 60" onClick={this.onReverseClick}>
+                            <polygon points="60,0 10,30 60,60" fill="#404040"/>
+                        </svg>
+                    </div>
+                    <div style={playDivStyle}>
+                        <svg className="button" viewBox="0 0 60 60" onClick={this.onPlayClick}>
+                            <polygon points="0,0 50,30 0,60" fill="#404040"/>
+                        </svg>
+                    </div>
+                    </>
+            }
+
+            let speedSlider;
+            if (!this.state.timeline) {
+                speedSlider = <></>;
+            } else {
+                speedSlider =
+                    <div style={speedWrapperStyle}>
+                        <Slider
+                            range={false}
+                            vertical={true}
+                            min={1}
+                            max={9}
+                            defaultValue={5}
+                            step={0.01}
+                            handleStyle={speedHandleStyle}
+                            railStyle={{backgroundColor: "#6d6ed1"}}
+                            trackStyle={speedTrackStyle}
+                            onAfterChange={value => this.onAfterSpeedChangeHandler(value)}
+                        />
+                    </div>
+            }
+
+            let slider;
+            if (!this.state.timeline) {
+                slider = <></>;
+            } else if (this.state.animated) {
+                slider = 
+                    <div className={styles.wrapperStyle}>
+                        <Slider
+                            range={false}
+                            min={this.state.sliderMin}
+                            max={this.state.sliderMax}
+                            step={0.01}
+                            defaultValue={this.state.sliderMin}
+                            value={this.state.year}
+                            marks={this.getMarks()}
+                            dotStyle={dotStyle}
+                            handleStyle={handleStyle}
+                            trackStyle={trackStyle}
+                        />
+                    </div>
+            } else {
+                slider = 
+                    <div className={styles.wrapperStyle}>
+                        <Slider
+                            range={false}
+                            min={this.state.sliderMin}
+                            max={this.state.sliderMax}
+                            step={0.01}
+                            defaultValue={this.state.sliderMin}
+                            marks={this.getMarks()}
+                            dotStyle={dotStyle}
+                            handleStyle={handleStyle}
+                            trackStyle={trackStyle}
+                            onAfterChange={value => this.onAfterSliderChangeHandler(value)}
+                        />
+                    </div>
+            }
+            mapOverlay =
+                <div>
+                    {buttonbar}
+                    {searchBox}
+                    {markers}
+                    {generationLines}
+                    {pauseplay}
+                    {speedSlider}
+                    {slider}
+                </div>
         } else {
-            generationLines = ancestors.map((ancestor, index) => {
-                let father = this.getFather(ancestor);
-                let mother = this.getMother(ancestor);
-                return <GenerationLines key={index} id={index}
-                    ancestor={ancestor}
-                    father={father}
-                    mother={mother}
-                    birthPins={this.state.birthPins}
-                    deathPins={this.state.deathPins}
-                    animated={this.state.animated}
-                    visible={this.ancestorVisible(ancestor)}
-                    fatherVisible={this.ancestorVisible(father)}
-                    motherVisible={this.ancestorVisible(mother)}
+            let markerCoordinates, ancestor, location, birthDeath;
+            if (this.state.hideBClosedAncestors.length !== 0) {
+                markerCoordinates = { lat: this.state.hideBClosedAncestors[0].blat, lng: this.state.hideBClosedAncestors[0].blng };
+                ancestor = this.state.hideBClosedAncestors[0];
+                location = ancestor.BirthLocation;
+                birthDeath = 'Birth';
+            } else {
+                markerCoordinates = { lat: this.state.hideDClosedAncestors[0].dlat, lng: this.state.hideDClosedAncestors[0].dlng };
+                ancestor = this.state.hideDClosedAncestors[0];
+                location = ancestor.DeathLocation;
+                birthDeath = 'Death';
+            }
+            let fixCoordinatesPanel, fixCoordinatesMarker;
+            fixCoordinatesPanel =
+                <div className={styles.coordinatesSearchBox}>
+                    <table className={styles.coordinatesSearchTable}>
+                        <tbody>
+                            <tr><td colSpan='2'>The marker is at the coordinates currently in the app's database for the location name/description below. If the marker placement is incorrect, drag and drop it at the correct place. Zoom in/out as necessary. Click 'Submit' when you are confident the marker is in the correct place to add it to the app's database. If the location name/description is incorrect, correct it in the profile and do not change the marker position.</td></tr>
+                            <tr><td className={styles.locationCell}>{location}</td><td className={styles.nameCell}>Found in {birthDeath} Location field for <a href={`https://www.wikitree.com/wiki/${this.props.id}`} target='_blank' rel='noopener noreferrer'>{ancestor.BirthNamePrivate}</a></td>
+                            <td className={styles.cancelCell}><button onClick={() => this.fixCancelClick()}>Cancel</button></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            fixCoordinatesMarker =
+                <Marker
+                    icon={`http://maps.google.com/mapfiles/ms/icons/blue-dot.png`}
+                    position={this.state.finalFixCoordinates === null ? {lat: markerCoordinates.lat, lng: markerCoordinates.lng} : {lat: this.state.finalFixCoordinates.lat, lng: this.state.finalFixCoordinates.lng}}
+                    draggable={true}
+                    onDragEnd={this.onDragEndHandler}
                 />
-            })
-        }
-
-        let pauseplay;
-        if (!this.state.timeline) {
-            pauseplay = <></>;
-        } else if (this.state.animated) {
-            pauseplay =
-                <div style={pauseDivStyle}>
-                    <svg className="button" viewBox="0 0 60 60" onClick={this.onPauseClick}>
-                        <polygon points="0,0 15,0 15,60 0,60" fill="#404040"/>
-                        <polygon points="25,0 40,0 40,60 25,60" fill="#404040"/>
-                    </svg>
-                </div>
-        } else { //not timeline and not animated
-            pauseplay =
-                <>
-                <div style={reverseDivStyle}>
-                    <svg className="button" viewBox="0 0 60 60" onClick={this.onReverseClick}>
-                        <polygon points="60,0 10,30 60,60" fill="#404040"/>
-                    </svg>
-                </div>
-                <div style={playDivStyle}>
-                    <svg className="button" viewBox="0 0 60 60" onClick={this.onPlayClick}>
-                        <polygon points="0,0 50,30 0,60" fill="#404040"/>
-                    </svg>
-                </div>
-                </>
-        }
-
-        let speedSlider;
-        if (!this.state.timeline) {
-            speedSlider = <></>;
-        } else {
-            speedSlider =
-                <div style={speedWrapperStyle}>
-                    <Slider
-                        range={false}
-                        vertical={true}
-                        min={1}
-                        max={9}
-                        defaultValue={5}
-                        step={0.01}
-                        handleStyle={speedHandleStyle}
-                        railStyle={{backgroundColor: "#6d6ed1"}}
-                        trackStyle={speedTrackStyle}
-                        onAfterChange={value => this.onAfterSpeedChangeHandler(value)}
-                    />
-                </div>
-        }
-
-        let slider;
-        if (!this.state.timeline) {
-            slider = <></>;
-        } else if (this.state.animated) {
-            slider = 
-                <div className={styles.wrapperStyle}>
-                    <Slider
-                        range={false}
-                        min={this.state.sliderMin}
-                        max={this.state.sliderMax}
-                        step={0.01}
-                        defaultValue={this.state.sliderMin}
-                        value={this.state.year}
-                        marks={this.getMarks()}
-                        dotStyle={dotStyle}
-                        handleStyle={handleStyle}
-                        trackStyle={trackStyle}
-                    />
-                </div>
-        } else {
-            slider = 
-                <div className={styles.wrapperStyle}>
-                    <Slider
-                        range={false}
-                        min={this.state.sliderMin}
-                        max={this.state.sliderMax}
-                        step={0.01}
-                        defaultValue={this.state.sliderMin}
-                        marks={this.getMarks()}
-                        dotStyle={dotStyle}
-                        handleStyle={handleStyle}
-                        trackStyle={trackStyle}
-                        onAfterChange={value => this.onAfterSliderChangeHandler(value)}
-                    />
+            mapOverlay = 
+                <div>
+                    {fixCoordinatesPanel}
+                    {fixCoordinatesMarker}
                 </div>
         }
  
         return (
-            <div>
-                {buttonbar}
-                {searchBox}
-                {markers}
-                {generationLines}
-                {pauseplay}
-                {speedSlider}
-                {slider}
-            </div> 
+            <>
+            {mapOverlay}
+            </>
         )
     }
 }

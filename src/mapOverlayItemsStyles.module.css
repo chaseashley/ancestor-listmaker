@@ -156,3 +156,29 @@ input:disabled+label {
     left: 50%;
     margin-left: -60px;
 }
+
+.coordinatesSearchBox {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 135px;
+    width: 100%;
+    background-color: white;
+}
+
+.coordinatesSearchTable {
+    margin: 15px 25px 20px 25px;
+}
+
+.locationCell {
+    padding-top: 10px;
+}
+
+.nameCell {
+    padding-top: 10px;
+}
+
+.cancelCell {
+    padding-top: 10px;
+    width: 90px;
+}

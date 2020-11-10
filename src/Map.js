@@ -19,12 +19,12 @@ class Map extends React.Component {
 
     constructor(props) {
         super(props);
-        this.fixCancelClick = this.fixCancelClick.bind(this);
+        this.fixCoordinatesCancelCallback = this.fixCoordinatesCancelCallback.bind(this);
+        this.fixCoordinatesClick = this.fixCoordinatesClick.bind(this);
         this.hideBClosedAncestorsCallBack = this.hideBClosedAncestorsCallBack.bind(this);
         this.hideDClosedAncestorsCallBack = this.hideDClosedAncestorsCallBack.bind(this);
         this.closeFixCoordinatesDialog = this.closeFixCoordinatesDialog.bind(this);
         this.openFixCoordinatesDialog = this.openFixCoordinatesDialog.bind(this);
-        this.fixCoordinatesClick = this.fixCoordinatesClick.bind(this);
         this.onSkipAllClick = this.onSkipAllClick.bind(this);
         this.onProceedClick = this.onProceedClick.bind(this);
         this.checkAddressesForCoordinates = this.checkAddressesForCoordinates.bind(this);
@@ -322,9 +322,12 @@ class Map extends React.Component {
     fixCoordinatesClick() {
         this.setState({
             fixCoordinates: true,
-            mapCenter: this.state.map.getCenter(),
-            zoom: this.state.map.getZoom()
+            openFixCoordinatesDialog: false
         });
+    }
+
+    fixCoordinatesCancelCallback() {
+        this.setState({fixCoordinates: false})
     }
 
     openFixCoordinatesDialog() {
@@ -333,13 +336,6 @@ class Map extends React.Component {
 
     closeFixCoordinatesDialog() {
         this.setState({openFixCoordinatesDialog: false});
-    }
-
-    fixCancelClick() {
-        this.setState({fixCoordinates: false});
-        this.centerMap(this.state.map);
-        //this.state.map.fitBounds(this.state.mapBounds);
-        //this.state.map.setZoom(this.state.zoom);
     }
 
     render() {
@@ -422,7 +418,7 @@ class Map extends React.Component {
                 </div>
         } else {
             let MapWithOverlay;
-            if (this.state.coordinatesLoaded && !this.state.fixCoordinates) {
+            if (this.state.coordinatesLoaded) {
                 MapWithOverlay = 
                     <LoadScript googleMapsApiKey={API_KEY}>
                         <GoogleMap
@@ -441,10 +437,11 @@ class Map extends React.Component {
                                 }
                             }}
                         >
-                            <MapOverlayItems ancestors={this.state.ancestors} birthPinsCallback={this.birthPinsCallback} deathPinsCallback={this.deathPinsCallback} hideBClosedAncestorsCallBack={this.hideBClosedAncestorsCallBack} hideDClosedAncestorsCallBack={this.hideDClosedAncestorsCallBack} zoom={this.state.mapZoom}/>
+                            <MapOverlayItems ancestors={this.state.ancestors} birthPinsCallback={this.birthPinsCallback} deathPinsCallback={this.deathPinsCallback} hideBClosedAncestorsCallBack={this.hideBClosedAncestorsCallBack} hideDClosedAncestorsCallBack={this.hideDClosedAncestorsCallBack} zoom={this.state.mapZoom} fixCoordinates={this.state.fixCoordinates} fixCoordinatesCancelCallback={this.fixCoordinatesCancelCallback}/>
                             {fixCoordinatesDialogBox}
                         </GoogleMap>
                     </LoadScript>
+            /*
             } else if (this.state.coordinatesLoaded && this.state.fixCoordinates) {
                 let markerCoordinates, ancestor, location, birthDeath;
                 if (this.state.hideBClosedAncestors.length !== 0) {
@@ -472,6 +469,7 @@ class Map extends React.Component {
                             <FixCoordinatesOverlay location={location} ancestorName={ancestor.BirthNamePrivate} id={ancestor.Id} birthDeath={birthDeath} markerCoordinates={markerCoordinates} onCancelClick={this.fixCancelClick}/>
                         </GoogleMap>
                     </LoadScript>
+            */
             } else if (this.state.missingCoordinates !== null) {
                 MapWithOverlay =
                     <LoadScript googleMapsApiKey={API_KEY}>

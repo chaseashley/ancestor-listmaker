@@ -28,8 +28,8 @@ class FixCoordinatesOverlay extends React.Component {
     
     render() {
 
-        let fixCoordinatesOverlay, marker;
-        fixCoordinatesOverlay =
+        let fixCoordinatesPanel, fixCoordinatesMarker;
+        fixCoordinatesPanel =
             <div className={styles.coordinatesSearchBox}>
                 <table className={styles.coordinatesSearchTable}>
                     <tbody>
@@ -39,7 +39,7 @@ class FixCoordinatesOverlay extends React.Component {
                     </tbody>
                 </table>
             </div>
-        marker =
+        fixCoordinatesMarker =
             <Marker
                 icon={`http://maps.google.com/mapfiles/ms/icons/blue-dot.png`}
                 position={this.state.finalCoordinates === null ? {lat: this.state.markerCoordinates.lat, lng: this.state.markerCoordinates.lng} : {lat: this.state.finalCoordinates.lat, lng: this.state.finalCoordinates.lng}}
@@ -48,8 +48,8 @@ class FixCoordinatesOverlay extends React.Component {
             />
         return (
             <div>
-                {fixCoordinatesOverlay}
-                {marker}
+                {fixCoordinatesPanel}
+                {fixCoordinatesMarker}
             </div> 
         )
 
