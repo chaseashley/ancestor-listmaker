@@ -161,7 +161,7 @@ input:disabled+label {
     position: absolute;
     top: 0;
     left: 0;
-    height: 135px;
+    height: 120px;
     width: 100%;
     background-color: white;
 }
@@ -176,6 +176,11 @@ input:disabled+label {
 
 .nameCell {
     padding-top: 10px;
+}
+
+.submitCell {
+    padding-top: 10px;
+    width: 90px;
 }
 
 .cancelCell {

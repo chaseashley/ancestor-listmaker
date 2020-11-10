@@ -11,6 +11,8 @@ import Dropdown from 'react-dropdown';
 import { sortByName } from './sort';
 import { Link } from "react-router-dom";
 import { Marker } from '@react-google-maps/api';
+import { updateCoordinates } from './locationsDBqueries';
+import { standardizeAddress } from './standardizeAddress';
 
 ///// slider constants ///////
 const dotStyle = {
@@ -90,6 +92,7 @@ class MapOverlayItems extends React.Component {
 
     constructor(props) {
         super(props);
+        this.submitFinalFixCoordinates = this.submitFinalFixCoordinates.bind(this);
         this.fixCancelClick = this.fixCancelClick.bind(this);
         this.onDragEndHandler = this.onDragEndHandler.bind(this);
         this.linkedAncestorClicked = this.linkedAncestorClicked.bind(this);
@@ -151,6 +154,20 @@ class MapOverlayItems extends React.Component {
             zoom: null,
             fixCoordinates: null,
             finalFixCoordinates: null,
+        }
+    }
+
+    static getDerivedStateFromProps(nextProps, prevState) {
+        if (nextProps.fixCoordinates !== prevState.fixCoordinates && nextProps.fixCoordinates === true) {
+            return {
+                fixCoordinates: true,
+                openBAncestors: [],
+                openDAncestors: [],
+            };
+        } else if (nextProps.fixCoordinates !== prevState.fixCoordinates && nextProps.fixCoordinates === false) {
+            return {
+                fixCoordinates: false,
+            };
         }
     }
 
@@ -397,18 +414,21 @@ class MapOverlayItems extends React.Component {
             this.props.hideBClosedAncestorsCallBack([]);
             this.props.hideDClosedAncestorsCallBack([]);
         } else {
+            let adjustedHideClosedAncestors;
             if (this.state.birthPins) {
+                adjustedHideClosedAncestors = adjustOverlappingMarkerCoordinates(this.state.openBAncestors.slice(), this.props.zoom, this.state.birthPins, this.state.deathPins);
                 this.setState({
                     hideClosed: true,
-                    hideBClosedAncestors: this.state.openBAncestors.slice(),
-                })
-                this.props.hideBClosedAncestorsCallBack(this.state.openBAncestors.slice());
+                    hideBClosedAncestors: adjustedHideClosedAncestors,
+                });
+                this.props.hideBClosedAncestorsCallBack(adjustedHideClosedAncestors);
             } else {
+                adjustedHideClosedAncestors = adjustOverlappingMarkerCoordinates(this.state.openDAncestors.slice(), this.props.zoom, this.state.birthPins, this.state.deathPins);
                 this.setState({
                     hideClosed: true,
-                    hideDClosedAncestors: this.state.openDAncestors.slice(),
-                })
-                this.props.hideDClosedAncestorsCallBack(this.state.openDAncestors.slice());
+                    hideDClosedAncestors: adjustedHideClosedAncestors,
+                });
+                this.props.hideDClosedAncestorsCallBack(adjustedHideClosedAncestors);
             }
         }
     }
@@ -847,13 +867,50 @@ class MapOverlayItems extends React.Component {
     }
 
     fixCancelClick() {
-        this.setState({fixCoordinates: false});
+        this.setState({
+            fixCoordinates: false,
+            finalFixCoordinates: null,
+        });
+        this.props.fixCoordinatesCancelCallback();
+    }
+
+    submitFinalFixCoordinates(location) {
+        updateCoordinates(standardizeAddress(location), `${this.state.finalFixCoordinates.lat},${this.state.finalFixCoordinates.lng}`);
+        for (let i=0; i<this.state.ancestors.length; i++) {
+            if (standardizeAddress(this.state.ancestors[i].BirthLocation) === standardizeAddress(location)) {
+                this.state.ancestors[i].blat = this.state.finalFixCoordinates.lat;
+                this.state.ancestors[i].blng = this.state.finalFixCoordinates.lng;
+            }
+            if (standardizeAddress(this.state.ancestors[i].DeathLocation) === standardizeAddress(location)) {
+                this.state.ancestors[i].dlat = this.state.finalFixCoordinates.lat;
+                this.state.ancestors[i].dlng = this.state.finalFixCoordinates.lng;
+            }
+        }
+        let adjustedAncestors = adjustOverlappingMarkerCoordinates(this.state.ancestors, this.props.zoom, this.state.birthPins, this.state.deathPins) 
+        let adjustedHideAncestors;
+        if (this.state.birthPins) {
+            adjustedHideAncestors = adjustOverlappingMarkerCoordinates(this.state.hideBClosedAncestors, this.props.zoom, this.state.birthPins, this.state.deathPins) 
+            this.setState({
+                ancestors: adjustedAncestors,
+                hideBClosedAncestors: adjustedHideAncestors,
+                fixCoordinates: false,
+                finalFixCoordinates: null,
+            });
+        } else {
+            adjustedHideAncestors = adjustOverlappingMarkerCoordinates(this.state.hideDClosedAncestors, this.props.zoom, this.state.birthPins, this.state.deathPins) 
+            this.setState({
+                ancestors: adjustedAncestors,
+                hideDClosedAncestors: adjustedHideAncestors,
+                fixCoordinates: false,
+                finalFixCoordinates: null,
+            });
+        }
         this.props.fixCoordinatesCancelCallback();
     }
 
     render() {
         let mapOverlay;
-        if (this.props.fixCoordinates === false || this.state.fixCoordinates === false) {
+        if (!this.state.fixCoordinates) {
             let ancestors;
             if (this.state.hideClose) {
                 if (this.state.birthPins) {
@@ -1049,7 +1106,7 @@ class MapOverlayItems extends React.Component {
                 </div>
         } else {
             let markerCoordinates, ancestor, location, birthDeath;
-            if (this.state.hideBClosedAncestors.length !== 0) {
+            if (this.state.birthPins) {
                 markerCoordinates = { lat: this.state.hideBClosedAncestors[0].blat, lng: this.state.hideBClosedAncestors[0].blng };
                 ancestor = this.state.hideBClosedAncestors[0];
                 location = ancestor.BirthLocation;
@@ -1065,8 +1122,9 @@ class MapOverlayItems extends React.Component {
                 <div className={styles.coordinatesSearchBox}>
                     <table className={styles.coordinatesSearchTable}>
                         <tbody>
-                            <tr><td colSpan='2'>The marker is at the coordinates currently in the app's database for the location name/description below. If the marker placement is incorrect, drag and drop it at the correct place. Zoom in/out as necessary. Click 'Submit' when you are confident the marker is in the correct place to add it to the app's database. If the location name/description is incorrect, correct it in the profile and do not change the marker position.</td></tr>
+                            <tr><td colSpan='3'>The marker is at the coordinates currently in the app's database for the location name/description below. If the marker placement is incorrect, drag and drop it at the correct place. Zoom in/out as necessary. Click 'Submit' when you are confident the marker is in the correct place to add it to the app's database. If the location name/description is incorrect, correct it in the profile and do not change the marker position.</td></tr>
                             <tr><td className={styles.locationCell}>{location}</td><td className={styles.nameCell}>Found in {birthDeath} Location field for <a href={`https://www.wikitree.com/wiki/${this.props.id}`} target='_blank' rel='noopener noreferrer'>{ancestor.BirthNamePrivate}</a></td>
+                            <td className={styles.submitCell}><button onClick={() => this.submitFinalFixCoordinates(location)}>Submit</button></td>
                             <td className={styles.cancelCell}><button onClick={() => this.fixCancelClick()}>Cancel</button></td></tr>
                         </tbody>
                     </table>
