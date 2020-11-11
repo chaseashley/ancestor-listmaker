@@ -46,7 +46,7 @@ class GenerationLines extends Component {
                         <Polyline
                             visible={this.props.visible && this.props.motherVisible}
                             path={[{ lat: this.props.ancestor.adjustedblat, lng: this.props.ancestor.adjustedblng },{ lat: this.props.mother.adjustedblat, lng: this.props.mother.adjustedblng }]}
-                            options={{ disableAutoPan: true }, {strokeColor: '#1e2eb8', strokeOpacity: 1.0, strokeWeight: 1.0}}
+                            options={{ disableAutoPan: true }, {strokeColor: '#e20147', strokeOpacity: 1.0, strokeWeight: 1.0}}
                         />
                     </>
             }
@@ -80,7 +80,7 @@ class GenerationLines extends Component {
                         <Polyline
                             visible={this.props.visible && this.props.motherVisible}
                             path={[{ lat: this.props.ancestor.adjusteddlat, lng: this.props.ancestor.adjusteddlng },{ lat: this.props.mother.adjusteddlat, lng: this.props.mother.adjusteddlng }]}
-                            options={{ disableAutoPan: true }, {strokeColor: '#1e2eb8', strokeOpacity: 1.0, strokeWeight: 1.0}}
+                            options={{ disableAutoPan: true }, {strokeColor: '#e20147', strokeOpacity: 1.0, strokeWeight: 1.0}}
                         />
                     </>
             }

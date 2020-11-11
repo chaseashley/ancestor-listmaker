@@ -452,7 +452,7 @@ class Main extends React.Component {
       if (noLocations) {
         mapButton = <button className={styles.mapButton} disabled={true}>Map List</button>;
       } else { //is at least one location field
-        mapButton = <Link to={{ pathname: '/apps/ashley1950/listmaker/map', ancestors: mapAncestors}}><button className={styles.mapButton}>Map List</button></Link>;
+        mapButton = <Link to={{ pathname: '/apps/ashley1950/listmaker/map', ancestors: mapAncestors, listLines: 'list'}}><button className={styles.mapButton}>Map List</button></Link>;
     
       }
     } else {

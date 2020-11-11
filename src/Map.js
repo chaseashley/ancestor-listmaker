@@ -40,6 +40,7 @@ class Map extends React.Component {
         this.state = {
             coordinatesLoaded: false,
             ancestors: this.props.location.ancestors,
+            listLines: this.props.location.listLines, //whether came from List or Lines
             missingCoordinates: null,
             markerCoordinates: null,
             initialMarkerCoordinates: null,
@@ -440,7 +441,7 @@ class Map extends React.Component {
                                 }
                             }}
                         >
-                            <MapOverlayItems ancestors={this.state.ancestors} birthPinsCallback={this.birthPinsCallback} deathPinsCallback={this.deathPinsCallback} hideBClosedAncestorsCallBack={this.hideBClosedAncestorsCallBack} hideDClosedAncestorsCallBack={this.hideDClosedAncestorsCallBack} zoom={this.state.mapZoom} fixCoordinates={this.state.fixCoordinates} fixCoordinatesCancelCallback={this.fixCoordinatesCancelCallback}/>
+                            <MapOverlayItems ancestors={this.state.ancestors} birthPinsCallback={this.birthPinsCallback} deathPinsCallback={this.deathPinsCallback} hideBClosedAncestorsCallBack={this.hideBClosedAncestorsCallBack} hideDClosedAncestorsCallBack={this.hideDClosedAncestorsCallBack} zoom={this.state.mapZoom} fixCoordinates={this.state.fixCoordinates} fixCoordinatesCancelCallback={this.fixCoordinatesCancelCallback} listLines={this.state.listLines}/>
                             {fixCoordinatesDialogBox}
                         </GoogleMap>
                     </LoadScript>

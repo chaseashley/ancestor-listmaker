@@ -921,8 +921,18 @@ class MapOverlayItems extends React.Component {
             } else {
                 ancestors = this.state.ancestors;
             }
+            ancestors = sortByName(ancestors, 'forward');
 
-            let buttonbar = 
+            let returnButton;
+            if (this.props.listLines === 'list') {
+                returnButton = 
+                    <Link to={{ pathname: '/apps/ashley1950/listmaker/'}}><ToggleButton label={'Return to List'} active={false} disabled={this.state.animated}/></Link>
+            } else {
+                returnButton =
+                    <Link to={{ pathname: '/apps/ashley1950/listmaker/lines'}}><ToggleButton label={'Return to Lines'} active={false} disabled={this.state.animated}/></Link>
+            }
+
+            let buttonbar =
                 <div className={styles.buttonbarDiv}>
                     <ToggleButton label={'Births'} active={this.state.birthPins} onClick={this.onBirthClick} disabled={((this.state.deathPins && this.state.hideClosed) || this.state.animated)}/>
                     <div className={styles.buttonbarspacer}/>
@@ -944,7 +954,7 @@ class MapOverlayItems extends React.Component {
                     <div className={styles.buttonbarspacer}/>
                     <ToggleButton label={'Children on Click'} active={this.state.childrenOnClick} onClick={this.onChildrenOnClick} disabled={((this.state.birthPins && this.state.deathPins) || this.state.animated)}/>
                     <div className={styles.buttonbarspacer}/>
-                    <Link to={{ pathname: '/apps/ashley1950/listmaker/'}}><ToggleButton label={'Return to List'} active={false} disabled={this.state.animated}/></Link>
+                    {returnButton}
                     </div>
 
             let searchBox;
@@ -952,7 +962,6 @@ class MapOverlayItems extends React.Component {
                 searchBox = <></>
             } else {
                 let searchList = [];
-                ancestors = sortByName(ancestors, 'forward');
                 for (let i=0; i<ancestors.length; i++) {
                     if (this.ancestorVisible(ancestors[i]) && ((this.state.birthPins && ancestors[i].adjustedblat !== undefined) || (this.state.deathPins && ancestors[i].adjusteddlat !== undefined))) {
                         let labelString;

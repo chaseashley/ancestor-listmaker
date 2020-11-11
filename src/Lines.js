@@ -4,6 +4,7 @@ import { getAllAncestralLines } from './ancestralLine';
 import db from './db';
 import { CSVLink } from "react-csv";
 import { Link } from "react-router-dom";
+import { removeDuplicates } from './filters';
 
 class Lines extends React.Component {
 
@@ -175,26 +176,53 @@ class Lines extends React.Component {
   createDownloadButton(ancestralLines, descendantJson, endAncestor) {
     let downloadFileName = `${descendantJson['BirthNamePrivate']} - ${endAncestor['BirthNamePrivate']} Lines`;
     downloadFileName = `${downloadFileName.replace(/\./g, '')}.csv`;
-    const downloadButton = <CSVLink data={this.getDownloadData(ancestralLines)} filename={downloadFileName}><button className={styles.button}>Download List</button></CSVLink>;
+    const downloadButton = <CSVLink data={this.getDownloadData(ancestralLines)} filename={downloadFileName}><button className={styles.button}>Download Lines</button></CSVLink>;
     return downloadButton;
   }
 
-  render() {
+  getAncestorsInLines(ancestralLines, descendantJson) {
+    let mapAncestors = [];
+    mapAncestors.push(descendantJson);
+    for (let i=0; i<ancestralLines.length; i++) {
+      for (let j=0; j<ancestralLines[i].length; j++) {
+        mapAncestors.push(ancestralLines[i][j]);
+      }
+    }
+    mapAncestors = removeDuplicates(mapAncestors);
+    return mapAncestors;
+  }
 
+  render() {
     let downloadButton;
     let headingsRow1;
     let headingsRow2;
     let tableRows;
+    let mapButton;
     if (this.state.ancestralLines !== null) {
       downloadButton = this.createDownloadButton(this.state.ancestralLines, this.state.descendantJson, this.state.endAncestor);
       headingsRow1 = this.createHeadingsRow1(this.state.ancestralLines);
       headingsRow2 = this.createHeadingsRow2(this.state.ancestralLines);
       tableRows = this.createTableRows(this.state.ancestralLines);
+      let mapAncestors = this.getAncestorsInLines(this.state.ancestralLines, this.state.descendantJson);
+      let noLocations = true;
+      for (let i=0; i<mapAncestors.length; i++){
+        let ancestor = mapAncestors[i];
+        if ((ancestor.BirthLocation !== null && ancestor.BirthLocation !== '') || (ancestor.DeathLocation !== null && ancestor.DeathLocation !== '')) {
+          noLocations = false;
+          break;
+        }
+      }
+      if (noLocations) {
+        mapButton = <button className={styles.button} disabled={true}>Map List</button>;
+      } else { //is at least one location field
+        mapButton = <Link to={{ pathname: '/apps/ashley1950/listmaker/map', ancestors: mapAncestors, listLines: 'lines'}}><button className={styles.button}>Map Lines</button></Link>;
+      }
     } else {
       downloadButton = <div></div>
       headingsRow1 = <div></div>;
       headingsRow2 = <div></div>;
       tableRows = <div></div>;
+      mapButton = <div></div>;
     }
     
     let pageBody;
@@ -211,7 +239,9 @@ class Lines extends React.Component {
           <tr className={styles.buttonsTr}>
                 <td className={styles.buttonSpacer}></td>
                 <td className={styles.buttonsTd}><Link to={{ pathname: '/apps/ashley1950/listmaker/'}}><button className={styles.button}>Return to List</button></Link>
-                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                {mapButton}
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 {downloadButton}</td>
                 <td></td>
             </tr></tbody>
