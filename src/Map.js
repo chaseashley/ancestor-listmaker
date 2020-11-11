@@ -355,6 +355,7 @@ class Map extends React.Component {
                 <h1 className={styles.h1}>
                     Ancestor Explorer
                 </h1>
+                <div className={styles.FAQlinkDiv}><a href='https://www.wikitree.com/index.php?title=Space:Ancestor_Explorer_Mapping_FAQ/Instructions' target='_blank'>FAQ/Instructions</a></div>
                 {fixCoordinatesLink}
             </div>
 

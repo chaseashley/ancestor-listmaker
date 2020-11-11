@@ -263,7 +263,7 @@ class Lines extends React.Component {
       <div className={styles.page}>
         <div className={styles.topBox}>
           <h1 className={styles.h1}>
-            Ancestor Listmaker
+            Ancestor Explorer
           </h1>
         </div>
         {pageBody}

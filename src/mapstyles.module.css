@@ -3,10 +3,19 @@
     height: 60px;
 }
 
+.FAQlinkDiv {
+    position: absolute;
+    top: 52px;
+    left: 70%;
+    width: 150px;
+    font-size: 13px;
+    color: black;
+}
+
 .fixcoordinatesLinkDiv {
     position: absolute;
     top: 50px;
-    left: 70%;
+    left: 80%;
     width: 150px
 }
 
