@@ -416,7 +416,7 @@ class Map extends React.Component {
                             <td className={styles.buttonSpacer}></td>
                             <td className={styles.buttonsTd}><button onClick={this.onProceedClick} className={styles.button}>Proceed</button></td>
                             <td className={styles.buttonsTd}><button onClick={this.onSkipAllClick} className={styles.button}>Skip All</button></td>
-                            <td className={styles.buttonsTd}><Link to={{ pathname: '/apps/ashley1950/listmaker/'}}><button className={styles.button}>Return to List</button></Link></td>
+                            <td className={styles.buttonsTd}><Link to={{ pathname: '/apps/ashley1950/ancestorexplorer/'}}><button className={styles.button}>Return to List</button></Link></td>
                             <td></td>
                         </tr></tbody>
                     </table>

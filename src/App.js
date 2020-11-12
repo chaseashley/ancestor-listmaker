@@ -45,8 +45,8 @@ class App extends Component {
             <BrowserRouter>
             <div>
                 <Switch>
-                    <Route path="/apps/ashley1950/listmaker/lines" component={Lines} />
-                    <Route path="/apps/ashley1950/listmaker/map" component={Map} />
+                    <Route path="/apps/ashley1950/ancestorexplorer/lines" component={Lines} />
+                    <Route path="/apps/ashley1950/ancestorexplorer/map" component={Map} />
                     <Route path="/:id?" component={Main} />
                     <Route component={NoMatchPage}/>
                 </Switch>

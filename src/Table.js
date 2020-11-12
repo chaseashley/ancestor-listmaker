@@ -12,7 +12,7 @@ export class Table extends React.Component {
       rows.push(<tr key={i}>
         <td className={styles.ancestor}><a href={`https://www.wikitree.com/wiki/${data[i]['Name']}`} target='_blank' rel='noopener noreferrer'>{fullname ? data[i]['BirthName'] : data[i]['BirthNamePrivate']}</a>
         {(multiples && multiplesArray[data[i]['Id']]>1) ? <span className={styles.multiples}>&nbsp;({multiplesArray[data[i]['Id']]})</span>:''}
-        &nbsp;<Link to={{ pathname: '/apps/ashley1950/listmaker/lines', endAncestor: data[i], descendantJson: descendantJson, ancestors: ancestors, generations: generations, fullname: fullname}}><img src={rfimage}/></Link>
+        &nbsp;<Link to={{ pathname: '/apps/ashley1950/ancestorexplorer/lines', endAncestor: data[i], descendantJson: descendantJson, ancestors: ancestors, generations: generations, fullname: fullname}}><img src={rfimage}/></Link>
         </td>
         <td className={styles.date}>{data[i]['BirthDate']}</td>
         <td className={styles.location}>{data[i]['BirthLocation']}</td>
