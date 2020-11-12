@@ -120,7 +120,7 @@ class Lines extends React.Component {
               row.push(
                 <>
                 <td className={styles.gen2}>{ancestralLines[j][i]['Generation']}</td>
-                <td className={styles.name2}>{(ancestralLines[j][i]['Id']<0) ? 'Private' : <a href={`https://www.wikitree.com/wiki/${ancestralLines[j][i]['Name']}`} target='_blank'>{(this.state.fullname) ? ancestralLines[j][i]['BirthName'] : ancestralLines[j][i]['BirthNamePrivate']}</a>}</td>
+                <td className={styles.name2}>{(ancestralLines[j][i]['Id']<0) ? 'Private' : <a href={`https://www.wikitree.com/wiki/${ancestralLines[j][i]['Name']}`} target='_blank' rel='noopener noreferrer'>{(this.state.fullname) ? ancestralLines[j][i]['BirthName'] : ancestralLines[j][i]['BirthNamePrivate']}</a>}</td>
                 </>
               );
             } else {
@@ -247,7 +247,7 @@ class Lines extends React.Component {
             </tr></tbody>
         </table>
         <div className={styles.contact}>
-          If you have any questions, comments, suggestions or problems, please post a comment on <a href='https://www.wikitree.com/wiki/Ashley-1950' target='_blank'>Chase Ashley's WikiTree page</a>.
+          If you have any questions, comments, suggestions or problems, please post a comment on <a href='https://www.wikitree.com/wiki/Ashley-1950' target='_blank' rel='noopener noreferrer'>Chase Ashley's WikiTree page</a>.
         </div>
         <div className={styles.tableDiv}> 
           <table className={styles.table}>

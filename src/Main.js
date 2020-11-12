@@ -540,7 +540,7 @@ class Main extends React.Component {
           <li>Download any of the ancestor lists or lines of descent to a .csv file, which can then be opened in a spreadsheet.</li>
         </div>
         <div className={styles.contact}>
-          If you have any questions, comments, suggestions or problems, please post a comment on <a href='https://www.wikitree.com/wiki/Ashley-1950' target='_blank'>Chase Ashley's WikiTree page</a>.
+          If you have any questions, comments, suggestions or problems, please post a comment on <a href='https://www.wikitree.com/wiki/Ashley-1950' target='_blank' rel='noopener noreferrer'>Chase Ashley's WikiTree page</a>.
         </div>
         <div className={styles.formContainer}>
           <table className={styles.formTable}>
@@ -580,7 +580,7 @@ class Main extends React.Component {
                 {mapButton}
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 {downloadButton}</td>
-                <td className={styles.version}>(ver 12p.22.Jul.2020)</td>
+                <td className={styles.version}>(ver 8p.11.Nov.2020)</td>
               </tr>
             </tbody>
           </table>
