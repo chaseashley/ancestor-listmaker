@@ -93,8 +93,11 @@ export function adjustOverlappingMarkerCoordinates(ancestors, zoom, birthPins, d
             latOffset = variableLatOffset;
         }
         const rowLength = Math.round((maxLatOffset/maxLngOffset) * Math.ceil(Math.sqrt(uniqueCoordinates[i][1].length)));
-        const topLeftLat = meanLat + (latOffset * Math.floor((rowLength-1)/2));
-        const topLeftLng = meanLng - (lngOffset * Math.floor((rowLength-1)/2));
+        /*const topLeftLat = meanLat + (latOffset * Math.floor((rowLength-1)/2));
+        const topLeftLng = meanLng - (lngOffset * Math.floor((rowLength-1)/2));*/
+        const numberOfRows = Math.ceil(uniqueCoordinates[i][1].length/rowLength);
+        const topLeftLat = meanLat + ((latOffset * (numberOfRows-1))/2);
+        const topLeftLng = meanLng - ((lngOffset * (rowLength-1))/2);
         let rowIndex = 0;
         let columnIndex = 0;
         for (let j=0; j<uniqueCoordinates[i][1].length; j++) {//for each ancestor in the array for those coordinates

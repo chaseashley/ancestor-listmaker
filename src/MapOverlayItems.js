@@ -405,8 +405,11 @@ class MapOverlayItems extends React.Component {
     }
 
     onHideClosedClick() {
+        let adjustedHideClosedAncestors;
         if (this.state.hideClosed) {
+            let adjustedAncestors = adjustOverlappingMarkerCoordinates(this.state.ancestors, this.props.zoom, this.state.birthPins, this.state.deathPins);
             this.setState({
+                ancestors: adjustedAncestors,
                 hideClosed: false,
                 hideClosedBAncestors: [],
                 hideClosedDAncestors: [],
@@ -414,7 +417,6 @@ class MapOverlayItems extends React.Component {
             this.props.hideBClosedAncestorsCallBack([]);
             this.props.hideDClosedAncestorsCallBack([]);
         } else {
-            let adjustedHideClosedAncestors;
             if (this.state.birthPins) {
                 adjustedHideClosedAncestors = adjustOverlappingMarkerCoordinates(this.state.openBAncestors.slice(), this.props.zoom, this.state.birthPins, this.state.deathPins);
                 this.setState({

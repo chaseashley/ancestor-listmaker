@@ -580,7 +580,7 @@ class Main extends React.Component {
                 {mapButton}
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 {downloadButton}</td>
-                <td className={styles.version}>(ver 8p.11.Nov.2020)</td>
+                <td className={styles.version}>(ver 7p.12.Nov.2020)</td>
               </tr>
             </tbody>
           </table>
