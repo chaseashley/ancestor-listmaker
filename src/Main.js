@@ -536,7 +536,7 @@ class Main extends React.Component {
           generations back.</li>
           <li>See sortable lists of all ancestors of Descendent up to 20 generations back who meet selected criteria.</li>
           <li>Click on the icon next to any ancestor in an ancestor list to see all lines of descent from that ancestor to the Descendant.</li>
-          <li>See a map of the birth and death locations of ancestors in an ancestor list or line of descent.</li>
+          <li>See a map of the birth and death locations of ancestors in an ancestor list or lines of descent.</li>
           <li>Download any of the ancestor lists or lines of descent to a .csv file, which can then be opened in a spreadsheet.</li>
         </div>
         <div className={styles.contact}>

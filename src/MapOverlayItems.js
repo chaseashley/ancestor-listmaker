@@ -879,13 +879,18 @@ class MapOverlayItems extends React.Component {
     submitFinalFixCoordinates(location) {
         updateCoordinates(standardizeAddress(location), `${this.state.finalFixCoordinates.lat},${this.state.finalFixCoordinates.lng}`);
         for (let i=0; i<this.state.ancestors.length; i++) {
-            if (standardizeAddress(this.state.ancestors[i].BirthLocation) === standardizeAddress(location)) {
-                this.state.ancestors[i].blat = this.state.finalFixCoordinates.lat;
-                this.state.ancestors[i].blng = this.state.finalFixCoordinates.lng;
+            let ancestor = this.state.ancestors[i];
+            if (ancestor.BirthLocation !== '' && ancestor.BirthLocation !== null) {
+                if (standardizeAddress(ancestor.BirthLocation) === standardizeAddress(location)) {
+                    ancestor.blat = this.state.finalFixCoordinates.lat;
+                    ancestor.blng = this.state.finalFixCoordinates.lng;
+                }
             }
-            if (standardizeAddress(this.state.ancestors[i].DeathLocation) === standardizeAddress(location)) {
-                this.state.ancestors[i].dlat = this.state.finalFixCoordinates.lat;
-                this.state.ancestors[i].dlng = this.state.finalFixCoordinates.lng;
+            if (ancestor.DeathLocation !== '' && ancestor.DeathLocation !== null) {
+                if (standardizeAddress(ancestor.DeathLocation) === standardizeAddress(location)) {
+                    ancestor.dlat = this.state.finalFixCoordinates.lat;
+                    ancestor.dlng = this.state.finalFixCoordinates.lng;
+                }
             }
         }
         let adjustedAncestors = adjustOverlappingMarkerCoordinates(this.state.ancestors, this.props.zoom, this.state.birthPins, this.state.deathPins) 
