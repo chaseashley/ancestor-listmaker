@@ -87,7 +87,6 @@ class Map extends React.Component {
 
     async onClickCoordinatesSkip(location) {
         let ancestors = this.state.ancestors;
-        /*
         ancestors.forEach(ancestor => {
             if (ancestor.BirthLocation === location) {
                 ancestor.BirthLocation = '';
@@ -95,7 +94,7 @@ class Map extends React.Component {
             if (ancestor.DeathLocation === location) {
                 ancestor.DeathLocation = '';
             }
-        })*/
+        })
         this.setState({ancestors: ancestors});
         let missingCoordinates = this.state.missingCoordinates;
         for (let i=0; i<missingCoordinates.length; i++) {

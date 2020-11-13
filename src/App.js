@@ -38,7 +38,8 @@ class App extends Component {
             ancestorLists: [null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
         }
         db.table('main').put(JSON.stringify(startingState),0); //This is to clean out the storage at the start of a session
-        
+        db.table('lines').clear();
+        db.table('map').clear();
         localStorage.setItem('scrollPosition', 0);
 
         return (      

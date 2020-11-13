@@ -1,6 +1,6 @@
 import Dexie from 'dexie';
 
-const db = new Dexie('ListmakerDexie');
+const db = new Dexie('AncestorExplorerDexie');
 
 db.version(2).stores({ main: '', lines: '', map: '' });
 
