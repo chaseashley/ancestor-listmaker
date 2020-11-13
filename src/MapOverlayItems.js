@@ -933,10 +933,10 @@ class MapOverlayItems extends React.Component {
             let returnButton;
             if (this.props.listLines === 'list') {
                 returnButton = 
-                    <Link to={{ pathname: '/apps/ashley1950/listmaker/'}}><ToggleButton label={'Return to List'} active={false} disabled={this.state.animated}/></Link>
+                    <Link to={{ pathname: '/apps/ashley1950/ancestorexplorer/'}}><ToggleButton label={'Return to List'} active={false} disabled={this.state.animated}/></Link>
             } else {
                 returnButton =
-                    <Link to={{ pathname: '/apps/ashley1950/listmaker/lines'}}><ToggleButton label={'Return to Lines'} active={false} disabled={this.state.animated}/></Link>
+                    <Link to={{ pathname: '/apps/ashley1950/ancestorexplorer/lines'}}><ToggleButton label={'Return to Lines'} active={false} disabled={this.state.animated}/></Link>
             }
 
             let buttonbar =
