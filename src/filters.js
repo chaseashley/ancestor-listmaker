@@ -1,6 +1,7 @@
 /* This module contains functions that check a list of ancestors against a particular criteria and return
 ** those that match */
-const fetch = require("node-fetch");
+//const fetch = require("node-fetch");
+import { get_retry} from './ancestors';
 
 export function filterOrphans(ancestors) {
     let matchingAncestors = [];
@@ -320,9 +321,12 @@ async function getWtPlusIdArray(descendant, filterName) {
 async function getWtPlusJson(databaseSearch) {
     const url = `https://wikitree.sdms.si/function/WTWebProfileSearch/Profiles.json?Query=${databaseSearch}&format=json`;
     try {
+        const response = await get_retry(url,1);
+        return response.data;
+        /*
         const response = await fetch(url);
         const jsonResponse = await response.json();
-        return jsonResponse;
+        return jsonResponse;*/
     } catch(err) {
         alert('No categories matching the entered terms have been found.');
         console.log(err);

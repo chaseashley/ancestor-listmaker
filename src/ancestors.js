@@ -6,7 +6,7 @@ a pre-fligth OPTIONS request in Firefox and Safari
 */
 const axios = require('axios'); 
 
-function get_retry(url, n) {
+export function get_retry(url, n) {
   return axios.get(url)
     .catch(function (error) {
       if (error.response) {
