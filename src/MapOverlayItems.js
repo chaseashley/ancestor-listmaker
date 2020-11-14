@@ -169,6 +169,7 @@ class MapOverlayItems extends React.Component {
                 fixCoordinates: false,
             };
         }
+        return null;
     }
 
     componentDidUpdate() {
