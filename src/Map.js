@@ -48,11 +48,14 @@ class Map extends React.Component {
             mapZoom: null,
             mapCenter: null,
             birthPins: true,
-            deathPins: false,
+            deathPins: true,
             proceed: false,
             fixCoordinates: false,
             hideBClosedAncestors: [],
             hideDClosedAncestors: [],
+            locationBeingGeocoded: '',
+            numberOfLocations: null,
+            numberToBeGeocoded: null,
         }
     }
 
@@ -79,7 +82,7 @@ class Map extends React.Component {
                 coordinates = response.results[0].geometry.location;
             },
             error => {
-                console.error(error);
+                coordinates = {lat: 0, lng: 0};
             }
         );
         return coordinates;
@@ -199,7 +202,7 @@ class Map extends React.Component {
     makeLocationsList() {
         let locations = [];
         for (let i=0; i<this.state.ancestors.length; i++) {
-            if (this.state.ancestors[i].BirthLocation !== '' && this.state.ancestors[i].BirthLocation !== null) {
+            if (this.state.ancestors[i].BirthLocation !== '' && this.state.ancestors[i].BirthLocation !== null && this.state.ancestors[i].BirthLocation.toUpperCase() !== 'UNKNOWN') {
                 let standardizedBirthLocation = standardizeAddress(this.state.ancestors[i].BirthLocation);
                 //console.log(this.state.ancestors[i].BirthLocation, standardizedBirthLocation);
                 let locationFound = false;
@@ -213,7 +216,7 @@ class Map extends React.Component {
                     locations.push(standardizedBirthLocation);
                 }
             }
-            if (this.state.ancestors[i].DeathLocation !== '' && this.state.ancestors[i].DeathLocation !== null) {
+            if (this.state.ancestors[i].DeathLocation !== '' && this.state.ancestors[i].DeathLocation !== null && this.state.ancestors[i].DeathLocation.toUpperCase() !== 'UNKNOWN') {
                 let standardizedDeathLocation = standardizeAddress(this.state.ancestors[i].DeathLocation);
                 //console.log(this.state.ancestors[i].DeathLocation, standardizedDeathLocation);
                 let locationFound = false;
@@ -228,10 +231,12 @@ class Map extends React.Component {
                 }
             }
         }
+        this.setState({numberOfLocations: locations.length});
         return locations;
     }
 
-    async getLocationsCoordinates(locations) {
+    //The function below was for pre-screening locations not already in the database
+    /*async getLocationsCoordinates(locations) {
         let locationsWithCoordinates = {};
         let coordinatesGets = [];
         let missingCoordinates = [];
@@ -280,17 +285,78 @@ class Map extends React.Component {
             }
         }
         return missingCoordinates;
+    }*/
+
+    async getLocationsCoordinates(locations) {
+        let locationsWithCoordinates = {};
+        let coordinatesGets = [];
+        //let missingCoordinates = [];
+        for (let i=0; i<locations.length; i++) {
+            coordinatesGets.push(getCoordinates(locations[i]));
+        }
+        let locationsToBeGeocoded = [];
+        await Promise.all(coordinatesGets)
+            .then(responses => {
+                for (let i=0; i<responses.length; i++) {
+                    if (responses[i] === undefined) {
+                        console.log(locations[i]);
+                        locationsToBeGeocoded.push(locations[i]);
+                    } else {
+                        locationsWithCoordinates[locations[i]] = responses[i].data.coordinates;
+                    }
+                }
+            })
+            .catch(error => {
+                console.log(error);
+            });
+        await this.setState({numberToBeGeocoded: locationsToBeGeocoded.length});
+        if (locationsToBeGeocoded.length > 300) {
+            return false;
+        }
+        for (let i=0; i<locationsToBeGeocoded.length; i++) {
+            await this.setState({
+                numberToBeGeocoded: locationsToBeGeocoded.length-i,
+                locationBeingGeocoded: locationsToBeGeocoded[i]
+            });
+            let geocodedCoordinates = await this.geocodeLocation(locationsToBeGeocoded[i]);
+            postCoordinates(standardizeAddress(locationsToBeGeocoded[i]), `${geocodedCoordinates.lat},${geocodedCoordinates.lng}`)
+            locationsWithCoordinates[locationsToBeGeocoded[i]] = `${geocodedCoordinates.lat},${geocodedCoordinates.lng}`;
+        }
+        for (let i=0; i<this.state.ancestors.length; i++) {
+            if (this.state.ancestors[i].BirthLocation !== '' && this.state.ancestors[i].BirthLocation !== null && this.state.ancestors[i].BirthLocation.toUpperCase() !== 'UNKNOWN') {
+                let standardizedBirthLocation = standardizeAddress(this.state.ancestors[i].BirthLocation);
+                //if (standardizedBirthLocation in locationsWithCoordinates) {
+                    let coordinates = locationsWithCoordinates[standardizedBirthLocation];
+                    let commaLocation = coordinates.indexOf(',');
+                    let blatString = coordinates.substring(0,commaLocation);
+                    this.state.ancestors[i]['blat'] = Number(blatString);
+                    let blngString = coordinates.substring(commaLocation+1);
+                    this.state.ancestors[i]['blng'] = Number(blngString);
+                /*} else {
+                    missingCoordinates = this.addToMissingCoordinates(missingCoordinates, this.state.ancestors[i].BirthLocation, this.state.ancestors[i].BirthNamePrivate, this.state.ancestors[i].Name, 'Birth');
+                }*/
+            }
+            if (this.state.ancestors[i].DeathLocation !== '' && this.state.ancestors[i].DeathLocation !== null && this.state.ancestors[i].DeathLocation.toUpperCase() !== 'UNKNOWN') {
+                let standardizedDeathLocation = standardizeAddress(this.state.ancestors[i].DeathLocation);
+                //if (standardizedDeathLocation in locationsWithCoordinates) {
+                    let coordinates = locationsWithCoordinates[standardizedDeathLocation];
+                    let commaLocation = coordinates.indexOf(',');
+                    let dlatString = coordinates.substring(0,commaLocation);
+                    this.state.ancestors[i]['dlat'] = Number(dlatString);
+                    let dlngString = coordinates.substring(commaLocation+1);
+                    this.state.ancestors[i]['dlng'] = Number(dlngString);
+                /*} else {
+                    missingCoordinates = this.addToMissingCoordinates(missingCoordinates, this.state.ancestors[i].DeathLocation, this.state.ancestors[i].BirthNamePrivate, this.state.ancestors[i].Name, 'Death');
+                }*/
+            }
+        }
+        return true;
     }
 
     async checkAddressesForCoordinates() {
         let locations = this.makeLocationsList();
-        let missingCoordinates = await this.getLocationsCoordinates(locations);
-        if (missingCoordinates.length === 0) {
-            this.setState({coordinatesLoaded: true});
-        } else {
-            const coordinates = await this.geocodeLocation(missingCoordinates[0][0]);
-            this.setState({missingCoordinates: missingCoordinates, markerCoordinates: coordinates});
-        }
+        let coordinatesLoaded = await this.getLocationsCoordinates(locations);
+        this.setState({coordinatesLoaded: coordinatesLoaded});
     }
 
     birthPinsCallback() {
@@ -371,7 +437,8 @@ class Map extends React.Component {
                             <li>Open the info window for a single marker at that location and close all other info 
                             windows.</li>
                             <li>Click ‘Hide Closed’ 
-                            to hide all markers other than the marker with the open info window.</li>
+                            to hide all markers other than the marker with the open info window. (Note that only one of 
+                            'Births' or 'Deaths" (not both) can be activated in order for 'Hide Closed' to be enabled.)</li>
                             <li>Check the location of the 
                             marker when it is the only visible marker to see if it is in the correct place. (When 
                             multiple markers are shown, they may not appear at their exact correct places due to 
@@ -382,7 +449,7 @@ class Map extends React.Component {
                                 the marker is in an incorrect location when it is the only visible marker, click ‘Proceed’.</li>
                             </ol>
                             <button className={styles.cancelButton} onClick={this.closeFixCoordinatesDialog}>Cancel</button>
-                            <button className={styles.fixcoordinatesButton} onClick={this.fixCoordinatesClick} disabled={!((this.state.hideBClosedAncestors.length === 1 && this.state.hideDClosedAncestors.length === 0) || (this.state.hideBClosedAncestors.length === 0 && this.state.hideDClosedAncestors.length === 1))}>Proceed</button>
+                            <button className={styles.fixcoordinatesButton} onClick={this.fixCoordinatesClick} disabled={!((this.state.hideBClosedAncestors.length === 1 && !this.state.deathPins) || (this.state.hideDClosedAncestors.length === 1 && !this.state.birthPins))}>Proceed</button>
                         </div>
                     </div>
                 </Draggable>
@@ -391,11 +458,28 @@ class Map extends React.Component {
         }
 
         let mapOrLoading;
-        if (!this.state.coordinatesLoaded && this.state.missingCoordinates === null) {
+        if (!this.state.coordinatesLoaded && this.state.numberToBeGeocoded === null) {
             mapOrLoading = 
-                <div className={styles.loadingDiv}>
-                    <div className={styles.statusElipsis}>Retrieving location coordinates</div>
+                <div className={styles.databaseCoordinatesLoadingDiv}>
+                    <div className={styles.statusElipsis}>Searching app's database for coordinates for {this.state.numberOfLocations} different locations</div>
                 </div>
+        } else if (!this.state.coordinatesLoaded && this.state.numberToBeGeocoded <= 300) {
+            mapOrLoading =
+                <div className={styles.geocodingLoadingDiv}>
+                    <div className={styles.statusGeocoding}>Coordinates for {this.state.numberToBeGeocoded} locations remaining to be added to 
+                    the app's database.<p>Getting suggested coordinates from Google Maps for:</p>{this.state.locationBeingGeocoded}</div>
+                </div>
+        } else if (!this.state.coordinatesLoaded && (this.state.numberToBeGeocoded > 300)) {
+            mapOrLoading =
+                <div className={styles.excessGeocoding}>
+                    <div>
+                    The selected ancestors list contains {this.state.numberToBeGeocoded} locations that are not yet in the app's 
+                    database and whose coordinates must obtained using Google's geocoding api. That exceeds the app's current limit 
+                    of 300 such locations at one time. Please start with a shorter list - e.g., fewer generations.
+                    </div>
+                    <Link to={{ pathname: '/apps/ashley1950/ancestorexplorer/'}}><button className={styles.OKButton}>OK</button></Link>
+                </div>
+        /*
         } else if (!this.state.coordinatesLoaded && this.state.missingCoordinates !== null && !this.state.proceed) {
             mapOrLoading = 
                 <div className={styles.reviewWarningDiv}>
@@ -419,7 +503,7 @@ class Map extends React.Component {
                             <td></td>
                         </tr></tbody>
                     </table>
-                </div>
+                </div>*/
         } else {
             let MapWithOverlay;
             if (this.state.coordinatesLoaded) {
@@ -441,12 +525,11 @@ class Map extends React.Component {
                                 }
                             }}
                         >
-                            <MapOverlayItems ancestors={this.state.ancestors} birthPinsCallback={this.birthPinsCallback} deathPinsCallback={this.deathPinsCallback} hideBClosedAncestorsCallBack={this.hideBClosedAncestorsCallBack} hideDClosedAncestorsCallBack={this.hideDClosedAncestorsCallBack} zoom={this.state.mapZoom} fixCoordinates={this.state.fixCoordinates} fixCoordinatesCancelCallback={this.fixCoordinatesCancelCallback} listLines={this.state.listLines}/>
+                            <MapOverlayItems ancestors={this.state.ancestors} birthPinsCallback={this.birthPinsCallback} deathPinsCallback={this.deathPinsCallback} hideBClosedAncestorsCallBack={this.hideBClosedAncestorsCallBack} hideDClosedAncestorsCallBack={this.hideDClosedAncestorsCallBack} zoom={this.state.mapZoom} fixCoordinates={this.state.fixCoordinates} fixCoordinatesCancelCallback={this.fixCoordinatesCancelCallback} listLines={this.state.listLines} birthPins={this.state.birthPins} deathPins={this.state.deathPins}/>
                             {fixCoordinatesDialogBox}
                         </GoogleMap>
                     </LoadScript>
-            /*
-            } else if (this.state.coordinatesLoaded && this.state.fixCoordinates) {
+            } /*else if (this.state.coordinatesLoaded && this.state.fixCoordinates) {
                 let markerCoordinates, ancestor, location, birthDeath;
                 if (this.state.hideBClosedAncestors.length !== 0) {
                     markerCoordinates = { lat: this.state.hideBClosedAncestors[0].blat, lng: this.state.hideBClosedAncestors[0].blng };
@@ -473,7 +556,6 @@ class Map extends React.Component {
                             <FixCoordinatesOverlay location={location} ancestorName={ancestor.BirthNamePrivate} id={ancestor.Id} birthDeath={birthDeath} markerCoordinates={markerCoordinates} onCancelClick={this.fixCancelClick}/>
                         </GoogleMap>
                     </LoadScript>
-            */
             } else if (this.state.missingCoordinates !== null) {
                 MapWithOverlay =
                     <LoadScript googleMapsApiKey={API_KEY}>
@@ -489,7 +571,7 @@ class Map extends React.Component {
                             <MissingCoordinatesOverlay location={this.state.missingCoordinates[0][0]} ancestorName={this.state.missingCoordinates[0][1]} id={this.state.missingCoordinates[0][2]} birthDeath={this.state.missingCoordinates[0][3]} markerCoordinates={this.state.markerCoordinates} numberMissing={this.state.missingCoordinates.length} onClickCoordinatesSubmit={this.onClickCoordinatesSubmit} onClickCoordinatesSkip={this.onClickCoordinatesSkip} onSkipAllClick={this.onSkipAllClick}/>
                         </GoogleMap>
                     </LoadScript>
-            }
+            }*/
             mapOrLoading =
                 <div className={styles.mapDiv}>
                     {MapWithOverlay}

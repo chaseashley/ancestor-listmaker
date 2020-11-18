@@ -149,7 +149,8 @@ async function getAdditionalAncestors(ancestorsMissingParents, additionalGens) {
     let result = await Promise.all(ancestorRequests).then((additionalAncestorData) => {
         let additionalAncestors = [];
         additionalAncestorData.forEach((additionalAncestor) => {
-            let additionalAncestorSelectedData = additionalAncestor[0]['ancestors'].slice(1);
+            //let additionalAncestorSelectedData = additionalAncestor[0]['ancestors'].slice(1);
+            let additionalAncestorSelectedData = condenseAncestorsJson(additionalAncestor);
             additionalAncestors = additionalAncestors.concat(additionalAncestorSelectedData);
         })
         return additionalAncestors;

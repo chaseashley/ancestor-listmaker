@@ -299,12 +299,15 @@ class StaticMarkers extends Component {
 
     render() {
         let personMarkers;
-        if (this.props.visible) {
+        if (this.props.ancestor.Name === 'Unknown-282952') {
+            let x = 1;
+        }
+        //if (this.props.visible) {
             if (this.props.birthPins && this.props.ancestor.adjustedblat !== undefined && this.props.deathPins && this.props.ancestor.adjusteddlat !== undefined && this.props.birthDeathLines) {
                 personMarkers =
                 <>
                     <Marker
-                        //key={this.props.ancestor.Id + this.props.ancestor.blat}
+                        key={this.props.key}
                         visible={this.props.visible}
                         position={{lat: this.props.ancestor.adjustedblat, lng: this.props.ancestor.adjustedblng}}
                         icon={`http://maps.google.com/mapfiles/ms/icons/green-dot.png`}
@@ -321,6 +324,7 @@ class StaticMarkers extends Component {
                         </InfoWindow>}
                     </Marker>
                     <Marker
+                        key={this.props.key}
                         visible={this.props.visible}
                         position={{lat: this.props.ancestor.adjusteddlat, lng: this.props.ancestor.adjusteddlng}}
                         icon={`http://maps.google.com/mapfiles/ms/icons/red-dot.png`}
@@ -346,6 +350,7 @@ class StaticMarkers extends Component {
                 personMarkers =
                 <>
                     <Marker
+                        key={this.props.key}
                         visible={this.props.visible}
                         position={{lat: this.props.ancestor.adjustedblat, lng: this.props.ancestor.adjustedblng}}
                         icon={`http://maps.google.com/mapfiles/ms/icons/green-dot.png`}
@@ -362,6 +367,7 @@ class StaticMarkers extends Component {
                         </InfoWindow>}
                     </Marker>
                     <Marker
+                        key={this.props.key}
                         visible={this.props.visible}
                         position={{lat: this.props.ancestor.adjusteddlat, lng: this.props.ancestor.adjusteddlng}}
                         icon={`http://maps.google.com/mapfiles/ms/icons/red-dot.png`}
@@ -382,6 +388,7 @@ class StaticMarkers extends Component {
                 personMarkers =
                 <>
                     <Marker
+                        key={this.props.key}
                         visible={this.props.visible}
                         position={{lat: this.props.ancestor.adjustedblat, lng: this.props.ancestor.adjustedblng}}
                         icon={`http://maps.google.com/mapfiles/ms/icons/green-dot.png`}
@@ -402,6 +409,7 @@ class StaticMarkers extends Component {
                 personMarkers =
                 <>
                     <Marker
+                        key={this.props.key}
                         visible={this.props.visible}
                         position={{lat: this.props.ancestor.adjusteddlat, lng: this.props.ancestor.adjusteddlng}}
                         icon={`http://maps.google.com/mapfiles/ms/icons/red-dot.png`}
@@ -418,11 +426,11 @@ class StaticMarkers extends Component {
                         </InfoWindow>}
                     </Marker>
                 </>
-            } else {
-                personMarkers = <></>;
-            }
 
-        }
+            }
+        //} else {
+          //personMarkers = <></>;
+        //}
         return (<>{personMarkers}</>)
     }
 }

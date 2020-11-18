@@ -6,6 +6,7 @@ export function standardizeAddress(address) {
     address = address.replace(/ ,/g,',');
     address = address.replace(/,,/g,',');
     address = address.replace(/\./g,'');
+    address = address.replace(/\?/g,'');
 
     //Australian standardizations
     if (address.indexOf('NEW SOUTH WALES') !== -1 && address.indexOf('NEW SOUTH WALES') === address.length-15) {

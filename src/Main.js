@@ -437,22 +437,21 @@ class Main extends React.Component {
 
     let mapButton;
     if (this.state.processingStatus ==='Done' && this.state.matchingAncestors.length !== 0) {
-      let noLocations = true;
       let mapAncestors = this.state.matchingAncestors.slice();
       if (this.state.category === 'All') {
         mapAncestors.push(this.state.descendantJson);
       }
+      let mapAncestorsWithALocation = [];
       for (let i=0; i<mapAncestors.length; i++){
         let ancestor = mapAncestors[i];
-        if ((ancestor.BirthLocation !== null && ancestor.BirthLocation !== '') || (ancestor.DeathLocation !== null && ancestor.DeathLocation !== '')) {
-          noLocations = false;
-          break;
+        if ((ancestor.BirthLocation !== null && ancestor.BirthLocation !== '' && ancestor.BirthLocation.toUpperCase() !== 'UNKNOWN') || (ancestor.DeathLocation !== null && ancestor.DeathLocation !== '' && ancestor.DeathLocation.toUpperCase() !== 'UNKNOWN')) {
+          mapAncestorsWithALocation.push(ancestor);
         }
       }
-      if (noLocations) {
+      if (mapAncestorsWithALocation.length === 0) {
         mapButton = <button className={styles.mapButton} disabled={true}>Map List</button>;
       } else { //is at least one location field
-        mapButton = <Link to={{ pathname: '/apps/ashley1950/ancestorexplorer/map', ancestors: mapAncestors, listLines: 'list'}}><button className={styles.mapButton}>Map List</button></Link>;
+        mapButton = <Link to={{ pathname: '/apps/ashley1950/ancestorexplorer/map', ancestors: mapAncestorsWithALocation, listLines: 'list'}}><button className={styles.mapButton}>Map List</button></Link>;
     
       }
     } else {
@@ -580,7 +579,7 @@ class Main extends React.Component {
                 {mapButton}
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 {downloadButton}</td>
-                <td className={styles.version}>(ver 10a.14.Nov.2020)</td>
+                <td className={styles.version}>(ver 10:20a.14.Nov.2020)</td>
               </tr>
             </tbody>
           </table>

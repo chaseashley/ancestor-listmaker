@@ -31,7 +31,7 @@
 .fixCoordinatesDialogBox {
     background: white;
     border: 1px solid;
-    height: 375px;
+    height: 395px;
     width: 600px;
 }
 
@@ -74,20 +74,35 @@
     height: 600;
 }
 
-.loadingDiv {
+.databaseCoordinatesLoadingDiv {
     position: relative;
     top: 200px;
-    left: 35%;
-    width: 370px;
-    height: 80px;
+    left: 28%;
+    width: 570px;
+    height: 60px;
     background-color: rgb(243, 241, 234);
     border:1px solid black;
 }
 
 .statusElipsis {
     position:relative;
-    top: 30px;
-    left: 60px;
+    padding: 20px;
+}
+
+.geocodingLoadingDiv {
+    position: relative;
+    top: 200px;
+    left: 26%;
+    width: 600px;
+    height: 130px;
+    background-color: rgb(243, 241, 234);
+    border:1px solid black;
+}
+
+.statusGeocoding {
+    text-align: center;
+    position:relative;
+    padding: 20px;
 }
 
 .statusElipsis:after {
@@ -112,6 +127,24 @@
       width: 30px;    
     }
   }
+
+.excessGeocoding {
+    position: relative;
+    top: 100px;
+    left: 30%;
+    width: 450px;
+    height: 130px;
+    background-color: rgb(243, 241, 234);
+    border:1px solid black;
+    padding: 20px;
+}
+
+.OKButton {
+    font-size: 16px;
+    position: relative;
+    top: 20px;
+    left: 45%;
+}
 
 .reviewWarningDiv {
     position: relative;

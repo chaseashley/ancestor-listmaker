@@ -132,10 +132,10 @@ class MapOverlayItems extends React.Component {
             decrementIntervalId:null,
             timeline: false,
             animated: false,
-            birthPins: true,
-            deathPins: false,
+            birthPins: this.props.birthPins,
+            deathPins: this.props.deathPins,
             birthDeathLines: false,
-            parentChildLines: true,
+            parentChildLines: false,
             birthDeathOnClick: false,
             parentsOnClick: false,
             childrenOnClick: false,
@@ -301,8 +301,8 @@ class MapOverlayItems extends React.Component {
             } else if ((latestDeathYear - earliestBirthYear) > 250) {
                 sliderInterval = 25;
             }
-            let sliderMin = (Math.floor(earliestBirthYear/sliderInterval))*sliderInterval;
-            let sliderMax = ((Math.floor(latestDeathYear/sliderInterval))+1)*sliderInterval;
+            let sliderMin = (Math.floor((earliestBirthYear-1)/sliderInterval))*sliderInterval;
+            let sliderMax = (Math.ceil((latestDeathYear+1)/sliderInterval))*sliderInterval;
             this.setState({
                 timeline: true,
                 year: sliderMin,
@@ -985,26 +985,24 @@ class MapOverlayItems extends React.Component {
                     <div><Dropdown className={styles.searchBox} value={(this.state.searchPerson===null) ? null : this.state.searchPerson[1]} options={searchList} onChange={(option) => this.onFindSelect(option.value)} placeholder="Select ancestor to find"/></div>
                 }        
 
-            let markers = ancestors.map((ancestor, index) => {
-                return <StaticMarkers key={index} id={index}
-                            ancestor={ancestor}
-                            birthPins={this.state.birthPins}
-                            deathPins={this.state.deathPins}
-                            birthDeathLines={this.state.birthDeathLines}
-                            timeline={this.state.timeline}
-                            animated={this.state.animated}
-                            visible={this.ancestorVisible(ancestor)}
-                            birthDeathOnClick={this.state.birthDeathOnClick}
-                            ancestorOnClick={this.state.parentsOnClick || this.state.childrenOnClick}
-                            linkedAncestorClick={this.linkedAncestorClicked(ancestor)}
-                            linkedAncestorCloseClick={this.linkedAncestorCloseClicked(ancestor)}
-                            onBClickCallback={this.onBClickCallback}
-                            onBCloseClickCallback={this.onBCloseClickCallback}
-                            onDClickCallback={this.onDClickCallback}
-                            onDCloseClickCallback={this.onDCloseClickCallback}
-                            searchPerson={this.state.searchPerson && (ancestor.Id === this.state.searchPerson[0].Id)}
-                        />
-            })
+            let markers = ancestors.map((ancestor) => <StaticMarkers
+                key={ancestor.Id}
+                ancestor={ancestor}
+                birthPins={this.state.birthPins}
+                deathPins={this.state.deathPins}
+                birthDeathLines={this.state.birthDeathLines}
+                timeline={this.state.timeline}
+                animated={this.state.animated}
+                visible={this.ancestorVisible(ancestor)}
+                birthDeathOnClick={this.state.birthDeathOnClick}
+                ancestorOnClick={this.state.parentsOnClick || this.state.childrenOnClick}
+                linkedAncestorClick={this.linkedAncestorClicked(ancestor)}
+                linkedAncestorCloseClick={this.linkedAncestorCloseClicked(ancestor)}
+                onBClickCallback={this.onBClickCallback}
+                onBCloseClickCallback={this.onBCloseClickCallback}
+                onDClickCallback={this.onDClickCallback}
+                onDCloseClickCallback={this.onDCloseClickCallback}
+                searchPerson={this.state.searchPerson && (ancestor.Id === this.state.searchPerson[0].Id)} />)
 
             let generationLines;
             if (!this.state.parentChildLines || (this.state.birthPins && this.state.deathPins)) {
