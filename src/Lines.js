@@ -204,18 +204,17 @@ class Lines extends React.Component {
       headingsRow2 = this.createHeadingsRow2(this.state.ancestralLines);
       tableRows = this.createTableRows(this.state.ancestralLines);
       let mapAncestors = this.getAncestorsInLines(this.state.ancestralLines, this.state.descendantJson);
-      let noLocations = true;
+      let mapAncestorsWithALocation = [];
       for (let i=0; i<mapAncestors.length; i++){
         let ancestor = mapAncestors[i];
-        if ((ancestor.BirthLocation !== null && ancestor.BirthLocation !== '') || (ancestor.DeathLocation !== null && ancestor.DeathLocation !== '')) {
-          noLocations = false;
-          break;
+        if ((ancestor.BirthLocation !== null && ancestor.BirthLocation !== '' && ancestor.BirthLocation.toUpperCase() !== 'UNKNOWN') || (ancestor.DeathLocation !== null && ancestor.DeathLocation !== '' && ancestor.DeathLocation.toUpperCase() !== 'UNKNOWN')) {
+          mapAncestorsWithALocation.push(ancestor);
         }
       }
-      if (noLocations) {
+      if (mapAncestorsWithALocation.length === 0) {
         mapButton = <button className={styles.button} disabled={true}>Map List</button>;
       } else { //is at least one location field
-        mapButton = <Link to={{ pathname: '/apps/ashley1950/ancestorexplorer/map', ancestors: mapAncestors, listLines: 'lines'}}><button className={styles.button}>Map Lines</button></Link>;
+        mapButton = <Link to={{ pathname: '/apps/ashley1950/ancestorexplorer/map', ancestors: mapAncestorsWithALocation, listLines: 'lines'}}><button className={styles.button}>Map Lines</button></Link>;
       }
     } else {
       downloadButton = <div></div>
