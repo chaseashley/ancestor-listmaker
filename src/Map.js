@@ -437,8 +437,8 @@ class Map extends React.Component {
                             <li>Open the info window for a single marker at that location and close all other info 
                             windows.</li>
                             <li>Click ‘Hide Closed’ 
-                            to hide all markers other than the marker with the open info window. (Note that only one of 
-                            'Births' or 'Deaths" (not both) can be activated in order for 'Hide Closed' to be enabled.)</li>
+                            to hide all markers other than the marker with the open info window. (Note that 'Hide Close' can only be 
+                            clicked if one of 'Births' or 'Deaths" (not both) is be activated and 'Timeline' is not activated.)</li>
                             <li>Check the location of the 
                             marker when it is the only visible marker to see if it is in the correct place. (When 
                             multiple markers are shown, they may not appear at their exact correct places due to 
@@ -467,7 +467,7 @@ class Map extends React.Component {
             mapOrLoading =
                 <div className={styles.geocodingLoadingDiv}>
                     <div className={styles.statusGeocoding}>Coordinates for {this.state.numberToBeGeocoded} locations remaining to be added to 
-                    the app's database.<p>Getting suggested coordinates from Google Maps for:</p>{this.state.locationBeingGeocoded}</div>
+                    the app's database.<p>Using Google's geocoding api to get coordinates for:</p>{this.state.locationBeingGeocoded}</div>
                 </div>
         } else if (!this.state.coordinatesLoaded && (this.state.numberToBeGeocoded > 300)) {
             mapOrLoading =

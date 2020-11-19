@@ -138,12 +138,13 @@ class Lines extends React.Component {
     const downloadData = [];
     let headings;
     if (ancestralLines.length === 1) {
-      headings = ['Gen', 'Name', 'Birth Date', 'Birth Location', 'Death Date', 'Death Location'];
+      headings = ['Gen', 'Name', 'WikiTree ID', 'Birth Date', 'Birth Location', 'Death Date', 'Death Location'];
     } else {
       headings = [];
       for (let i = 0; i < ancestralLines.length; i++) {
         headings.push('Gen');
         headings.push('Name');
+        headings.push('WikiTree ID');
       }
     }
     downloadData.push(headings);
@@ -152,6 +153,7 @@ class Lines extends React.Component {
       if (ancestralLines.length === 1) {
         row = [ancestralLines[0][i]['Generation'],
         `=HYPERLINK(""https://www.wikitree.com/wiki/${ancestralLines[0][i]['Name']}""` + `,""${ancestralLines[0][i]['BirthNamePrivate']}"")`,
+        ancestralLines[0][i]['Name'],
         ancestralLines[0][i]['BirthDate'],
         ancestralLines[0][i]['BirthLocation'],
         ancestralLines[0][i]['DeathDate'],
@@ -162,7 +164,9 @@ class Lines extends React.Component {
           if (i < ancestralLines[j].length) {
             row.push(ancestralLines[j][i]['Generation']);
             row.push(`=HYPERLINK(""https://www.wikitree.com/wiki/${ancestralLines[j][i]['Name']}""` + `,""${ancestralLines[j][i]['BirthNamePrivate']}"")`);
+            row.push(ancestralLines[j][i]['Name']);
           } else {
+            row.push('');
             row.push('');
             row.push('');
           }

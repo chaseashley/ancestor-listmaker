@@ -162,7 +162,6 @@ export async function getAllRelatedCategoryArefs(category) {
         const nativeAmProjectArefs = await getCategoryArefs('Native Americans Project');
         const nativeAmStickerArefs = await getCategoryArefs('Native Americans Sticker');
         categoryArefs = nativeAmProjectArefs + nativeAmStickerArefs;
-        console.log(nativeAmStickerArefs);
     } else if (category === 'New Netherland Settlers') {
         const newNetherlandSettlerArefs = await getCategoryArefs('New Netherland Settler');
         const newNetherlandSettlerStickerArefs = await getCategoryArefs('New Netherland Settler Sticker');
@@ -174,5 +173,5 @@ export async function getAllRelatedCategoryArefs(category) {
     } else {
         categoryArefs = await getCategoryArefs(category);
     }
-    return categoryArefs;
+    return decodeURI(categoryArefs);
 }

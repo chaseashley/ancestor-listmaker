@@ -94,7 +94,7 @@ class Main extends React.Component {
         {value:'Mexican-American War', label: 'Mexican-American War - Ancestors who participated in the Mexican-American War, as indicated by the presence of the Mexican-American War sticker or project template on their profile'},
         {value:'Native Americans', label: 'Native Americans - Ancestors who were Native Americans, as indicated by the presence of the Native American sticker or project template on their profile'},
         {value:'New Netherland Settlers', label: 'New Netherland Settlers - Ancestors who lived in New Netherland before 1675, as indicated by the presence of the New Netherland Settler sticker or project template on their profile'},
-        {value:'Notables', label: 'Notables - Ancestors who have the Notables sticker or project template on their profile'},
+        {value:'Notables', label: 'Notables - Ancestors who have the Notables sticker or project template on their profile or are included in a category containing the word Notables'},
         {value:'Orphans', label: 'Orphans - Ancestors whose profiles do not currently have a Profile Manager'},
         {value:'Palatine Migration', label: 'Palatine Migration - Ancestors who immigrated to America from a German-speaking area of Europe in 1700-1776, as indicated by the presence of the Palatine Migration template on their profile'},
         {value:'Puritan Great Migration', label: 'Puritan Great Migration - Ancestors who immigrated to New England in 1621-1640, as indicated by the presence of the Puritan Great Migration template on their profile'},
@@ -241,6 +241,15 @@ class Main extends React.Component {
             matchingAncestors = filterMCSuretyBarons(matchingAncestors);
           } else if (this.state.category === 'English Monarchs') {
             matchingAncestors = filterEnglishMonarchs(matchingAncestors);
+          } else if (this.state.category === 'Notables') {
+            if (this.state['Notables'] === null) { // if no pages saved for the category, need to get them; otherwise use the save pages
+              const categoryArefs = await getAllRelatedCategoryArefs('Notables');
+              await this.setState({['Notables']: categoryArefs});
+            }
+            let templateNotables = filterCategoryArefs(matchingAncestors, this.state['Notables']);
+            let categoryNotables = await filterByWikiTreePlus(this.state.descendantJson, matchingAncestors, 'Notables');
+            matchingAncestors = templateNotables.concat(categoryNotables);
+            matchingAncestors= removeDuplicates(matchingAncestors);
           } else {
             if (this.state[this.state.category] === null) { // if no pages saved for the category, need to get them; otherwise use the save pages
               const categoryArefs = await getAllRelatedCategoryArefs(this.state.category);
@@ -364,7 +373,7 @@ class Main extends React.Component {
   getDownloadData(matchingAncestors) {
     let downloadData;
     if (this.state.lastAhnentafel) {
-      downloadData = [['Gen-Ahnen', 'Name', 'Birth Date', 'Birth Location', 'Death Date', 'Death Location']];
+      downloadData = [['Gen-Ahnen', 'Name', 'WikiTree ID', 'Birth Date', 'Birth Location', 'Death Date', 'Death Location']];
       for (let i=0; i<matchingAncestors.length; i++) {
         const ancestor = this.state.matchingAncestors[i];
         let ancestorLink;
@@ -373,11 +382,11 @@ class Main extends React.Component {
         } else {
           ancestorLink = `=HYPERLINK(""https://www.wikitree.com/wiki/${ancestor['Name']}""` + `,""${ancestor['BirthNamePrivate']}"")`;
         }
-        const ancestorDownloadData = [[ancestor['Generation'] + '-' + ancestor['Ahnen'], ancestorLink, ancestor['BirthDate'], ancestor['BirthLocation'], ancestor['DeathDate'], ancestor['DeathLocation']]];
+        const ancestorDownloadData = [[ancestor['Generation'] + '-' + ancestor['Ahnen'], ancestorLink, ancestor['Name'], ancestor['BirthDate'], ancestor['BirthLocation'], ancestor['DeathDate'], ancestor['DeathLocation']]];
         downloadData = downloadData.concat(ancestorDownloadData);
       }
     } else {
-      downloadData = [['Name', 'Birth Date', 'Birth Location', 'Death Date', 'Death Location']];
+      downloadData = [['Name', 'WikiTree ID', 'Birth Date', 'Birth Location', 'Death Date', 'Death Location']];
       for (let i=0; i<matchingAncestors.length; i++) {
         const ancestor = this.state.matchingAncestors[i];
         let ancestorLink;
@@ -386,7 +395,7 @@ class Main extends React.Component {
         } else {
           ancestorLink = `=HYPERLINK(""https://www.wikitree.com/wiki/${ancestor['Name']}""` + `,""${ancestor['BirthNamePrivate']}"")`;
         }
-        const ancestorDownloadData = [[ancestorLink, ancestor['BirthDate'], ancestor['BirthLocation'], ancestor['DeathDate'], ancestor['DeathLocation']]];
+        const ancestorDownloadData = [[ancestorLink, ancestor['Name'], ancestor['BirthDate'], ancestor['BirthLocation'], ancestor['DeathDate'], ancestor['DeathLocation']]];
         downloadData = downloadData.concat(ancestorDownloadData);
       }
     }
@@ -579,7 +588,7 @@ class Main extends React.Component {
                 {mapButton}
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 {downloadButton}</td>
-                <td className={styles.version}>(ver 10:20a.14.Nov.2020)</td>
+                <td className={styles.version}>(ver 6p.18.Nov.2020)</td>
               </tr>
             </tbody>
           </table>

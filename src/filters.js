@@ -309,6 +309,9 @@ async function getWtPlusIdArray(descendant, filterName) {
     } else if (filterName === 'Witches') {
         databaseSearch = `Ancestors%3D${descendant}+CategoryWord%3Dwitches+CategoryWord%3Daccused`;
     }
+    else if (filterName === 'Notables') {
+        databaseSearch = `Ancestors%3D${descendant}+CategoryWord%3DNotables`;
+    }
     const wtplusJson = await getWtPlusJson(databaseSearch);
 
     let wtPlusIdArray;
