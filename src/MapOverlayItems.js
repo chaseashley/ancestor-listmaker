@@ -954,13 +954,13 @@ class MapOverlayItems extends React.Component {
                     <div className={styles.buttonbarspacer}/>
                     <ToggleButton label={'Birth-Death on Click'} active={this.state.birthDeathOnClick} onClick={this.onBirthDeathOnClick} disabled={((!this.state.birthPins || !this.state.deathPins) || this.state.animated)}/>
                     <div className={styles.buttonbarspacer}/>
-                    <ToggleButton label={'Find'} active={this.state.find} onClick={this.onFindClick} disabled={this.state.animated}/>
-                    <div className={styles.buttonbarspacer}/>
-                    <ToggleButton label={'Hide Closed'} active={this.state.hideClosed} onClick={this.onHideClosedClick} disabled={this.state.timeline || (this.state.birthPins && this.state.deathPins)}/>
-                    <div className={styles.buttonbarspacer}/>
                     <ToggleButton label={'Parents on Click'} active={this.state.parentsOnClick} onClick={this.onParentsOnClick} disabled={((this.state.birthPins && this.state.deathPins) || this.state.animated)}/>
                     <div className={styles.buttonbarspacer}/>
                     <ToggleButton label={'Children on Click'} active={this.state.childrenOnClick} onClick={this.onChildrenOnClick} disabled={((this.state.birthPins && this.state.deathPins) || this.state.animated)}/>
+                    <div className={styles.buttonbarspacer}/>
+                    <ToggleButton label={'Hide Closed'} active={this.state.hideClosed} onClick={this.onHideClosedClick} disabled={this.state.timeline || (this.state.birthPins && this.state.deathPins)}/>
+                    <div className={styles.buttonbarspacer}/>
+                    <ToggleButton label={'Find'} active={this.state.find} onClick={this.onFindClick} disabled={this.state.animated}/>
                     <div className={styles.buttonbarspacer}/>
                     {returnButton}
                     </div>
