@@ -4,6 +4,8 @@
 /*use axios get rather than fetch because for some reason a simple fetch was causing an
 a pre-fligth OPTIONS request in Firefox and Safari
 */
+
+import { removeDuplicates } from './filters';
 const axios = require('axios'); 
 
 export function get_retry(url, n) {
@@ -152,6 +154,7 @@ async function getAdditionalAncestors(ancestorsMissingParents, additionalGens) {
             //let additionalAncestorSelectedData = additionalAncestor[0]['ancestors'].slice(1);
             let additionalAncestorSelectedData = condenseAncestorsJson(additionalAncestor);
             additionalAncestors = additionalAncestors.concat(additionalAncestorSelectedData);
+            //additionalAncestors = additionalAncestors.concat(additionalAncestor);
         })
         return additionalAncestors;
     })
@@ -189,6 +192,7 @@ export async function getAdditionalGens(ancestors, nextGens){
     const ancestorsMissingParents = createAncestorsMissingParents(ancestors);
     const additionalAncestors = await getAdditionalAncestors(ancestorsMissingParents, nextGens);
     ancestors = ancestors.concat(additionalAncestors);
+    ancestors = removeDuplicates(ancestors);
     return ancestors;
 }
 

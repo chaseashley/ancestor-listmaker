@@ -146,13 +146,14 @@ class Main extends React.Component {
             this.setAncestorListsState(9,ancestors);
             ancestors = await getAdditionalGens(ancestors, this.state.generations-10);
           }
-          this.setAncestorListsState(this.state.generations-1, ancestors);
-          await this.setState({processingStatus: 'CalculatingAhnentafel'});
-          ancestors = addGensAndAhnens(ancestors);
-          if (ancestors === null) {
-            await this.setState({processingStatus: 'null'});
+          if (ancestors === null) { //will be null if there is a problem gettingAdditionalGens
+            await this.setState({processingStatus: null});
+          } else {
+            this.setAncestorListsState(this.state.generations-1, ancestors);
+            await this.setState({processingStatus: 'CalculatingAhnentafel'});
+            ancestors = addGensAndAhnens(ancestors);
+            this.setState({ancestors: ancestors});
           }
-          this.setState({ancestors: ancestors});
         }
       } else if ((this.state.descendant === this.state.lastDescendant) && (this.state.generations !== this.state.lastGenerations)){ //same descendant, but diff number of gens, so need to get ancestors for that number of gens
         if (this.state.ancestorLists[this.state.generations-1] !== null) {
@@ -187,7 +188,7 @@ class Main extends React.Component {
           this.setAncestorListsState(this.state.generations-1, ancestors);
         }
         if (ancestors === null) {
-          await this.setState({processingStatus: 'null'});
+          await this.setState({processingStatus: null});
         } else {
           await this.setState({processingStatus: 'CalculatingAhnentafel'});
           ancestors = addGensAndAhnens(ancestors);
