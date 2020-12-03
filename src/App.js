@@ -4,10 +4,11 @@ import Main from './Main';
 import Lines from './Lines';
 import Map from './Map';
 import db from './db';
-import ReactGA from 'react-ga';
 
+import ReactGA from 'react-ga';
 ReactGA.initialize('UA-184628630-1');
 ReactGA.pageview(window.location.pathname + window.location.search);
+//ReactGA.ga('send', 'pageview', '/mypage');
 
 const NoMatchPage = () => {
     return (
@@ -48,14 +49,12 @@ class App extends Component {
 
         return (      
             <BrowserRouter>
-            <div>
                 <Switch>
                     <Route path="/apps/ashley1950/ancestorexplorer/lines" component={Lines} />
                     <Route path="/apps/ashley1950/ancestorexplorer/map" component={Map} />
                     <Route path="/:id?" component={Main} />
                     <Route component={NoMatchPage}/>
                 </Switch>
-            </div> 
             </BrowserRouter>
         );
     }

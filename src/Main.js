@@ -12,6 +12,7 @@ import { sortByName, sortByDOB, sortByDOD, sortByPOB, sortByPOD, sortByAhnen } f
 import { AhnenTable } from './AhnenTable';
 import { addGensAndAhnens} from './ahnentafel';
 import db from './db';
+import ReactGA from 'react-ga';
 
 class Main extends React.Component {
 
@@ -126,6 +127,10 @@ class Main extends React.Component {
   ////////////////
 
   async onClickSubmit() { // the Find Ancestors button click event
+    ReactGA.event({
+      category: 'List Generation',
+      action: `${this.state.descendant}, ${this.state.generations}, ${this.state.category}`,
+    });
     // First get named descendant's ancestors for the specified number of generations
     if (this.state.descendant === '' || this.state.category === null || this.state.generations === null) {
       alert('Make sure a Wikitree ID has been entered in the top text box and the number of generations and a category have been selected');
@@ -589,7 +594,7 @@ class Main extends React.Component {
                 {mapButton}
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 {downloadButton}</td>
-                <td className={styles.version}>(ver 7p.2.Dec.2020)</td>
+                <td className={styles.version}>(ver 1p.3.Dec.2020)</td>
               </tr>
             </tbody>
           </table>

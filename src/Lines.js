@@ -5,6 +5,7 @@ import db from './db';
 import { CSVLink } from "react-csv";
 import { Link } from "react-router-dom";
 import { removeDuplicates } from './filters';
+import ReactGA from 'react-ga';
 
 class Lines extends React.Component {
 
@@ -276,6 +277,10 @@ class Lines extends React.Component {
   
   componentDidMount() {
     this.setOrResetState();
+    ReactGA.event({
+      category: 'Lines of Descent',
+      action: `${this.props.location.descendantJson['Name']}, ${this.props.location.endAncestor['Name']}`,
+    });
   }
 
 }
