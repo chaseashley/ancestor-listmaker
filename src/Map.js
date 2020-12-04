@@ -12,7 +12,6 @@ import db from './db';
 import { standardizeAddress } from './standardizeAddress';
 import { Link } from "react-router-dom";
 import Draggable from 'react-draggable';
-import ReactGA from 'react-ga';
 
 const API_KEY='AIzaSyD5VQNhUE4UQlIZbaJo4aHE1pt9zuZFzPw';
 
@@ -73,9 +72,6 @@ class Map extends React.Component {
                 this.checkAddressesForCoordinates();
             }
         });
-        ReactGA.event({
-            category: 'Map',
-            action: 'Map Generated'});
     }
 
     async geocodeLocation(location) {

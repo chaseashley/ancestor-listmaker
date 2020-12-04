@@ -18,6 +18,8 @@ class Main extends React.Component {
 
   constructor(props) {
     super(props);
+    this.onClickMap = this.onClickMap.bind(this);
+    this.onClickDownload = this.onClickDownload.bind(this);
     this.onClickSubmit = this.onClickSubmit.bind(this);
     this.onClickNameSort = this.onClickNameSort.bind(this);
     this.onClickDOBSort = this.onClickDOBSort.bind(this);
@@ -128,8 +130,8 @@ class Main extends React.Component {
 
   async onClickSubmit() { // the Find Ancestors button click event
     ReactGA.event({
-      category: 'List Generation',
-      action: `${this.state.descendant}, ${this.state.generations}, ${this.state.category}`,
+      category: 'Generate List',
+      action: `${this.state.descendant}, ${this.state.generations}, ${this.state.category}, ahnen=${this.state.ahnentafel}, multiples=${this.state.multiples}, fullname=${this.state.fullname}`,
     });
     // First get named descendant's ancestors for the specified number of generations
     if (this.state.descendant === '' || this.state.category === null || this.state.generations === null) {
@@ -376,6 +378,20 @@ class Main extends React.Component {
     }
   }
 
+  onClickMap() {
+    ReactGA.event({
+      category: 'Map List',
+      action: `${this.state.descendant}, ${this.state.generations}, ${this.state.category}, ahnen=${this.state.ahnentafel}, multiples=${this.state.multiples}, fullname=${this.state.fullname}`,
+    });
+  }
+
+  onClickDownload() {
+    ReactGA.event({
+      category: 'Download List',
+      action: `${this.state.descendant}, ${this.state.generations}, ${this.state.category}, ahnen=${this.state.ahnentafel}, multiples=${this.state.multiples}, fullname=${this.state.fullname}`,
+    });
+  }
+
   getDownloadData(matchingAncestors) {
     let downloadData;
     if (this.state.lastAhnentafel) {
@@ -466,7 +482,7 @@ class Main extends React.Component {
       if (mapAncestorsWithALocation.length === 0) {
         mapButton = <button className={styles.mapButton} disabled={true}>Map List</button>;
       } else { //is at least one location field
-        mapButton = <Link to={{ pathname: '/apps/ashley1950/ancestorexplorer/map', ancestors: mapAncestorsWithALocation, listLines: 'list'}}><button className={styles.mapButton}>Map List</button></Link>;
+        mapButton = <Link to={{ pathname: '/apps/ashley1950/ancestorexplorer/map', ancestors: mapAncestorsWithALocation, listLines: 'list'}}><button className={styles.mapButton} onClick={this.onClickMap}>Map List</button></Link>;
     
       }
     } else {
@@ -477,7 +493,7 @@ class Main extends React.Component {
     if (this.state.processingStatus ==='Done' && this.state.matchingAncestors.length !== 0) {
       let downloadFileName = `${this.state.descendant} - ${this.state.generations} Generations - ${this.state.category}`;
       downloadFileName = `${downloadFileName.replace(/\./g, '')}.csv`;
-      downloadButton = <CSVLink data={this.getDownloadData(this.state.matchingAncestors)} filename={downloadFileName}><button className={styles.downloadButton}>Download List</button></CSVLink>;
+      downloadButton = <CSVLink data={this.getDownloadData(this.state.matchingAncestors)} filename={downloadFileName}><button className={styles.downloadButton} onClick={this.onClickDownload}>Download List</button></CSVLink>;
     } else {
       downloadButton = <button className={styles.downloadButton} disabled={true}>Download List</button>;
     }
@@ -594,7 +610,7 @@ class Main extends React.Component {
                 {mapButton}
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 {downloadButton}</td>
-                <td className={styles.version}>(ver 1p.3.Dec.2020)</td>
+                <td className={styles.version}>(ver 10a.4.Dec.2020)</td>
               </tr>
             </tbody>
           </table>
