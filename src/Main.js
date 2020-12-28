@@ -56,6 +56,7 @@ class Main extends React.Component {
       'American Immigrants': null,
       'American Revolution': null,
       'Arbroath Signatories': null,
+      'Domesday': null,
       'European Aristocrats': null,
       'Filles du Roi': null,
       'French and Indian War': null,
@@ -82,6 +83,7 @@ class Main extends React.Component {
         {value:'Canadian Immigrants', label: 'Canadian Immigrants - Ancestors who immigrated or may have immigrated to Canada (or areas that became a part thereof), as indicated by the birth and death locations on their profiles'},
         {value:'Category Text', label: 'Category Text - Ancestors who are in a category whose name contains the search terms you enter. When this list option is selected, a text box will appear in which to enter the search terms.'},
         {value:'Companions of the Conqueror', label: 'Companions of the Conqueror - Ancestors who fought with William the Conqueror at the Battle of Hastings. Generally only useful for Descendants born before 1700 since the Companions are at least 30 generations back from living people.'},
+        {value:'Domesday', label: 'Domesday - Ancestors whose names are included in the Domesday Book, as indicated by their inclusion in the Domesday Book category'},
         {value:'English Monarchs', label: 'English Monarchs - Ancestors who were English monarchs'},
         {value:'European Aristocrats', label: 'European Aristocrats - Ancestors who were European aristocrats, as indicated by the presence of the EuroAristo sticker or the British Isles Aristo, European Aristocrat, or European Royals and Aristocrats template on their profile'},
         {value:'Filles du Roi', label: 'Filles du Roi - Ancestors who were among the Filles du Roi, as indicated by the presence of the Filles du Roi template on their profile'},
@@ -610,7 +612,7 @@ class Main extends React.Component {
                 {mapButton}
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 {downloadButton}</td>
-                <td className={styles.version}>(ver 10a.4.Dec.2020)</td>
+                <td className={styles.version}>(ver 4p.28.Dec.2020)</td>
               </tr>
             </tbody>
           </table>

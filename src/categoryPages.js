@@ -10,6 +10,7 @@ async function getCategoryArefs(category) {
         'American Revolution New Sticker': 'https://www.wikitree.com/index.php?title=Special:Whatlinkshere/Template:1776_Sticker&limit=5000&from=0',
         'Arbroath Signatories': 'https://www.wikitree.com/wiki/Category:Declaration_of_Arbroath',
         'British Aristo': 'https://www.wikitree.com/index.php?title=Special:Whatlinkshere/Template:British_Isles_Aristo&limit=5000&from=0',
+        'Domesday': 'https://www.wikitree.com/wiki/Category:Domesday_Book',
         'EuroAristo': 'https://www.wikitree.com/index.php?title=Special:Whatlinkshere/Template:EuroAristo_Sticker&limit=5000&from=0',
         'European Aristocrat': 'https://www.wikitree.com/index.php?title=Special:Whatlinkshere/Template:European_Aristocrat&limit=5000&from=0',
         'European Royals and Aristocrats': 'https://www.wikitree.com/index.php?title=Special:Whatlinkshere/Template:European_Royals_and_Aristocrats&limit=5000&from=0',
