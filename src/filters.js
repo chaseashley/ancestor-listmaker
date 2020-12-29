@@ -203,7 +203,7 @@ export function filterCanadianImmigrants(ancestors) {
 }
 
 export function filterAustralianImmigrants(ancestors) {
-    const regex = /Australia| AUS|Tasmania|New South Wales|Queensland|Van Dieman|Victoria/;
+    const regex = /Australia| AUS|Tasmania|New South Wales|Queensland|Van Dieman|Victoria|Qld|NSW|South Australia|West Australia|Northern Territory|Canberra|ACT|Australian Capital Territory/;
     let matchingAncestors = [];
     for (let i = 0; i < ancestors.length; i++) {
         if (!regex.test(ancestors[i]['BirthLocation']) && regex.test(ancestors[i]['DeathLocation'])) {
