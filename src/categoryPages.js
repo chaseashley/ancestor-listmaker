@@ -88,9 +88,13 @@ function deleteAmp(str) {
 }
 
 function getNextLinkUrl(page) {
-    console.log(page);
-    const nextLoc = page.indexOf('>Next ');
-    if (nextLoc === -1) {return ''};
+    let nextLoc = page.indexOf('>next ');
+    if (nextLoc === -1) {
+        nextLoc = page.indexOf('>Next ');
+        if (nextLoc === -1) {
+            return '';
+        }
+    }
     const endATag = page.indexOf('<', nextLoc);
     const nextNum = page.substring(nextLoc + 5, endATag).trim();
     const noCommaNextNum = +nextNum.replace(/,/g, '');
